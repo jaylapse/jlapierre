@@ -5,14 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gallery</title>
 
+  <!-- Font Awesome for icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <link rel="stylesheet" href="../styles.css" />
 </head>
-
-  <link rel="stylesheet" href="styles.css" />
-  
 <body>
-  <h1>My Gallery</h1>
-  <div class="folder-list">
-    <div class="folder"><a href="/gallery/Texas-2025/">Texas 2025</a></div>
-  </div>
+  <!-- Top Navigation Bar -->
+  <nav>
+    <div class="nav-title">Profile Hub</div>
+    <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
+      <a href="index.html" class="active"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
+    </div>
+  </nav>
+
+  <!-- Gallery Content -->
+  <main>
+    <h1>My Gallery</h1>
+    <div class="folder-list">
+      <div class="folder"><a href="/gallery/Texas-2025/">Texas 2025</a></div>
+    </div>
+  </main>
+
+  <!-- Script for responsive hamburger toggle -->
+  <script>
+    function toggleMenu() {
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+  </script>
 </body>
 </html>
