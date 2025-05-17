@@ -1,46 +1,64 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Hub</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1e1e2f;
+      color: #fff;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .section {
+      margin-bottom: 3rem;
+    }
+    .section h2 {
+      border-bottom: 2px solid #444;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin-bottom: 0.5rem;
+    }
+    a {
+      color: #66ccff;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>My Profile Hub</h1>
-      <button id="theme-toggle"><i class="fas fa-moon"></i></button>
-    </header>
+  <h1>My Online Hub</h1>
 
-    <section>
-      <h2><i class="fas fa-gamepad"></i> Gaming Profiles</h2>
-      <ul class="card-list">
-        <li class="card"><a href="https://lolprofile.com" target="_blank"><i class="fab fa-steam"></i> League of Legends</a></li>
-        <li class="card"><a href="https://playvalorant.com" target="_blank"><i class="fab fa-steam-symbol"></i> Valorant</a></li>
-        <li class="card"><a href="https://supercell.com/en/games/clashofclans/" target="_blank"><i class="fas fa-shield-alt"></i> Clash of Clans</a></li>
-      </ul>
-    </section>
-
-    <section>
-      <h2><i class="fas fa-user"></i> Personal Profiles</h2>
-      <ul class="card-list">
-        <li class="card"><a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
-        <li class="card"><a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a></li>
-        <li class="card"><a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a></li>
-      </ul>
-    </section>
+  <div class="section">
+    <h2>🎮 Gaming Profiles</h2>
+    <ul>
+      <li><a href="https://example.com/lol" target="_blank">League of Legends</a></li>
+      <li><a href="https://example.com/valorant" target="_blank">Valorant</a></li>
+      <li><a href="https://example.com/clashofclans" target="_blank">Clash of Clans</a></li>
+    </ul>
   </div>
 
-  <script>
-    const toggleBtn = document.getElementById('theme-toggle');
-    const html = document.documentElement;
-    toggleBtn.addEventListener('click', () => {
-      const isDark = html.getAttribute('data-theme') === 'dark';
-      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      toggleBtn.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
-    });
-  </script>
+  <div class="section">
+    <h2>🙋 Personal Profiles</h2>
+    <ul>
+      <li><a href="https://linkedin.com/in/yourprofile" target="_blank">LinkedIn</a></li>
+      <li><a href="https://instagram.com/yourprofile" target="_blank">Instagram</a></li>
+      <li><a href="https://facebook.com/yourprofile" target="_blank">Facebook</a></li>
+    </ul>
+  </div>
 </body>
 </html>
