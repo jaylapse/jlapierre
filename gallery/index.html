@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gallery</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+</head>
+<body>
+  <nav>
+    <div class="nav-title">Profile Hub</div>
+    <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
+      <a href="index.html" class="active"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
+    </div>
+  </nav>
+
+  <main>
+    <section>
+      <h2><i class="fa-solid fa-folder-open fa-icon"></i>Gallery Folders</h2>
+      <ul>
+        <!-- Add more folders as needed -->
+         <li><a href="Texas 2025"><i class="fa-solid fa-image fa-icon"></i>Paris, Texas (May 2025)</a></li>
+         <li><a href="Thunder Bay ON"><i class="fa-solid fa-image fa-icon"></i>Thunder Bay ON (March 2025)</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thunder Bay Gallery</title>
+  <link rel="stylesheet" href="../../styles.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css"
+  />
+</head>
+<body>
+  <nav>
+    <div class="nav-title">Profile Hub</div>
+    <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="../../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
+      <a href="../index.html" class="active"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
+    </div>
+  </nav>
+
+  <div id="gallery"></div>
+
+  <script>
+    const gallery = document.getElementById('gallery');
+    const numPhotos = 12; // change this to your number of photos
+    const folder = './'; // relative path to your images folder
+
+    // First photo without a number in parentheses
+    let firstFilename = 'photo.JPG';
+    let a = document.createElement('a');
+    a.href = folder + firstFilename;
+    a.setAttribute('data-lightbox', 'gallery');
+    a.setAttribute('data-title', 'Photo 1');
+    let img = document.createElement('img');
+    img.src = folder + firstFilename;
+    img.alt = 'Photo 1';
+    a.appendChild(img);
+    gallery.appendChild(a);
+
+    // Remaining photos with numbering
+    for (let i = 2; i <= numPhotos; i++) {
+      let filename = `photo (${i}).JPG`;
+      let a = document.createElement('a');
+      a.href = folder + filename;
+      a.setAttribute('data-lightbox', 'gallery');
+      a.setAttribute('data-title', `Photo ${i}`);
+      let img = document.createElement('img');
+      img.src = folder + filename;
+      img.alt = `Photo ${i}`;
+      a.appendChild(img);
+      gallery.appendChild(a);
+    }
+  </script>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox-plus-jquery.min.js"></script>
+  <script>
+    lightbox.option({
+      'resizeDuration': 200,
+      'wrapAround': true
+    })
+  </script>
+</body>
+</html>
