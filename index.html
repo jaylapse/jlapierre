@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Profile Hub</title>
-  <!-- Font Awesome CDN -->
+  <!-- this sets all the styles -->
+ <link rel="stylesheet" href="../styles/style.css" />
+ 
+ <!-- this link allows icons -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -12,45 +15,21 @@
     referrerpolicy="no-referrer"
   />
 
-  <link rel="stylesheet" href="styles.css" />
-
 </head>
 <body>
   <nav>
     <div class="nav-title">Profile Hub</div>
     <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
     <div class="nav-links" id="navLinks">
-      <a href="../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
-      <a href="gallery/index.html" class="active"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
-      <a href="itinerary/index.html" class="active"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
+      <a href="../index.html" class="active"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
+      <a href="gallery/index.html"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
+      <a href="itinerary/index.html"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
     </div>
   </nav>
 
   <main>
     <section>
-      <h2><i class="fa-solid fa-gamepad fa-icon"></i>Gaming Profiles</h2>
-      <ul>
-        <li>
-          <a href="https://u.gg/lol/profile/na1/jaylapse-jay/overview" target="_blank" rel="noopener noreferrer">
-            <i class="fa-solid fa-gamepad fa-icon"></i>League of Legends
-          </a>
-        </li>
-
-        <li>
-          <a href="https://u.gg/val/profile/JayLapse-jay" target="_blank" rel="noopener noreferrer">
-            <i class="fa-solid fa-crosshairs fa-icon"></i>Valorant
-          </a>
-        </li>
-        <li>
-          <a href="https://www.clashofstats.com/players/jaylapse-GL28QVPY0/summary" target="_blank" rel="noopener noreferrer">
-            <i class="fa-solid fa-shield-alt fa-icon"></i>Clash of Clans
-          </a>
-        </li>
-      </ul>
-    </section>
-
-    <section>
-      <h2><i class="fa-solid fa-user fa-icon"></i>Personal Profiles</h2>
+      <h2><i class="fa-solid fa-user fa-icon"></i> Personal Profiles</h2>
       <ul>
         <li>
           <a href="https://instagram.com/jaylapse" target="_blank" rel="noopener noreferrer">
@@ -64,6 +43,42 @@
         </li>
       </ul>
     </section>
+
+    <section>
+      <h2><i class="fa-solid fa-gamepad fa-icon"></i> Gaming Profiles</h2>
+      <ul>
+        <li>
+          <a href="https://u.gg/lol/profile/na1/jaylapse-jay/overview" target="_blank" rel="noopener noreferrer">
+            <i class="fa-solid fa-gamepad fa-icon"></i>League of Legends
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2><i class="fa-solid fa-gamepad fa-icon"></i> Contact Card</h2>
+      <ul>
+        <li>
+            <i class="fa-solid fa-phone fa-icon"></i> Cell Phone: <strong>450-543-2148</strong>
+        </li>
+        <li>
+            <i class="fa-solid fa-envelope fa-icon"></i> Personal E-mail: <strong>jlapierre@live.ca</strong>
+        </li>
+        <li>
+            <i class="fa-solid fa-envelope-circle-check fa-icon"></i> Valmet E-mail: <strong>james.lapierre@valmet.com</strong>
+        </li>
+      </ul>
+    </section>
+
   </main>
+
+<script>
+  function toggleMenu() {
+    const navLinks = document.getElementById('navLinks');
+    navLinks.classList.toggle('open');
+  }
+</script>
+
+
 </body>
 </html>

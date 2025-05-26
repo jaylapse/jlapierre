@@ -1,0 +1,7 @@
+/* style.css - Combines all modular CSS files into one */
+
+@import url('./base.css');     /* Basic reset and global styles */
+@import url('./theme.css');    /* Light and dark theme variables */
+@import url('./nav.css');      /* Navigation bar and hamburger menu */
+@import url('./layout.css');   /* Page layout and section styling */
+@import url('./gallery.css');  /* Gallery-specific styles */

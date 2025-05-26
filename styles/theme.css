@@ -1,0 +1,25 @@
+/* Dark theme variables */
+html[data-theme="dark"] {
+  --bg: #121212;
+  --text-color: #eee;
+  --nav-bg: #1f1f1f;
+  --link-color: #bbb;
+  --link-hover: #4ea8de;
+  --section-bg: #1a1a1a;
+  --btn-bg: #333;
+  --btn-hover: #4ea8de;
+  --icon-color: #7ea9d6;
+}
+
+/* Light theme variables */
+html[data-theme="light"] {
+  --bg: #f5f5f5;
+  --text-color: #111;
+  --nav-bg: #fff;
+  --link-color: #333;
+  --link-hover: #0077cc;
+  --section-bg: #fff;
+  --btn-bg: #ddd;
+  --btn-hover: #0077cc;
+  --icon-color: #0077cc;
+}

@@ -1,0 +1,92 @@
+/* Navigation bar container */
+nav {
+  background-color: var(--nav-bg); /* Dynamic background */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  position: sticky;     /* Stick to top of viewport */
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Slight shadow */
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Title inside navbar */
+.nav-title {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+/* Links container */
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+/* Each nav link */
+.nav-links a {
+  color: var(--link-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Hover and active states */
+.nav-links a:hover,
+.nav-links a.active {
+  background-color: var(--btn-bg);
+  color: var(--btn-hover);
+  transform: scale(1.05);  /* Slight zoom */
+}
+
+/* Focus accessibility */
+.nav-links a:focus,
+button:focus {
+  outline: 3px solid var(--btn-hover);
+  outline-offset: 2px;
+}
+
+/* Hamburger menu button */
+.hamburger {
+  display: none;  /* Hidden by default */
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+/* Show hamburger & hide nav-links on small screens */
+@media (max-width: 768px) {
+  .nav-links {
+    position: fixed;
+    top: 56px;
+    right: 0;
+    background-color: var(--nav-bg);
+    height: calc(100vh - 56px);
+    width: 200px;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+    transform: translateX(100%); /* Hide off-screen */
+    transition: transform 0.3s ease;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+  }
+
+  .nav-links.open {
+    transform: translateX(0);  /* Slide in on open */
+  }
+
+  .hamburger {
+    display: block;
+  }
+}

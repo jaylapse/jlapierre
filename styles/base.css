@@ -1,0 +1,47 @@
+/* Apply border-box to all elements for easier sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* General body styles */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg);      /* Uses theme variable */
+  color: var(--text-color);         /* Uses theme variable */
+  transition: background 0.3s, color 0.3s; /* Smooth theme transition */
+}
+
+/* Universal link styles */
+a {
+  color: var(--link-color);
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Link hover state */
+a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+/* List and list items */
+ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+li {
+  margin-bottom: 0.8rem;
+}
+
+/* Font Awesome icon styles */
+.fa-icon {
+  color: var(--icon-color);
+  min-width: 20px;
+  text-align: center;
+}
