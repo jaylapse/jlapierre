@@ -91,7 +91,7 @@
       referrerpolicy="no-referrer"
     />
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2tu6p+U6GkG6aQpQbQ4Q4Q4Q4Q4Q4Q4=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2tu6p+U6GkG6aQpQbQ4Q4Q4Q4Q4Q4=" crossorigin=""/>
     <style>
       #map { height: 350px; width: 100%; margin-bottom: 1.5rem; border-radius: 10px; }
       .timeline-container { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
@@ -100,7 +100,7 @@
       .timeline-dot.active { opacity: 1; border: 2px solid #ff3860; }
     </style>
     <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j6kG6aQpQbQ4Q4Q4Q4Q4Q4Q4=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j6kG6aQpQbQ4Q4Q4Q4Q4=" crossorigin=""></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -131,6 +131,7 @@ const firebaseConfig = {
       </div>
     </nav>
     <h1>My Travel Itinerary</h1>
+    <div id="countdown" style="text-align:center;font-size:1.2rem;margin:1rem 0;"></div>
     <div class="itinerary-container">
       <div id="adminSection" class="sticky-form" style="display:none;">
         <form id="itineraryForm">
@@ -213,9 +214,14 @@ const firebaseConfig = {
       async function loadItineraries() {
         const items = await fetchItineraries();
         list.innerHTML = '';
+        const today = new Date().toISOString().slice(0, 10);
         items.forEach((item, index) => {
           const div = document.createElement('div');
           div.className = 'entry';
+          // Highlight past entries
+          if (item.endDate < today) {
+            div.style.background = '#4e2323'; // red shade for past
+          }
           // Calendar links
           const start = item.startDate.replace(/-/g, '');
           const end = item.endDate.replace(/-/g, '');
@@ -223,8 +229,11 @@ const firebaseConfig = {
           const details = encodeURIComponent(item.details);
           const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}`;
           const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&body=${details}&startdt=${item.startDate}&enddt=${item.endDate}`;
+          const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}`;
           div.innerHTML = `
-            <h3>${item.destination} (${item.startDate} - ${item.endDate})</h3>
+            <h3>${item.destination} (${item.startDate} - ${item.endDate})
+              <a href="${mapsUrl}" target="_blank" title="View on Google Maps" style="margin-left:8px;color:#4ea8de;"><i class="fa-solid fa-map-location-dot"></i></a>
+            </h3>
             <p>${item.details}</p>
             <a href="${googleUrl}" target="_blank" rel="noopener" class="calendar-btn">Add to Google Calendar</a> - 
             <a href="${outlookUrl}" target="_blank" rel="noopener" class="calendar-btn">Add to Outlook</a>
@@ -232,6 +241,7 @@ const firebaseConfig = {
           `;
           list.appendChild(div);
         });
+        updateCountdown(items);
       }
 
       form.addEventListener('submit', async e => {
@@ -275,6 +285,19 @@ const firebaseConfig = {
           form.reset();
           editId = null;
         }
+      }
+
+      function updateCountdown(items) {
+        const countdownDiv = document.getElementById('countdown');
+        const today = new Date().toISOString().slice(0, 10);
+        const upcoming = items.filter(item => item.startDate > today);
+        if (!upcoming.length) {
+          countdownDiv.textContent = '';
+          return;
+        }
+        const next = upcoming[0];
+        const diff = Math.ceil((new Date(next.startDate) - new Date()) / (1000*60*60*24));
+        countdownDiv.textContent = `Next trip: ${next.destination} in ${diff} day${diff !== 1 ? 's' : ''} (${next.startDate})`;
       }
 
       window.onload = function() {
