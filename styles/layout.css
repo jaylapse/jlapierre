@@ -23,3 +23,34 @@ section h2 {
   border-bottom: 2px solid var(--btn-hover);
   padding-bottom: 0.3rem;
 }
+
+/* Itinerary layout */
+.itinerary-container {
+  display: flex;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+.sticky-form {
+  flex: 0 0 350px;
+  position: sticky;
+  top: 1.5rem;
+  align-self: flex-start;
+}
+.entries-list {
+  flex: 1 1 0%;
+}
+@media (max-width: 900px) {
+  .itinerary-container {
+    flex-direction: column;
+    gap: 0;
+  }
+  .sticky-form {
+    position: static;
+    margin-bottom: 2rem;
+  }
+  .entries-list {
+    max-width: 100%;
+  }
+}
