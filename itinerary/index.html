@@ -5,8 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Travel Itinerary</title>
 
-    <style>html,body{background:#121212;color:#eee;}</style>
-    <!-- this sets all the styles -->
+    <style>
+      html, body {
+        background: #121212;
+        color: #eee;
+      }
+      nav {
+        background-color: #181a1b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        max-width: 100%;
+        margin: 0 auto;
+      }
+      .nav-title {
+        font-weight: bold;
+        font-size: 1.5rem;
+        color: #f1f1f1;
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+      }
+      .nav-links a {
+        color: #b3e5fc;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding: 0.3rem 0.5rem;
+        border-radius: 4px;
+        transition: background-color 0.2s, color 0.2s, transform 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        background-color: #23272a;
+        color: #ff3860;
+        transform: scale(1.05);
+      }
+      .hamburger {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        color: #f1f1f1;
+        cursor: pointer;
+      }
+      @media (max-width: 768px) {
+        .nav-links {
+          position: fixed;
+          top: 56px;
+          right: 0;
+          background-color: #181a1b;
+          height: calc(100vh - 56px);
+          width: 200px;
+          flex-direction: column;
+          padding: 1rem;
+          gap: 1rem;
+          transform: translateX(100%);
+          transition: transform 0.3s ease;
+          box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+        }
+        .nav-links.open {
+          transform: translateX(0);
+        }
+        .hamburger {
+          display: block;
+        }
+      }
+    </style>
     <link rel="stylesheet" href="../styles/style.css" />
 
     <!-- this link allows icons -->
@@ -16,20 +90,46 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2tu6p+U6GkG6aQpQbQ4Q4Q4Q4Q4Q4Q4=" crossorigin=""/>
+    <style>
+      #map { height: 350px; width: 100%; margin-bottom: 1.5rem; border-radius: 10px; }
+      .timeline-container { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
+      .timeline-btn { background: #23272a; color: #eee; border: none; border-radius: 4px; padding: 0.5rem 1rem; cursor: pointer; font-size: 1.2rem; }
+      .timeline-dot { width: 18px; height: 18px; border-radius: 50%; background: #4ea8de; margin: 0 8px; display: inline-block; opacity: 0.5; border: 2px solid #23272a; transition: opacity 0.2s, border 0.2s; }
+      .timeline-dot.active { opacity: 1; border: 2px solid #ff3860; }
+    </style>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j6kG6aQpQbQ4Q4Q4Q4Q4Q4Q4=" crossorigin=""></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script>
+      // TODO: Replace with your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCrXvaiwHdc5whQHuhk6SR7EutV_MY7HWE",
+  authDomain: "jlapierre-9ed45.firebaseapp.com",
+  projectId: "jlapierre-9ed45",
+  storageBucket: "jlapierre-9ed45.firebasestorage.app",
+  messagingSenderId: "747343028064",
+  appId: "1:747343028064:web:2ef67506c81c09103ac805",
+  measurementId: "G-EFMF6L65H5"
+};  
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
   </head>
 
   <body>
     <nav>
-      <div class="nav-title">Itinerary</div>
+      <div class="nav-title">Profile Hub</div>
       <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
       <div class="nav-links" id="navLinks">
         <a href="../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
-        <a href="/gallery/index.html"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
-        <a href="/itinerary/index.html" class="active"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
+        <a href="../gallery/index.html"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
+        <a href="../itinerary/index.html" class="active"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
       </div>
     </nav>
-
     <h1>My Travel Itinerary</h1>
     <div class="itinerary-container">
       <div id="adminSection" class="sticky-form" style="display:none;">
@@ -58,6 +158,7 @@
       const endDateInput = document.getElementById('endDate');
       const adminLoginBtn = document.getElementById('adminLoginBtn');
       let isAdmin = false;
+      let editId = null;
 
       // Admin mode logic
       function checkAdmin() {
@@ -94,9 +195,23 @@
         return array.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
       }
 
-      function loadItineraries() {
-        let items = JSON.parse(localStorage.getItem('itinerary') || '[]');
-        items = sortByDateAsc(items); // Sort before displaying
+      // Replace all localStorage itinerary logic with Firestore
+      async function fetchItineraries() {
+        const snapshot = await db.collection('itineraries').orderBy('startDate').get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+      async function addItinerary(item) {
+        await db.collection('itineraries').add(item);
+      }
+      async function updateItinerary(id, item) {
+        await db.collection('itineraries').doc(id).set(item);
+      }
+      async function deleteItineraryFromDb(id) {
+        await db.collection('itineraries').doc(id).delete();
+      }
+      // Patch loadItineraries to use Firestore
+      async function loadItineraries() {
+        const items = await fetchItineraries();
         list.innerHTML = '';
         items.forEach((item, index) => {
           const div = document.createElement('div');
@@ -113,35 +228,13 @@
             <p>${item.details}</p>
             <a href="${googleUrl}" target="_blank" rel="noopener" class="calendar-btn">Add to Google Calendar</a> - 
             <a href="${outlookUrl}" target="_blank" rel="noopener" class="calendar-btn">Add to Outlook</a>
-            ${isAdmin ? `<button onclick="editItinerary(${index})">Edit</button> <button onclick="deleteItinerary(${index})">Delete</button>` : ''}
+            ${isAdmin ? `<button onclick="editItinerary('${item.id}')">Edit</button> <button onclick="deleteItinerary('${item.id}')">Delete</button>` : ''}
           `;
           list.appendChild(div);
         });
       }
 
-      function deleteItinerary(index) {
-        const items = JSON.parse(localStorage.getItem('itinerary') || '[]');
-        items.splice(index, 1);
-        localStorage.setItem('itinerary', JSON.stringify(items));
-        loadItineraries();
-        if (editIndex === index) {
-          form.reset();
-          editIndex = null;
-        }
-      }
-
-      function editItinerary(index) {
-        const items = JSON.parse(localStorage.getItem('itinerary') || '[]');
-        const item = items[index];
-        document.getElementById('destination').value = item.destination;
-        document.getElementById('startDate').value = item.startDate;
-        document.getElementById('endDate').value = item.endDate;
-        document.getElementById('details').value = item.details;
-        editIndex = index;
-        form.querySelector('button[type="submit"]').textContent = 'Update Itinerary';
-      }
-
-      form.addEventListener('submit', e => {
+      form.addEventListener('submit', async e => {
         e.preventDefault();
         if (endDateInput.value < startDateInput.value) {
           alert('End date cannot be before start date.');
@@ -153,19 +246,36 @@
           endDate: endDateInput.value,
           details: document.getElementById('details').value
         };
-        let items = JSON.parse(localStorage.getItem('itinerary') || '[]');
-        if (editIndex !== null) {
-          items[editIndex] = newItem;
-          editIndex = null;
+        if (editId) {
+          await updateItinerary(editId, newItem);
+          editId = null;
           form.querySelector('button[type="submit"]').textContent = 'Add Itinerary';
         } else {
-          items.push(newItem);
+          await addItinerary(newItem);
         }
-        items = sortByDateAsc(items); // Sort before saving
-        localStorage.setItem('itinerary', JSON.stringify(items));
         form.reset();
         loadItineraries();
       });
+
+      window.editItinerary = async function(id) {
+        const items = await fetchItineraries();
+        const item = items.find(i => i.id === id);
+        document.getElementById('destination').value = item.destination;
+        document.getElementById('startDate').value = item.startDate;
+        document.getElementById('endDate').value = item.endDate;
+        document.getElementById('details').value = item.details;
+        editId = id;
+        form.querySelector('button[type="submit"]').textContent = 'Update Itinerary';
+      }
+
+      window.deleteItinerary = async function(id) {
+        await deleteItineraryFromDb(id);
+        loadItineraries();
+        if (editId === id) {
+          form.reset();
+          editId = null;
+        }
+      }
 
       window.onload = function() {
         checkAdmin();
