@@ -1,121 +1,133 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark"></html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Travel Itinerary</title>
- 
-  <!-- this sets all the styles -->
- <link rel="stylesheet" href="../styles/style.css" />
- 
- <!-- this link allows icons -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
-</head>
-  
-<style>
-  h1 {
-    text-align: center;
-  }
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-width: 500px;
-    margin: 0 auto 2rem;
-  }
-  input, textarea, button {
-    padding: 0.6rem;
-    font-size: 1rem;
-  }
-  .entry {
-    background: rgb(167, 164, 164);
-    padding: 1rem;
-    margin: 1rem auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    max-width: 600px;
-  }
-  .entry h3 {
-    margin-top: 0;
-  }
-  .entry button {
-    background: rgb(141, 3, 31);
-    color: white;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    margin-top: 0.5rem;
-    cursor: pointer;
-  }
-</style>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Travel Itinerary</title>
 
-<body>
+    <!-- this sets all the styles -->
+    <link rel="stylesheet" href="../styles/style.css" />
 
-  <nav>
-    <div class="nav-title">Itinerary</div>
-    <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
-    <div class="nav-links" id="navLinks">
-      <a href="../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
-      <a href="/gallery/index.html"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
-      <a href="/itinerary/index.html" class="active"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
-    </div>
-  </nav>
+    <!-- this link allows icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    
+    <style>
+      h1 {
+        text-align: center;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 500px;
+        margin: 0 auto 2rem;
+      }
+      input, textarea, button {
+        padding: 0.6rem;
+        font-size: 1rem;
+      }
+      .entry {
+        background: rgb(167, 164, 164);
+        padding: 1rem;
+        margin: 1rem auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        max-width: 600px;
+      }
+      .entry h3 {
+        margin-top: 0;
+      }
+      .entry button {
+        background: rgb(141, 3, 31);
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        margin-top: 0.5rem;
+        cursor: pointer;
+      }
+    </style>
+  </head>
 
-  <h1>My Travel Itinerary</h1>
-  <form id="itineraryForm">
-    <input type="text" id="destination" placeholder="Destination" required />
-    <input type="date" id="date" required />
-    <textarea id="details" placeholder="Details" rows="4" required></textarea>
-    <button type="submit">Add Itinerary</button>
-  </form>
+  <body>
+    <nav>
+      <div class="nav-title">Itinerary</div>
+      <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
+      <div class="nav-links" id="navLinks">
+        <a href="../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
+        <a href="/gallery/index.html"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
+        <a href="/itinerary/index.html" class="active"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
+      </div>
+    </nav>
 
-  <div id="itineraryList"></div>
+    <h1>My Travel Itinerary</h1>
+    <form id="itineraryForm">
+      <input type="text" id="destination" placeholder="Destination" required />
+      <input type="date" id="date" required />
+      <textarea id="details" placeholder="Details" rows="4" required></textarea>
+      <button type="submit">Add Itinerary</button>
+    </form>
 
-  <script>
-    const form = document.getElementById('itineraryForm');
-    const list = document.getElementById('itineraryList');
+    <div id="itineraryList"></div>
 
-    function loadItineraries() {
-      const items = JSON.parse(localStorage.getItem('itinerary') || '[]');
-      list.innerHTML = '';
-      items.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'entry';
-        div.innerHTML = `
-          <h3>${item.destination} (${item.date})</h3>
-          <p>${item.details}</p>
-          <button onclick="deleteItinerary(${index})">Delete</button>
-        `;
-        list.appendChild(div);
+    <script>
+      const form = document.getElementById('itineraryForm');
+      const list = document.getElementById('itineraryList');
+
+      // Sort helper function: oldest to newest
+      function sortByDateAsc(array) {
+        return array.sort((a, b) => new Date(a.date) - new Date(b.date));
+      }
+
+      function loadItineraries() {
+        let items = JSON.parse(localStorage.getItem('itinerary') || '[]');
+        items = sortByDateAsc(items); // Sort before displaying
+        list.innerHTML = '';
+        items.forEach((item, index) => {
+          const div = document.createElement('div');
+          div.className = 'entry';
+          div.innerHTML = `
+            <h3>${item.destination} (${item.date})</h3>
+            <p>${item.details}</p>
+            <button onclick="deleteItinerary(${index})">Delete</button>
+          `;
+          list.appendChild(div);
+        });
+      }
+
+      function deleteItinerary(index) {
+        const items = JSON.parse(localStorage.getItem('itinerary') || '[]');
+        items.splice(index, 1);
+        localStorage.setItem('itinerary', JSON.stringify(items));
+        loadItineraries();
+      }
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const newItem = {
+          destination: document.getElementById('destination').value,
+          date: document.getElementById('date').value,
+          details: document.getElementById('details').value
+        };
+        let items = JSON.parse(localStorage.getItem('itinerary') || '[]');
+        items.push(newItem);
+        items = sortByDateAsc(items); // Sort before saving
+        localStorage.setItem('itinerary', JSON.stringify(items));
+        form.reset();
+        loadItineraries();
       });
-    }
 
-    function deleteItinerary(index) {
-      const items = JSON.parse(localStorage.getItem('itinerary') || '[]');
-      items.splice(index, 1);
-      localStorage.setItem('itinerary', JSON.stringify(items));
-      loadItineraries();
-    }
+      window.onload = loadItineraries;
+    </script>
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const newItem = {
-        destination: document.getElementById('destination').value,
-        date: document.getElementById('date').value,
-        details: document.getElementById('details').value
-      };
-      const items = JSON.parse(localStorage.getItem('itinerary') || '[]');
-      items.push(newItem);
-      localStorage.setItem('itinerary', JSON.stringify(items));
-      form.reset();
-      loadItineraries();
-    });
-
-    window.onload = loadItineraries;
-  </script>
-</body>
+    <script>
+      function toggleMenu() {
+        document.getElementById('navLinks').classList.toggle('open');
+      }
+    </script>
+  </body>
 </html>
