@@ -1,0 +1,25 @@
+/* Main content wrapper */
+main {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Section boxes */
+section {
+  background-color: var(--section-bg);
+  padding: 1.2rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.8rem;
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}
+
+/* Section headers */
+section h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--btn-hover);
+  border-bottom: 2px solid var(--btn-hover);
+  padding-bottom: 0.3rem;
+}
