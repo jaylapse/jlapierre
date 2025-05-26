@@ -8,5 +8,21 @@
   --section-bg: #1a1a1a;
   --btn-bg: #333;
   --btn-hover: #4ea8de;
-   --icon-color: #7ea9d6;
+  --icon-color: #7ea9d6;
+}
+
+/* Itinerary theme overrides */
+.sticky-form {
+  background: #181a1b;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.entry {
+  background: rgb(32, 34, 37);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  color: #eee;
+}
+.entry button {
+  background: rgb(141, 3, 31);
+  color: white;
 }
