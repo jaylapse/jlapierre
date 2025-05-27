@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en"></html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Test Gallery</title>
+ 
+  <!-- this sets all the styles -->
+ <link rel="stylesheet" href="/styles/style.css" />
+ 
+ <!-- this link allows icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+      .gallery-iframe-container {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+      }
+      .gallery-iframe-container iframe {
+        width: 100%;
+        max-width: 700px;
+        aspect-ratio: 16/9;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+        border: none;
+        background: #181a1b;
+      }
+      @media (max-width: 800px) {
+        .gallery-iframe-container iframe {
+          max-width: 100vw;
+          min-width: 0;
+        }
+      }
+      .gallery-photo-thumb {
+        max-width: 320px;
+        max-height: 180px;
+        border-radius: 8px;
+        margin: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        cursor: pointer;
+      }
+      .gallery-photo-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+      }
+    </style>
+</head>
+
+<body>
+  <nav>
+    <div class="nav-title">Galleries</div>
+    <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
+      <a href="/gallery/index.html" class="active"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
+      <a href="/itinerary/index.html"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
+    </div>
+  </nav>
+
+  <div id="gallery"></div>
+
+  <script>
+    // Add your Google Drive file IDs here (just the IDs, no objects)
+    const imageIds = [
+      // Example: '1a2b3c4d5e6f7g8h9i0j',
+      '1EgZBIQyU5EHbQcC-1DRVe_B0r0Sez95e'
+    ];
+    const videoIds = [
+      // Example: '2b3c4d5e6f7g8h9i0j1a',
+      '1k6QZ_ZEAvaJZnoCYRV2QdqXPaWNqP8Xa',
+      '1ZpJFGDEkEiOS64foRitawebxxxVxAhOx'
+    ];
+    const gallery = document.getElementById('gallery');
+    imageIds.forEach((id, idx) => {
+      const a = document.createElement('a');
+      const imgUrl = `https://drive.google.com/uc?export=view&id=${id}`;
+      a.href = imgUrl;
+      a.setAttribute('data-lightbox', 'gallery');
+      a.setAttribute('data-title', `Photo ${idx + 1}`);
+      const img = document.createElement('img');
+      img.src = imgUrl;
+      img.alt = `Photo ${idx + 1}`;
+      img.onerror = function() {
+        a.innerHTML = `<span style='color:red;'>Image failed to load</span><br><a href='${imgUrl}' target='_blank' style='color:#4ea8de;'>Try direct link</a>`;
+        console.error('Failed to load image:', imgUrl);
+      };
+      img.onload = function() {
+        a.appendChild(img);
+      };
+      // Always append the <a> so you see the error if it fails
+      gallery.appendChild(a);
+    });
+    videoIds.forEach((id, idx) => {
+      const div = document.createElement('div');
+      div.style.margin = '1rem 0';
+      div.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" width="640" height="360" allow="autoplay" frameborder="0" allowfullscreen title="Video ${idx + 1}"></iframe>`;
+      gallery.appendChild(div);
+    });
+  </script>
+
+  <script>
+    // Add your GitHub image URLs here
+    const githubImages = [
+      // Example: 'https://raw.githubusercontent.com/yourusername/yourrepo/main/gallery/photo1.jpg',
+    ];
+    // Add your Google Drive video IDs here
+    const driveVideoIds = [
+      // Example: '2b3c4d5e6f7g8h9i0j1a',
+    ];
+    const galleryEl = document.getElementById('gallery');
+    // Show photos from GitHub
+    if (githubImages.length) {
+      const photoRow = document.createElement('div');
+      photoRow.className = 'gallery-photo-row';
+      githubImages.forEach((url, idx) => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.setAttribute('data-lightbox', 'gallery');
+        a.setAttribute('data-title', `Photo ${idx + 1}`);
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = `Photo ${idx + 1}`;
+        img.className = 'gallery-photo-thumb';
+        a.appendChild(img);
+        photoRow.appendChild(a);
+      });
+      galleryEl.appendChild(photoRow);
+    }
+    // Show videos from Google Drive (HTML5 video tag, not iframe)
+    driveVideoIds.forEach((id, idx) => {
+      const div = document.createElement('div');
+      div.className = 'gallery-iframe-container';
+      div.innerHTML = `<video controls style="width:100%;max-width:700px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.18);background:#181a1b;">
+        <source src="https://drive.google.com/uc?export=download&id=${id}" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>`;
+      galleryEl.appendChild(div);
+    });
+  </script>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById('navLinks').classList.toggle('open');
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox-plus-jquery.min.js"></script>
+  <script>
+    lightbox.option({
+      'resizeDuration': 200,
+      'wrapAround': true
+    })
+  </script>
+</body>
+</html>

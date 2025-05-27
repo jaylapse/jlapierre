@@ -23,3 +23,30 @@
 #gallery a img:hover {
   transform: scale(1.05);  /* Subtle zoom */
 }
+
+/* Video icon thumbnails in gallery row */
+.gallery-photo-row a div {
+  width: 100%;
+  max-width: 1080px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #23272a;
+  border-radius: 2px;
+  margin: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.gallery-photo-row a div:hover {
+  transform: scale(1.05);
+}
+
+.gallery-photo-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
