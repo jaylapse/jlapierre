@@ -7,6 +7,8 @@
  
   <!-- this sets all the styles -->
  <link rel="stylesheet" href="/styles/style.css" />
+  <!-- Lightbox2 CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" />
  
  <!-- this link allows icons -->
   <link
@@ -22,13 +24,20 @@
     <div class="nav-title">Galleries</div>
     <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
     <div class="nav-links" id="navLinks">
-      <a href="../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
+      <a href="/index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
       <a href="/gallery/index.html" class="active"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
       <a href="/itinerary/index.html"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
     </div>
   </nav>
 
   <div id="gallery"></div>
+  <!-- Video Modal for pop-out viewing -->
+  <div id="videoModal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeVideoModal()">&times;</button>
+      <iframe id="modalVideo" src="" allow="autoplay" allowfullscreen></iframe>
+    </div>
+  </div>
 
   <script>
     const gallery = document.getElementById('gallery');
@@ -61,21 +70,40 @@
       gallery.appendChild(a);
     }
 
-
-          // --- Google Drive Videos Section ---
+    // --- Google Drive Videos Section ---
     const videoIds = [
-     //'1wVzoLGK_uKmeLYUkr8c2qKriKqlpIzAo', '1k6QZ_ZEAvaJZnoCYRV2QdqXPaWNqP8Xa','1FLorcgRgLDE71TPq609oWGV5AYSSHaWu',
-
+      // Add your video IDs here
     ];
     const videoGallery = document.createElement('div');
     videoGallery.className = 'gallery-photo-row';
     videoIds.forEach((id, idx) => {
       const div = document.createElement('div');
       div.className = 'gallery-iframe-container';
-      div.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" width="1080" height="720" allow="autoplay" allowfullscreen title="Video ${idx + 1}"></iframe>`;
+      div.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" width="320" height="180" allow="autoplay" allowfullscreen title="Video ${idx + 1}"></iframe>`;
+      div.style.cursor = 'pointer';
+      div.onclick = function() { openVideoModal(id); };
       videoGallery.appendChild(div);
     });
-    gallery.appendChild(videoGallery);
+    // Place videos after the photo grid
+    gallery.parentNode.appendChild(videoGallery);
+
+    // Modal logic
+    function openVideoModal(id) {
+      const modal = document.getElementById('videoModal');
+      const iframe = document.getElementById('modalVideo');
+      iframe.src = `https://drive.google.com/file/d/${id}/preview`;
+      modal.classList.add('active');
+    }
+    function closeVideoModal() {
+      const modal = document.getElementById('videoModal');
+      const iframe = document.getElementById('modalVideo');
+      iframe.src = '';
+      modal.classList.remove('active');
+    }
+    // Close modal on outside click
+    document.getElementById('videoModal').addEventListener('click', function(e) {
+      if (e.target === this) closeVideoModal();
+    });
   </script>
 
   <script>
@@ -84,6 +112,7 @@
     }
   </script>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox-plus-jquery.min.js"></script>
   <script>
     lightbox.option({
