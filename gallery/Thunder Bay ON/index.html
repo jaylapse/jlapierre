@@ -60,6 +60,22 @@
       a.appendChild(img);
       gallery.appendChild(a);
     }
+
+
+          // --- Google Drive Videos Section ---
+    const videoIds = [
+     //'1wVzoLGK_uKmeLYUkr8c2qKriKqlpIzAo', '1k6QZ_ZEAvaJZnoCYRV2QdqXPaWNqP8Xa','1FLorcgRgLDE71TPq609oWGV5AYSSHaWu',
+
+    ];
+    const videoGallery = document.createElement('div');
+    videoGallery.className = 'gallery-photo-row';
+    videoIds.forEach((id, idx) => {
+      const div = document.createElement('div');
+      div.className = 'gallery-iframe-container';
+      div.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" width="1080" height="720" allow="autoplay" allowfullscreen title="Video ${idx + 1}"></iframe>`;
+      videoGallery.appendChild(div);
+    });
+    gallery.appendChild(videoGallery);
   </script>
 
   <script>

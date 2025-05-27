@@ -30,11 +30,12 @@
 
   <main>
     <section>
-      <h2><i class="fa-solid fa-folder-open fa-icon"></i>Gallery Folders</h2>
+      <h2><i class="fa-solid fa-folder-open fa-icon"></i>Photo Galleries</h2>
       <ul>
         <!-- Add more folders as needed -->
-         <li><a href="Texas 2025"><i class="fa-solid fa-image fa-icon"></i>Paris, Texas (May 2025)</a></li>
-         <li><a href="Thunder Bay ON"><i class="fa-solid fa-image fa-icon"></i>Thunder Bay ON (March 2025)</a></li>
+        <li><a href="Home"><i class="fa-solid fa-image fa-icon"></i>Home</a></li> 
+        <li><a href="Texas 2025"><i class="fa-solid fa-image fa-icon"></i>Paris, Texas (May 2025)</a></li>
+        <li><a href="Thunder Bay ON"><i class="fa-solid fa-image fa-icon"></i>Thunder Bay ON (March 2025)</a></li>
       </ul>
     </section>
   </main>
@@ -43,6 +44,37 @@
     function toggleMenu() {
       document.getElementById('navLinks').classList.toggle('open');
     }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox-plus-jquery.min.js"></script>
+  <script>
+    // Example: Add your video IDs here
+    const videoIds = [
+      // 'your_google_drive_video_id',
+    ];
+    const videoGallery = document.createElement('div');
+    videoGallery.className = 'gallery-photo-row';
+    videoIds.forEach((id, idx) => {
+      const a = document.createElement('a');
+      a.href = `https://drive.google.com/file/d/${id}/preview`;
+      a.setAttribute('data-lightbox', 'gallery');
+      a.setAttribute('data-title', `Video ${idx + 1}`);
+      // Use a video icon as the thumbnail
+      const thumb = document.createElement('div');
+      thumb.style.width = '120px';
+      thumb.style.height = '90px';
+      thumb.style.display = 'flex';
+      thumb.style.alignItems = 'center';
+      thumb.style.justifyContent = 'center';
+      thumb.style.background = '#23272a';
+      thumb.style.borderRadius = '8px';
+      thumb.style.margin = '1rem';
+      thumb.innerHTML = '<i class="fa-solid fa-circle-play" style="font-size:3rem;color:#4ea8de;"></i>';
+      a.appendChild(thumb);
+      videoGallery.appendChild(a);
+    });
+    // Insert after the main gallery section
+    document.querySelector('main').appendChild(videoGallery);
+    // Lightbox2 will open the video preview in an overlay (not native playback, but visually consistent)
   </script>
 </body>
 </html>
