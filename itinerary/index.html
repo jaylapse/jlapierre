@@ -91,7 +91,7 @@
       referrerpolicy="no-referrer"
     />
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2tu6p+U6GkG6aQpQbQ4Q4Q4Q4Q4Q4=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2tu6p+U6GkG6aQpQbQ4Q4Q4Q4Q4=" crossorigin=""/>
     <style>
       #map { height: 350px; width: 100%; margin-bottom: 1.5rem; border-radius: 10px; }
       .timeline-container { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
@@ -100,7 +100,7 @@
       .timeline-dot.active { opacity: 1; border: 2px solid #ff3860; }
     </style>
     <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j6kG6aQpQbQ4Q4Q4Q4Q4=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j6kG6aQpQbQ4Q4Q4Q4=" crossorigin=""></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -132,7 +132,7 @@ const firebaseConfig = {
     </nav>
     <h1>My Travel Itinerary</h1>
     <div id="countdown" style="text-align:center;font-size:1.2rem;margin:1rem 0;"></div>
-    <div class="itinerary-container">
+    <div class="itinerary-container" style="position:relative;">
       <div id="adminSection" class="sticky-form" style="display:none;">
         <form id="itineraryForm">
           <label for="destination">Destination</label>
@@ -146,9 +146,71 @@ const firebaseConfig = {
           <button type="submit">Add Itinerary</button>
         </form>
       </div>
+      <div class="fold-controls">
+        <button id="foldAllBtn" type="button" title="Fold All"><i class="fa-solid fa-chevron-up"></i></button>
+        <button id="unfoldAllBtn" type="button" title="Unfold All"><i class="fa-solid fa-chevron-down"></i></button>
+      </div>
       <div class="entries-list" id="itineraryList"></div>
       <button id="adminLoginBtn" style="position:fixed;bottom:24px;right:24px;z-index:9999;opacity:0.5;">Admin Login</button>
     </div>
+    <style>
+      .fold-controls {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 10;
+      }
+      .fold-controls button {
+        background: #23272a;
+        color: #eee;
+        border: none;
+        border-radius: 4px;
+        width: 2.2rem;
+        height: 2.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, transform 0.1s;
+      }
+      .fold-controls button:hover {
+        background: #4ea8de;
+        color: #fff;
+        transform: scale(1.08);
+      }
+      @media (max-width: 700px) {
+        .fold-controls {
+          top: 0.2rem;
+          right: 0.2rem;
+        }
+      }
+      .toggle-btn {
+        width: 1.3rem;
+        height: 1.3rem;
+        min-width: 1.3rem;
+        min-height: 1.3rem;
+        font-size: 0.95rem !important;
+        padding: 0.1rem 0.2rem;
+        border-radius: 4px;
+        border: none;
+        background: #23272a;
+        color: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, transform 0.1s;
+      }
+      .toggle-btn:hover {
+        background: #4ea8de;
+        color: #fff;
+        transform: scale(1.08);
+      }
+    </style>
 
     <script>
       const form = document.getElementById('itineraryForm');
@@ -218,27 +280,47 @@ const firebaseConfig = {
         items.forEach((item, index) => {
           const div = document.createElement('div');
           div.className = 'entry';
+          div.style.position = 'relative';
           // Highlight past entries
-          if (item.endDate < today) {
+          const isPast = item.endDate < today;
+          if (isPast) {
             div.style.background = '#4e2323'; // red shade for past
           }
-          // Calendar links
-          const start = item.startDate.replace(/-/g, '');
-          const end = item.endDate.replace(/-/g, '');
-          const title = encodeURIComponent(item.destination);
-          const details = encodeURIComponent(item.details);
-          const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}`;
-          const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&body=${details}&startdt=${item.startDate}&enddt=${item.endDate}`;
-          const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}`;
+          // Collapsible logic
+          const collapsed = isPast ? 'collapsed' : '';
           div.innerHTML = `
-            <h3>${item.destination} (${item.startDate} - ${item.endDate})
-              <a href="${mapsUrl}" target="_blank" title="View on Google Maps" style="margin-left:8px;color:#4ea8de;"><i class="fa-solid fa-map-location-dot"></i></a>
-            </h3>
-            <p>${item.details}</p>
-            <a href="${googleUrl}" target="_blank" rel="noopener" class="calendar-btn">Add to Google Calendar</a> - 
-            <a href="${outlookUrl}" target="_blank" rel="noopener" class="calendar-btn">Add to Outlook</a>
-            ${isAdmin ? `<button onclick="editItinerary('${item.id}')">Edit</button> <button onclick="deleteItinerary('${item.id}')">Delete</button>` : ''}
+            <div class="entry-toggle-btn" style="position:absolute;top:0.7rem;right:0.7rem;z-index:2;">
+              <button class="toggle-btn" aria-label="Toggle details" style="width:1.3rem;height:1.3rem;font-size:0.95rem;padding:0.1rem 0.2rem;border-radius:4px;">
+                <i class="fa-solid ${collapsed ? 'fa-chevron-down' : 'fa-chevron-up'}"></i>
+              </button>
+            </div>
+            <div class="entry-header" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+              <h3 style="margin:0;flex:1;">${item.destination} (${item.startDate} - ${item.endDate})
+                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}" target="_blank" title="View on Google Maps" style="margin-left:8px;color:#4ea8de;"><i class="fa-solid fa-map-location-dot"></i></a>
+              </h3>
+            </div>
+            <div class="entry-details" style="display:${collapsed ? 'none' : 'block'};margin-top:0.5rem;">
+              <p>${item.details}</p>
+              <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(item.destination)}&dates=${item.startDate.replace(/-/g, '')}/${item.endDate.replace(/-/g, '')}&details=${encodeURIComponent(item.details)}" target="_blank" rel="noopener" class="calendar-btn" title="Add to Google Calendar" style="margin-right:0.7rem;font-size:1.2rem;color:#4285F4;"><i class="fa-brands fa-google"></i></a>
+              <a href="https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(item.destination)}&body=${encodeURIComponent(item.details)}&startdt=${item.startDate}&enddt=${item.endDate}" target="_blank" rel="noopener" class="calendar-btn" title="Add to Outlook" style="font-size:1.2rem;color:#4ea8de;"><i class="fa-solid fa-envelope"></i></a>
+              ${isAdmin ? `<button onclick="editItinerary('${item.id}')">Edit</button> <button onclick="deleteItinerary('${item.id}')">Delete</button>` : ''}
+            </div>
           `;
+          // Toggle logic
+          div.querySelector('.toggle-btn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const details = div.querySelector('.entry-details');
+            const icon = div.querySelector('.toggle-btn i');
+            if (details.style.display === 'none') {
+              details.style.display = 'block';
+              icon.classList.remove('fa-chevron-down');
+              icon.classList.add('fa-chevron-up');
+            } else {
+              details.style.display = 'none';
+              icon.classList.remove('fa-chevron-up');
+              icon.classList.add('fa-chevron-down');
+            }
+          });
           list.appendChild(div);
         });
         updateCountdown(items);
@@ -303,6 +385,23 @@ const firebaseConfig = {
       window.onload = function() {
         checkAdmin();
       };
+
+      // Fold/Unfold All logic
+      document.getElementById('foldAllBtn').onclick = function() {
+        document.querySelectorAll('.entry .entry-details').forEach(d => { d.style.display = 'none'; });
+        document.querySelectorAll('.entry .toggle-btn i').forEach(icon => {
+          icon.classList.remove('fa-chevron-up');
+          icon.classList.add('fa-chevron-down');
+        });
+      };
+      document.getElementById('unfoldAllBtn').onclick = function() {
+        document.querySelectorAll('.entry .entry-details').forEach(d => { d.style.display = 'block'; });
+        document.querySelectorAll('.entry .toggle-btn i').forEach(icon => {
+          icon.classList.remove('fa-chevron-down');
+          icon.classList.add('fa-chevron-up');
+        });
+      };
+
     </script>
 
     <script>
