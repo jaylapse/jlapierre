@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Contact Me - James Lapierre</title>
-  <link rel="stylesheet" href="styles/style.css" />
+  <title>James Lapierre | Contact</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="icon" type="image/jpeg" href="/hoodie.jpg" />
 </head>
 <body>
   <div id="nav-placeholder"></div>
@@ -19,6 +21,7 @@
 
   
   <main>
+    <div class="main-section-container">
       <section>
       <h2><i class="fa-solid fa-user fa-icon"></i> James Lapierre</h2>
       <ul>
@@ -32,15 +35,16 @@
     </section>
 
 
-    <section class="contact-section">
-      <h2 style="margin-top:0;margin-bottom:1.2rem;text-align:left;font-size:2rem;font-weight:bold;">Contact Me</h2>
-      <form action="https://formspree.io/f/meognnzq" method="POST" style="display:flex;flex-direction:column;gap:1rem;">
-        <input type="text" id="name" name="name" placeholder="Your Name" required>
-        <input type="email" id="email" name="email" placeholder="Your Email" required>
-        <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
-        <button type="submit">Send</button>
-      </form>
-    </section>
+      <section class="contact-section">
+        <h2 style="margin-top:0;margin-bottom:1.2rem;text-align:left;font-size:2rem;font-weight:bold;">Contact Me</h2>
+        <form action="https://formspree.io/f/meognnzq" method="POST">
+          <input type="text" id="name" name="name" placeholder="Your Name" required>
+          <input type="email" id="email" name="email" placeholder="Your Email" required>
+          <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
+          <button type="submit">Send</button>
+        </form>
+      </section>
+    </div>
   </main>
   <!-- Footer -->
 <div id="footer-placeholder"></div>
