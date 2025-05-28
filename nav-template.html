@@ -1,8 +1,11 @@
 <!-- Top Navigation Bar Template -->
 <nav>
-  <div class="nav-title">
-    <a href="/index.html">J. Lapierre</a></div>
-  <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
+  <div class="nav-header">
+    <div class="nav-title">
+      <a href="/index.html">J. Lapierre</a>
+    </div>
+    <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
+  </div>
   <div class="nav-links" id="navLinks">
     <a href="/index.html"><i class="fa-solid fa-user fa-icon"></i>Home</a>
     <a href="/gallery/index.html"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
@@ -17,4 +20,11 @@
     referrerpolicy="no-referrer"
   />
   <link rel="icon" type="image/jpeg" href="/hoodie.jpg" />
+
+<script>
+function toggleMenu() {
+  var navLinks = document.getElementById('navLinks');
+  navLinks.classList.toggle('open');
+}
+</script>
 <!-- End Top Navigation Bar Template -->
