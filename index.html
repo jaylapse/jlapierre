@@ -60,6 +60,11 @@
     }
     loadTemplate('nav-placeholder', '/nav-template.html');
     loadTemplate('footer-placeholder', '/footer-template.html');
+
+    function toggleMenu() {
+      var navLinks = document.getElementById('navLinks');
+      navLinks.classList.toggle('open');
+    }
   </script>
 </body>
 </html>
