@@ -32,33 +32,25 @@
 
   <script>
     const gallery = document.getElementById('gallery');
-    const maxPhotos = 100; // set a high maximum
+    const maxPhotos = 100;
     const folder = './';
-    let foundMissing = false;
-    (function loadPhotos() {
-      let i = 1;
-      function tryNext() {
-        if (i > maxPhotos || foundMissing) return;
-        let filename = i === 1 ? 'photo.JPG' : `photo (${i}).JPG`;
-        let img = new Image();
-        img.onload = function() {
-          let a = document.createElement('a');
-          a.href = folder + filename;
-          a.setAttribute('data-lightbox', 'gallery');
-          a.setAttribute('data-title', `Photo ${i}`);
-          img.alt = `Photo ${i}`;
-          a.appendChild(img);
-          gallery.appendChild(a);
-          i++;
-          tryNext();
-        };
-        img.onerror = function() {
-          foundMissing = true;
-        };
-        img.src = folder + filename;
-      }
-      tryNext();
-    })();
+    for (let i = 1; i <= maxPhotos; i++) {
+      let filename = i === 1 ? 'photo.JPG' : `photo (${i}).JPG`;
+      let img = new Image();
+      img.onload = function() {
+        let a = document.createElement('a');
+        a.href = folder + filename;
+        a.setAttribute('data-lightbox', 'gallery');
+        a.setAttribute('data-title', `Photo ${i}`);
+        img.alt = `Photo ${i}`;
+        a.appendChild(img);
+        gallery.appendChild(a);
+      };
+      img.onerror = function() {
+        // Do nothing, just skip
+      };
+      img.src = folder + filename;
+    }
   </script>
 
   <script>
