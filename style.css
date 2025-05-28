@@ -65,6 +65,12 @@ form {
   max-width: 100%;
   margin: 0;
 }
+form input,
+form textarea,
+form select {
+  width: 100%;
+  box-sizing: border-box;
+}
 input, textarea, button {
   padding: 0.6rem;
   font-size: 1rem;
@@ -377,7 +383,7 @@ nav {
 .hamburger {
   display: none;
 }
-@media (max-width: 100%px) {
+@media (max-width: 700px) {
   nav {
     flex-direction: column;
     align-items: flex-start;
@@ -536,8 +542,8 @@ section, .contact-section {
   padding: 2rem 1.5rem 1.5rem 1.5rem;
 }
 .contact-section form {
-  max-width: 420px;
-  width: 400px;
+  max-width: 95%;
+  width: 95%;
   margin: 0 auto;
 }
 @media (max-width: 700px) {
