@@ -17,6 +17,7 @@ body {
   display: flex;
   flex-direction: column;
   padding-top: 64px; /* Adjust if your nav is taller/shorter */
+  overflow-x: hidden;
 }
 
 /* Universal link styles */
@@ -243,7 +244,8 @@ input, textarea, button {
 /* --- Layout Styles  --- */
 /* Main content wrapper */
 main {
-  max-width: 70%;
+  max-width: 700px;
+  width: 100%;
   margin: 2rem auto;
   padding: 0 1rem;
   flex: 1 0 auto;
@@ -272,7 +274,7 @@ section h2 {
 .itinerary-container {
   display: flex;
   gap: 2rem;
-  width: 100%
+  width: 100%;
   max-width: 100%;
   margin: 0 auto;
   align-items: flex-start;
@@ -285,18 +287,24 @@ section h2 {
 }
 .entries-list {
   flex: 1 1 0%;
+  width: 100%;
 }
 @media (max-width: 900px) {
   .itinerary-container {
     flex-direction: column;
     gap: 0;
+    width: 100%;
+    max-width: 100%;
   }
   .sticky-form {
     position: static;
     margin-bottom: 2rem;
+    width: 100%;
+    max-width: 100%;
   }
   .entries-list {
     max-width: 100%;
+    width: 100%;
   }
 }
 /* --- Itinerary Theme Overrides --- */
@@ -495,7 +503,7 @@ nav {
   padding: 0.2rem 0 0.3rem 0;
   background: transparent;
 }
-@media (max-width: 100%) {
+@media (max-width: 700px) {
   .footer-links-bar {
     gap: 1rem;
   }
@@ -507,7 +515,7 @@ nav {
 /* --- Main Section Styles --- */
 .main-section-container {
   max-width: 700px;
-  width: 120%;
+  width: 100%;
   margin: 2rem auto 4rem auto;
   padding: 0 1rem;
   display: flex;
@@ -534,13 +542,27 @@ section, .contact-section {
 }
 @media (max-width: 700px) {
   .main-section-container {
-    max-width: 98vw;
+    max-width: 100vw;
+    width: 100vw;
     padding: 1rem 0.2rem 4rem 0.2rem;
+  }
+  main {
+    max-width: 100vw;
+    width: 100vw;
+    padding: 0 0.2rem;
   }
   .hero-section,
   .about-section,
   .contact-section {
     padding: 1.2rem 0.5rem 1rem 0.5rem;
+  }
+  .footer-bar {
+    font-size: 0.98rem;
+    padding: 0 0 0.2rem 0;
+  }
+  .footer-links-bar {
+    gap: 1rem;
+    padding: 0.5rem 0 0.2rem 0;
   }
 }
 
