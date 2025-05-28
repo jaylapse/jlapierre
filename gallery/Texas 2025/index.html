@@ -6,7 +6,7 @@
   <title>Texas Gallery</title>
  
   <!-- this sets all the styles -->
- <link rel="stylesheet" href="/styles/style.css" />
+ <link rel="stylesheet" href="/style.css" />
   <!-- Lightbox2 CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" />
  
@@ -33,23 +33,36 @@
 
   <script>
     const gallery = document.getElementById('gallery');
-    const numPhotos = 14; // change this to your number of photos
-    const folder = './'; // relative path to your images folder
+    const maxPhotos = 100; // set a high maximum
+    const folder = './';
+    let foundMissing = false;
+    (function loadPhotos() {
+      let i = 1;
+      function tryNext() {
+        if (i > maxPhotos || foundMissing) return;
+        let filename = i === 1 ? 'photo.JPG' : `photo (${i}).JPG`;
+        let img = new Image();
+        img.onload = function() {
+          let a = document.createElement('a');
+          a.href = folder + filename;
+          a.setAttribute('data-lightbox', 'gallery');
+          a.setAttribute('data-title', `Photo ${i}`);
+          img.alt = `Photo ${i}`;
+          a.appendChild(img);
+          gallery.appendChild(a);
+          i++;
+          tryNext();
+        };
+        img.onerror = function() {
+          foundMissing = true;
+        };
+        img.src = folder + filename;
+      }
+      tryNext();
+    })();
+  </script>
 
-    // Photo gallery grid
-    for (let i = 1; i <= numPhotos; i++) {
-      let filename = i === 1 ? 'photo.JPG' : `photo (${i}).JPG`;
-      let a = document.createElement('a');
-      a.href = folder + filename;
-      a.setAttribute('data-lightbox', 'gallery');
-      a.setAttribute('data-title', `Photo ${i}`);
-      let img = document.createElement('img');
-      img.src = folder + filename;
-      img.alt = `Photo ${i}`;
-      a.appendChild(img);
-      gallery.appendChild(a);
-    }
-
+  <script>
     // --- Google Drive Videos Section ---
     const videoIds = [
       '1wVzoLGK_uKmeLYUkr8c2qKriKqlpIzAo', '1k6QZ_ZEAvaJZnoCYRV2QdqXPaWNqP8Xa','1FLorcgRgLDE71TPq609oWGV5AYSSHaWu',
