@@ -54,6 +54,8 @@ const firebaseConfig = {
           <form id="itineraryForm">
             <label for="destination">Destination</label>
             <input type="text" id="destination" placeholder="-" required />
+            <label for="galleryLink">Gallery Link (optional)</label>
+            <input type="url" id="galleryLink" placeholder="/gallery/YourGalleryFolder/" />
             <label for="startDate">Start</label>
             <input type="date" id="startDate" required />
             <label for="endDate">End</label>
@@ -207,6 +209,7 @@ const firebaseConfig = {
           }
           // Collapsible logic
           const collapsed = isPast ? 'collapsed' : '';
+          const galleryLink = item.galleryLink && item.galleryLink.trim() !== '' ? item.galleryLink : null;
           div.innerHTML = `
             <div class="entry-toggle-btn" style="position:absolute;top:0.7rem;right:0.7rem;z-index:2;">
               <button class="toggle-btn" aria-label="Toggle details" style="width:1.3rem;height:1.3rem;font-size:0.95rem;padding:0.1rem 0.2rem;border-radius:4px;">
@@ -214,7 +217,9 @@ const firebaseConfig = {
               </button>
             </div>
             <div class="entry-header" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
-              <h3 style="margin:0;flex:1;">${item.destination} (${item.startDate} - ${item.endDate})
+              <h3 style="margin:0;flex:1;">
+                ${galleryLink ? `<a href="${galleryLink}" style="color:#4ea8de;text-decoration:underline;" target="_blank">${item.destination}</a>` : item.destination}
+                (${item.startDate} - ${item.endDate})
                 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}" target="_blank" title="View on Google Maps" style="margin-left:8px;color:#4ea8de;"><i class="fa-solid fa-map-location-dot"></i></a>
               </h3>
             </div>
@@ -255,7 +260,8 @@ const firebaseConfig = {
           destination: document.getElementById('destination').value,
           startDate: startDateInput.value,
           endDate: endDateInput.value,
-          details: document.getElementById('details').value
+          details: document.getElementById('details').value,
+          galleryLink: document.getElementById('galleryLink').value || ''
         };
         if (editId) {
           await updateItinerary(editId, newItem);
@@ -275,6 +281,7 @@ const firebaseConfig = {
         document.getElementById('startDate').value = item.startDate;
         document.getElementById('endDate').value = item.endDate;
         document.getElementById('details').value = item.details;
+        document.getElementById('galleryLink').value = item.galleryLink || '';
         editId = id;
         form.querySelector('button[type="submit"]').textContent = 'Update Itinerary';
       }
