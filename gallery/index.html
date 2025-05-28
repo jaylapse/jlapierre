@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <div id="nav-placeholder"></div>
+
   <title>Gallery</title>
   
   <!-- this sets all the styles -->
@@ -18,19 +21,11 @@
 </head>
 
 <body style="background:#121212;color:#eee;">
-  <nav>
-    <div class="nav-title">Galleries</div>
-    <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
-    <div class="nav-links" id="navLinks">
-      <a href="../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
-      <a href="index.html" class="active"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
-      <a href="/itinerary/index.html"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
-    </div>
-  </nav>
+  <div id="nav-placeholder"></div>
 
   <main>
     <section>
-      <h2><i class="fa-solid fa-folder-open fa-icon"></i>Photo Galleries</h2>
+      <h2><i class="fa-solid fa-folder-open fa-icon"></i> Photo Galleries</h2>
       <ul>
         <!-- Add more folders as needed -->
         <li><a href="Home"><i class="fa-solid fa-image fa-icon"></i>Home</a></li> 
@@ -40,10 +35,23 @@
     </section>
   </main>
 
+  <div id="footer-placeholder"></div>
+
   <script>
     function toggleMenu() {
       document.getElementById('navLinks').classList.toggle('open');
     }
+  </script>
+
+   <script>
+    // Load nav and footer templates dynamically
+    function loadTemplate(id, url) {
+      fetch(url)
+        .then(res => res.text())
+        .then(html => { document.getElementById(id).innerHTML = html; });
+    }
+    loadTemplate('nav-placeholder', '/nav-template.html');
+    loadTemplate('footer-placeholder', '/footer-template.html');
   </script>
 </body>
 </html>

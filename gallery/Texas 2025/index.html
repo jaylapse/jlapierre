@@ -19,15 +19,8 @@
   />
 </head>
 <body>
-  <nav>
-    <div class="nav-title">Galleries</div>
-    <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
-    <div class="nav-links" id="navLinks">
-      <a href="/index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
-      <a href="/gallery/index.html" class="active"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
-      <a href="/itinerary/index.html"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
-    </div>
-  </nav>
+  <div id="nav-placeholder"></div>
+
 
   <div id="gallery"></div>
   <!-- Video Modal for pop-out viewing -->
@@ -107,6 +100,19 @@
       'resizeDuration': 200,
       'wrapAround': true
     })
+  </script>
+
+  <div id="footer-placeholder"></div>
+ 
+ <script>
+    // Load nav and footer templates dynamically
+    function loadTemplate(id, url) {
+      fetch(url)
+        .then(res => res.text())
+        .then(html => { document.getElementById(id).innerHTML = html; });
+    }
+    loadTemplate('nav-placeholder', '/nav-template.html');
+    // loadTemplate('footer-placeholder', '/footer-template.html');
   </script>
 </body>
 </html>

@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <div id="nav-placeholder"></div>
+
     <title>Travel Itinerary</title>
 
     <style>
@@ -121,15 +124,8 @@ const firebaseConfig = {
   </head>
 
   <body>
-    <nav>
-      <div class="nav-title">Profile Hub</div>
-      <button class="hamburger" aria-label="Toggle menu" onclick="toggleMenu()">☰</button>
-      <div class="nav-links" id="navLinks">
-        <a href="../index.html"><i class="fa-solid fa-user fa-icon"></i>Profile Hub</a>
-        <a href="../gallery/index.html"><i class="fa-solid fa-photo-film fa-icon"></i>Galleries</a>
-        <a href="../itinerary/index.html" class="active"><i class="fa-solid fa-plane fa-icon"></i>Itinerary</a>
-      </div>
-    </nav>
+    <div id="nav-placeholder"></div>
+
     <h1>My Travel Itinerary</h1>
     <div id="countdown" style="text-align:center;font-size:1.2rem;margin:1rem 0;"></div>
     <div class="itinerary-container" style="position:relative;">
@@ -409,5 +405,18 @@ const firebaseConfig = {
         document.getElementById('navLinks').classList.toggle('open');
       }
     </script>
+
+  <div id="footer-placeholder"></div>
+
+   <script>
+    // Load nav and footer templates dynamically
+    function loadTemplate(id, url) {
+      fetch(url)
+        .then(res => res.text())
+        .then(html => { document.getElementById(id).innerHTML = html; });
+    }
+    loadTemplate('nav-placeholder', '/nav-template.html');
+    loadTemplate('footer-placeholder', '/footer-template.html');
+  </script>
   </body>
 </html>

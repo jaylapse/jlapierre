@@ -363,4 +363,88 @@ nav {
     max-height: 50vh;
   }
 }
+
+/* --- Footer Styles --- */
+.footer-bar {
+  width: 100%;
+  background: linear-gradient(to top, #181a1b 90%, #23272a 100%);
+  color: #bbb;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.10);
+  padding: 0 0 0.3rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.footer-links-bar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  background: linear-gradient(to top, #23272a 80%, #181a1b 100%);
+  padding: 0.5rem 0 0.2rem 0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+.footer-links-bar a {
+  color: #4ea8de;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+  font-size: 1.08rem;
+}
+.footer-links-bar a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+.footer-content {
+  width: 100%;
+  text-align: center;
+  font-size: 1rem;
+  padding: 0.2rem 0 0.3rem 0;
+  background: transparent;
+}
+@media (max-width: 700px) {
+  .footer-links-bar {
+    gap: 1rem;
+  }
+  .footer-content {
+    font-size: 0.98rem;
+  }
+}
+
+/* --- Main Section Styles --- */
+.main-section-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem 1rem;
+}
+.hero-section,
+.about-section,
+.contact-section {
+  background: rgba(26,26,26,0.95);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  margin-bottom: 2rem;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+}
+@media (max-width: 700px) {
+  .main-section-container {
+    max-width: 98vw;
+    padding: 1rem 0.2rem 4rem 0.2rem;
+  }
+  .hero-section,
+  .about-section,
+  .contact-section {
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+  }
+}
+
+p {
+  text-align: justify;
+}
+
 /* --- End of style.css --- */
