@@ -6,22 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" />
   <link rel="stylesheet" href="/assets/css/main.css" />
-  		<title>James Lapierre | Home</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="assets/css/main.css" />
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 </head>
 <body>
-
-
+<div id="bg"></div>
+<div id="wrapper">
+  <h1 style="text-align: center">Galleries</h1>
+<div>    <button class="button small" id="back-to-main" style="display:flex;gap:1.2rem;justify-content:center;margin-bottom:2rem;flex-wrap:wrap;">&larr; Back</button>
+</div>
   <div style="display:flex;gap:1.2rem;justify-content:center;margin-bottom:2rem;flex-wrap:wrap;">
-    <button id="back-to-main" style="margin-bottom:1.5rem;">&larr; Back</button>
+
     <button class="gallery-switch" data-gallery="home">Home</button>
     <button class="gallery-switch" data-gallery="thunderbay">Thunder Bay ON (March 2025)</button>
     <button class="gallery-switch" data-gallery="paris">Paris, Texas (May 2025)</button>
   </div>
-  <h2 id="gallery-header" class="major" style="text-align: center;"></h2></div>
+  <h3 id="gallery-header" class="major" style="text-align:center;"></h3>
   <div id="gallery-photos" class="gallery-cards-container"></div>
   <div id="gallery-videos" class="gallery-videos-container"></div>
   <div id="videoModal">
@@ -39,7 +37,7 @@
         folder: '/gallery/Home/',
         maxPhotos: 100,
         title: 'Home',
-        header: 'Believe it or not, I do go home, sometimes.',
+        header: 'Home sweet home.',
         imgPrefix: 'photo',
         imgExt: '.JPG',
         videoIds: []
@@ -96,19 +94,35 @@
         img.onerror = function(){};
         img.src = config.folder + filename;
       }
-      // Videos
-      const videoContainer = document.getElementById('gallery-videos');
-      videoContainer.innerHTML = '';
-      if (config.videoIds && config.videoIds.length > 0) {
-        config.videoIds.forEach((id, idx) => {
-          const div = document.createElement('div');
-          div.className = 'gallery-card';
-          div.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" allow="autoplay" allowfullscreen title="Video ${idx + 1}"></iframe>`;
-          div.style.cursor = 'pointer';
-          div.onclick = function() { openVideoModal(id); };
-          videoContainer.appendChild(div);
-        });
-      }
+
+// Videos (use thumbnail instead of iframe)
+const videoContainer = document.getElementById('gallery-videos');
+videoContainer.innerHTML = '';
+if (config.videoIds && config.videoIds.length > 0) {
+  config.videoIds.forEach((id, idx) => {
+    const div = document.createElement('div');
+    div.className = 'gallery-card video-card';
+    // Use a Google Drive thumbnail (replace with your own if you have custom thumbs)
+    const thumbUrl = `https://drive.google.com/thumbnail?id=${id}`;
+    div.innerHTML = `
+      <div style="position:relative;cursor:pointer;">
+        <img src="${thumbUrl}" alt="Video ${idx + 1}" class="gallery-card-img" style="filter:brightness(0.7);">
+        <span style="
+          position:absolute;
+          left:50%;top:50%;
+          transform:translate(-50%,-50%);
+          font-size:2.5rem;
+          color:#fff;
+          text-shadow:0 2px 8px #000;
+          pointer-events:none;">
+          &#9658;
+        </span>
+      </div>
+    `;
+    div.onclick = function() { openVideoModal(id); };
+    videoContainer.appendChild(div);
+  });
+}
     }
 
     // Video modal logic
@@ -151,11 +165,21 @@
   window.location.href = '/index.html#galleries';
     };
   </script>
-</body>
+  
+
 
 <footer id="footer">
     <ul class="copyright">
         <li>&copy; James Lapierre. 2025</li>
     </ul>
 </footer>
+
+<!-- Scripts -->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/browser.min.js"></script>
+<script src="assets/js/breakpoints.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
+
+</body>
 </html>
