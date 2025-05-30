@@ -1,0 +1,35 @@
+      .fold-controls {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        position: static;
+        top: unset;
+        right: unset;
+        z-index: 10;
+      }
+      .fold-controls button {
+        background: #23272a;
+        color: #eee;
+        border: none;
+        border-radius: 4px;
+        width: 1.5rem;
+        height: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, transform 0.1s;
+      }
+      .fold-controls button:hover {
+        background: #4ea8de;
+        color: #fff;
+        transform: scale(1.08);
+      }
+      @media (max-width: 700px) {
+        .fold-controls {
+          margin-bottom: 0.2rem;
+        }
+      }

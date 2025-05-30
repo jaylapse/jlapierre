@@ -1,70 +1,750 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>James Lapierre | Home</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="icon" type="image/jpeg" href="/hoodie.jpg" />
-</head>
-<body>
-  <!-- Top Navigation Bar -->
-  <div id="nav-placeholder"></div>
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>James Lapierre | Home</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 
-  <main>
-    <div class="main-section-container">
-      <!-- Hero Section -->
-      <section class="hero-section" style="text-align:center;">
-        <img src="hoodie.jpg" alt="James Lapierre" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin-bottom:1.2rem;box-shadow:0 2px 12px rgba(0,0,0,0.18);display:block;margin-left:auto;margin-right:auto;">
-        <h1 style="font-size:2.5rem;margin-bottom:0.5rem;">Hi, I'm James</h1>
-        <p style="font-size:1.2rem;color:#bbb;max-width:500px;margin:0 auto 1.5rem auto;">Travel. Photography. Adventure. Welcome to my digital hub for tracking travels, and sharing the views.</p>
-        <div style="margin:1.5rem 0;display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;">
-          <a href="gallery/index.html" class="hero-btn"><i class="fa-solid fa-photo-film"></i> Galleries</a>
-          <a href="itinerary/index.html" class="hero-btn"><i class="fa-solid fa-plane"></i> Itinerary</a>
-          <a href="contact.html" class="hero-btn"><i class="fa-solid fa-envelope"></i> Contact</a>
-          <a href="about.html" class="hero-btn"><i class="fa-solid fa-user"></i> About</a>
+	<!-- this link allows icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="logo">
+							<a href="https://www.chess.com/member/jaylapse" target="_blank" rel="noopener" title="Instagram" class="icon fa-chess-king"><span class="label">Instagram</span></a>
+						</div>
+						<div class="content">
+							<div class="inner">
+								<h1>Hi, I'm James</h1>
+								<img src="/images/hoodie.jpg" alt="James Lapierre" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin-bottom:1.2rem;box-shadow:0 2px 12px rgba(0,0,0,0.18);display:block;margin-left:auto;margin-right:auto;">
+								<p>Travel. Photography. Adventure. Welcome to my digital hub for tracking travels, and sharing the views.</p>
+								<p>I'm an occasional traveler by trade, and I love trying to get a good photo where I can. Explore my galleries, check out my travel plans, or drop me a message!</p>
+							</div>
+						</div>
+						<nav>
+							<ul>
+								<li><a href="#about">About</a></li>
+								<li><a href="#contact">Contact</a></li>
+								<li><a href="#itinerary">Itinerary</a></li>
+								<li><a href="#galleries">Galleries</a></li>
+								<!-- <li><a href="#elements">Elements</a></li> -->
+							</ul>
+						</nav>
+					</header>
+
+<!-- Main -->
+	<div id="main">
+
+<!-- Itinerary -->
+<article id="itinerary">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2tu6p+U6GkG6aQpQbQ4Q4Q4Q4Q4=" crossorigin=""/>
+
+	<!-- Leaflet JS -->
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j6kG6aQpQbQ4Q4Q4=" crossorigin=""></script>
+	<!-- Firebase SDK -->
+	<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+	<script>
+		const firebaseConfig = {
+		apiKey: "AIzaSyCrXvaiwHdc5whQHuhk6SR7EutV_MY7HWE",
+		authDomain: "jlapierre-9ed45.firebaseapp.com",
+		projectId: "jlapierre-9ed45",
+		storageBucket: "jlapierre-9ed45.firebasestorage.app",
+		messagingSenderId: "747343028064",
+		appId: "1:747343028064:web:2ef67506c81c09103ac805",
+		measurementId: "G-EFMF6L65H5"
+		};  
+
+		firebase.initializeApp(firebaseConfig);
+		const db = firebase.firestore();
+
+		function formatDate(dateStr) {
+		const date = new Date(dateStr);
+		const options = { day: 'numeric', month: 'long', year: 'numeric' };
+		return date.toLocaleDateString(undefined, options);
+		}
+	</script>
+
+  <body>
+	<div id="nav-placeholder"></div>
+    <main>
+      <h1 class="major"><span class="fas fa-plane-departure"></span> My Travel Itinerary 
+	</h1>
+      <div id="countdown"></div>
+      <div class="itinerary-container" style="position:relative;">
+        <div id="adminSection" class="sticky-form" style="display:none;">
+          <form id="itineraryForm">
+            <label for="destination">Destination</label>
+            <input type="text" id="destination" placeholder="-" required />
+            <label for="galleryLink">Gallery Link (optional)</label>
+            <input type="url" id="galleryLink" placeholder="/gallery/YourGalleryFolder/" />
+            <label for="startDate">Start</label>
+            <input type="date" id="startDate" required />
+            <label for="endDate">End</label>
+            <input type="date" id="endDate" required />
+            <label for="details">Details</label>
+            <textarea id="details" placeholder="-" rows="4" required></textarea>
+            <button type="submit">Add Itinerary</button>
+          </form>
         </div>
-        <div style="margin-top:1.2rem;text-align:center;">
-          <a href="https://instagram.com/jaylapse" target="_blank" rel="noopener" title="Instagram" style="margin:0 0.5rem;font-size:1.5rem;color:#E1306C;"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://facebook.com/lapierre92" target="_blank" rel="noopener" title="Facebook" style="margin:0 0.5rem;font-size:1.5rem;color:#1877F3;"><i class="fa-brands fa-facebook"></i></a>
+        <div class="fold-controls">
+          <button id="foldAllBtn" type="button" title="Fold All"><i class="fa-solid fa-chevron-up"></i></button>
+          <button id="unfoldAllBtn" type="button" title="Unfold All"><i class="fa-solid fa-chevron-down"></i></button>
         </div>
-      </section>
-      <!-- About Preview -->
-      <section class="about-section">
-        <h2 style="margin-top:0;">About Me</h2>
-        <p style="color:#ccc;">I'm an occasional traveler by trade, and I love trying to get a good photo where I can. Explore my galleries, check out my travel plans, or drop me a message!</p>
-        <a href="about.html" style="color:#4ea8de;text-decoration:underline;">Read more &rarr;</a>
-      </section>
-      <!-- Contact Preview -->
-      <section id="contact" class="contact-section">
-        <h2 style="margin-top:0;">Contact Me</h2>
-        <form action="https://formspree.io/f/meognnzq" method="POST" style="display:flex;flex-direction:column;gap:1rem;">
-          <input type="text" name="name" placeholder="Your Name" required style="padding:0.6rem;font-size:1rem;">
-          <input type="email" name="email" placeholder="Your Email" required style="padding:0.6rem;font-size:1rem;">
-          <textarea name="message" placeholder="Your Message" rows="4" required style="padding:0.6rem;font-size:1rem;"></textarea>
-          <button type="submit" style="padding:0.6rem;font-size:1rem;background:#4ea8de;color:#fff;border:none;border-radius:6px;cursor:pointer;">Send</button>
-        </form>
-      </section>
+        <div class="entries-list" id="itineraryList"></div>
+        <button id="adminLoginBtn" style="position:fixed;bottom:24px;right:24px;z-index:9999;opacity:0.5;">Admin Login</button>
+      </div>
+    </main>
+
+    <script>
+      const form = document.getElementById('itineraryForm');
+      const list = document.getElementById('itineraryList');
+      const adminSection = document.getElementById('adminSection');
+      let editIndex = null;
+      const startDateInput = document.getElementById('startDate');
+      const endDateInput = document.getElementById('endDate');
+      const adminLoginBtn = document.getElementById('adminLoginBtn');
+      let isAdmin = false;
+      let editId = null;
+
+      // Admin mode logic
+      function checkAdmin() {
+        isAdmin = localStorage.getItem('itineraryAdmin') === 'true';
+        adminSection.style.display = isAdmin ? 'block' : 'none';
+        adminLoginBtn.textContent = isAdmin ? 'Logout Admin' : 'Admin Login';
+        loadItineraries();
+      }
+      adminLoginBtn.addEventListener('click', function() {
+        if (isAdmin) {
+          localStorage.removeItem('itineraryAdmin');
+          checkAdmin();
+        } else {
+          const pw = prompt('Enter admin password:');
+          if (pw === 'letmein') {
+            localStorage.setItem('itineraryAdmin', 'true');
+            checkAdmin();
+          } else {
+            alert('Incorrect password.');
+          }
+        }
+      });
+
+      // Prevent end date before start date
+      startDateInput.addEventListener('change', function() {
+        endDateInput.min = this.value;
+        if (endDateInput.value && endDateInput.value < this.value) {
+          endDateInput.value = this.value;
+        }
+      });
+
+      // Sort helper function: oldest to newest by startDate
+      function sortByDateAsc(array) {
+        return array.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+      }
+
+      // Replace all localStorage itinerary logic with Firestore
+      async function fetchItineraries() {
+        const snapshot = await db.collection('itineraries').orderBy('startDate').get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+      async function addItinerary(item) {
+        await db.collection('itineraries').add(item);
+      }
+      async function updateItinerary(id, item) {
+        await db.collection('itineraries').doc(id).set(item);
+      }
+      async function deleteItineraryFromDb(id) {
+        await db.collection('itineraries').doc(id).delete();
+      }
+      // Patch loadItineraries to use Firestore
+      async function loadItineraries() {
+        const items = await fetchItineraries();
+        list.innerHTML = '';
+        const today = new Date().toISOString().slice(0, 10);
+        items.forEach((item, index) => {
+          const div = document.createElement('div');
+          div.className = 'entry';
+          div.style.position = 'relative';
+          // Highlight past entries by changing h3 color only
+          const isPast = item.endDate < today;
+          // Collapsible logic
+          const collapsed = isPast ? 'collapsed' : 'collapsed';
+          div.innerHTML = `
+            <div class="entry-header" style="display:flex;align-items:flex-start;gap:0.2rem;cursor:pointer;flex-direction:column;">
+              <h3 style="${isPast ? 'color:#800020;' : ''}">
+                ${item.destination}
+              </h3>
+            </div>
+            <div class="entry-details" style="display:${collapsed ? 'none' : 'block'};margin-top:0.5rem;">
+              <div style="font-size:1rem;color:#bbb;margin-bottom:0.2rem;">
+                ${formatDate(item.startDate)} - ${formatDate(item.endDate)}
+                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}" target="_blank" title="View on Google Maps" style="margin-left:8px;color:#4ea8de;"><i class="fa-solid fa-map-location-dot"></i></a>
+              </div>
+              <p>${item.details}</p>
+              ${isAdmin ? `<button onclick="editItinerary('${item.id}')">Edit</button> <button onclick="deleteItinerary('${item.id}')">Delete</button>` : ''}
+            </div>
+          `;
+          // Add separator except after last entry
+          if (index < items.length - 1) {
+            const sep = document.createElement('div');
+            sep.className = 'entry-separator';
+            list.appendChild(div);
+            list.appendChild(sep);
+          } else {
+            list.appendChild(div);
+          }
+          // Toggle logic: clicking the header toggles details
+          div.querySelector('.entry-header').addEventListener('click', function(e) {
+            // Prevent map icon click from toggling
+            if (e.target.closest('a')) return;
+            const details = div.querySelector('.entry-details');
+            if (details.style.display === 'none') {
+              details.style.display = 'block';
+            } else {
+              details.style.display = 'none';
+            }
+          });
+        });
+        updateCountdown(items);
+      }
+
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (endDateInput.value < startDateInput.value) {
+          alert('End date cannot be before start date.');
+          return;
+        }
+        const newItem = {
+          destination: document.getElementById('destination').value,
+          startDate: startDateInput.value,
+          endDate: endDateInput.value,
+          details: document.getElementById('details').value,
+          galleryLink: document.getElementById('galleryLink').value || ''
+        };
+        if (editId) {
+          await updateItinerary(editId, newItem);
+          editId = null;
+          form.querySelector('button[type="submit"]').textContent = 'Add Itinerary';
+        } else {
+          await addItinerary(newItem);
+        }
+        form.reset();
+        loadItineraries();
+      });
+
+      window.editItinerary = async function(id) {
+        const items = await fetchItineraries();
+        const item = items.find(i => i.id === id);
+        document.getElementById('destination').value = item.destination;
+        document.getElementById('startDate').value = item.startDate;
+        document.getElementById('endDate').value = item.endDate;
+        document.getElementById('details').value = item.details;
+        document.getElementById('galleryLink').value = item.galleryLink || '';
+        editId = id;
+        form.querySelector('button[type="submit"]').textContent = 'Update Itinerary';
+      }
+
+      window.deleteItinerary = async function(id) {
+        await deleteItineraryFromDb(id);
+        loadItineraries();
+        if (editId === id) {
+          form.reset();
+          editId = null;
+        }
+      }
+
+      function updateCountdown(items) {
+        const countdownDiv = document.getElementById('countdown');
+        const today = new Date().toISOString().slice(0, 10);
+        const upcoming = items.filter(item => item.startDate > today);
+        if (!upcoming.length) {
+          countdownDiv.textContent = '';
+          return;
+        }
+        const next = upcoming[0];
+        const diff = Math.ceil((new Date(next.startDate) - new Date()) / (1000*60*60*24));
+        countdownDiv.textContent = `Next trip: ${next.destination} in ${diff} day${diff !== 1 ? 's' : ''} (${formatDate(next.startDate)})`;
+      }
+
+      window.onload = function() {
+        checkAdmin();
+      };
+
+      // Fold/Unfold All logic
+      document.getElementById('foldAllBtn').onclick = function() {
+        document.querySelectorAll('.entry .entry-details').forEach(d => { d.style.display = 'none'; });
+        document.querySelectorAll('.entry .toggle-btn i').forEach(icon => {
+          icon.classList.remove('fa-chevron-up');
+          icon.classList.add('fa-chevron-down');
+        });
+      };
+      document.getElementById('unfoldAllBtn').onclick = function() {
+        document.querySelectorAll('.entry .entry-details').forEach(d => { d.style.display = 'block'; });
+        document.querySelectorAll('.entry .toggle-btn i').forEach(icon => {
+          icon.classList.remove('fa-chevron-down');
+          icon.classList.add('fa-chevron-up');
+        });
+      };
+
+    </script>
+</article>
+
+<!-- Galleries -->
+<article id="galleries">
+  <h2 class="major"><i class="fa-solid fa-folder-open fa-icon"></i> Photo Galleries</h2>
+  <div style="display:flex;gap:1.2rem;justify-content:center;margin-bottom:2rem;flex-wrap:wrap;">
+    <button class="gallery-switch" data-gallery="home">Home</button>
+    <button class="gallery-switch" data-gallery="thunderbay">Thunder Bay ON (March 2025)</button>
+    <button class="gallery-switch" data-gallery="paris">Paris, Texas (May 2025)</button>
+  </div>
+  <div id="gallery-header" style="text-align:center;font-size:1.4rem;font-weight:600;margin-bottom:1.2rem;"></div>
+  <div id="gallery-photos" class="gallery-cards-container"></div>
+  <div id="gallery-videos" class="gallery-videos-container"></div>
+  <div id="videoModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
+    <div style="position:relative;max-width:90vw;max-height:90vh;">
+      <button onclick="closeVideoModal()" style="position:absolute;top:-2.5rem;right:0;font-size:2rem;background:none;border:none;color:#fff;cursor:pointer;">&times;</button>
+      <iframe id="modalVideo" src="" allow="autoplay" allowfullscreen style="width:70vw;height:40vw;max-width:900px;max-height:70vh;border-radius:10px;"></iframe>
     </div>
-  </main>
-  <!-- Footer -->
-<div id="footer-placeholder"></div>
-
- <script>
-    // Load nav and footer templates dynamically
-    function loadTemplate(id, url) {
-      fetch(url)
-        .then(res => res.text())
-        .then(html => { document.getElementById(id).innerHTML = html; });
+  </div>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox-plus-jquery.min.js"></script>
+  <script>
+    // Gallery config
+    const galleryConfigs = {
+      home: {
+        folder: '/gallery/Home/',
+        maxPhotos: 100,
+        title: 'Home',
+        header: 'Believe it or not, I do go home, sometimes.',
+        imgPrefix: 'photo',
+        imgExt: '.JPG',
+        videoIds: [] // Add Google Drive video IDs here
+      },
+      thunderbay: {
+        folder: '/gallery/Thunder Bay ON/',
+        maxPhotos: 100,
+        title: 'Thunder Bay, Ontario (March 2025)',
+        header: 'Home of the Sleeping Giant.',
+        imgPrefix: 'photo',
+        imgExt: '.JPG',
+        videoIds: ["1AXyQr-5OTnAH3pE_cdKlZjuBwX8Ao5XE","1uWjbaF6b8xyhUS25SW3UMGTpigzHNKSE","1yMOUzLwTqFjXpGcGOQsLPdujIlVqESk0"]
+      },
+      paris: {
+        folder: '/gallery/Texas 2025/',
+        maxPhotos: 100,
+        title: 'Paris, Texas (May 2025)',
+        header: 'Who knew America had its own Eiffel Tower?',
+        imgPrefix: 'photo',
+        imgExt: '.JPG',
+        videoIds: ['1wVzoLGK_uKmeLYUkr8c2qKriKqlpIzAo', '1k6QZ_ZEAvaJZnoCYRV2QdqXPaWNqP8Xa','1FLorcgRgLDE71TPq609oWGV5AYSSHaWu',
+      				'1ZpJFGDEkEiOS64foRitawebxxxVxAhOx','1JkORrlEO-nIOyPP3YYbMRes3lvXAfpW0']
+      }
+    };
+    function loadGallery(galleryKey) {
+      const config = galleryConfigs[galleryKey];
+      document.getElementById('gallery-header').textContent = config.header || '';
+      const container = document.getElementById('gallery-photos');
+      const videoContainer = document.getElementById('gallery-videos');
+      container.innerHTML = '';
+      videoContainer.innerHTML = '';
+      let loaded = 0;
+      // Photos
+      for (let i = 1; i <= config.maxPhotos; i++) {
+        let filename = i === 1 ? `${config.imgPrefix}${config.imgExt}` : `${config.imgPrefix} (${i})${config.imgExt}`;
+        let img = new Image();
+        img.onload = function() {
+          const div = document.createElement('div');
+          div.className = 'gallery-card';
+          div.innerHTML = `<a href="${config.folder + filename}" data-lightbox="gallery" target="_blank" data-title="${config.title} Photo ${i}"><img src="${config.folder + filename}" alt="${config.title} Photo ${i}" class="gallery-card-img" /></a>`;
+          container.appendChild(div);
+          loaded++;
+          if (loaded === config.maxPhotos) {
+            if (window.lightbox && typeof window.lightbox.init === 'function') {
+              window.lightbox.init();
+            }
+          }
+        };
+        img.onerror = function(){};
+        img.src = config.folder + filename;
+      }
+      // Videos
+      if (config.videoIds && config.videoIds.length > 0) {
+        config.videoIds.forEach((id, idx) => {
+          const div = document.createElement('div');
+          div.className = 'gallery-iframe-container';
+          div.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" width=720 height=405px allow="autoplay" allowfullscreen title="Video ${idx + 1}"></iframe>`;
+          div.style.cursor = 'pointer';
+          div.onclick = function() { openVideoModal(id); };
+          videoContainer.appendChild(div);
+        });
+      }
     }
-    loadTemplate('nav-placeholder', '/nav-template.html');
-    loadTemplate('footer-placeholder', '/footer-template.html');
-
-    function toggleMenu() {
-      var navLinks = document.getElementById('navLinks');
-      navLinks.classList.toggle('open');
+    // Video modal logic
+    function openVideoModal(id) {
+      const modal = document.getElementById('videoModal');
+      const iframe = document.getElementById('modalVideo');
+      iframe.src = `https://drive.google.com/file/d/${id}/preview`;
+      modal.style.display = 'flex';
     }
+    function closeVideoModal() {
+      const modal = document.getElementById('videoModal');
+      const iframe = document.getElementById('modalVideo');
+      iframe.src = '';
+      modal.style.display = 'none';
+    }
+    document.getElementById('videoModal').addEventListener('click', function(e) {
+      if (e.target === this) closeVideoModal();
+    });
+    // Switch gallery on button click
+    document.querySelectorAll('.gallery-switch').forEach(btn => {
+      btn.onclick = function() {
+        document.querySelectorAll('.gallery-switch').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadGallery(btn.dataset.gallery);
+      };
+    });
+    // Load default gallery
+    loadGallery('home');
+    // Lightbox2 options
+    lightbox.option({
+      'resizeDuration': 200,
+      'wrapAround': true
+    });
   </script>
+</article>
+
+<!-- About -->
+	<article id="about">
+		<h2 class="major"><span class="fas fa-info-circle"></span> About</h2>
+		<!-- <span class="image main"><img src="images/pic03.jpg" alt="" /></span> -->
+		<p>Hello! I'm James. Welcome to my personal website. Here you can find my travel galleries, itinerary, and ways to contact me. 
+			I travel quite a bit for work, and enjoy photography, so the two go hand in hand. 
+			Feel free to explore the site and reach out if you'd like to connect!.
+		
+		<p>You can view my current and previous work resumé below, or <a href="CV.pdf" download>download it here</a>.</p>
+		<embed src="James-Lapierre_CV-English_2025.pdf" type="application/pdf" width="100%" height="700px" style="border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.10);background:#222;max-width:900px;display:block;margin:auto;" />
+		</p>
+	</article>
+
+<!-- Contact -->
+	<article id="contact">								
+		<h2 class="major"><span class="fas fa-user"></span> Contact</h2>
+		<h2><i class=""></i> James Lapierre</h2>
+	
+		<table>
+			<tbody>
+				<tr>
+					<td>Cell Phone</td>
+					<td>450 - 543 - 2148</td>
+				</tr>
+				<tr>
+					<td>E-mail</td>
+					<td>james@jlapierre.com</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<h2><i class=""></i> Message Me</h2>
+	
+		<form action="https://formspree.io/f/meognnzq" method="POST">
+			<div class="fields">
+				<div class="field half">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="name" />
+				</div>
+				<div class="field half">
+					<label for="email">Email</label>
+					<input type="text" name="email" id="email" />
+				</div>
+				<div class="field">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" rows="4" style="max-width: 100%; max-height:100%; min-width: 100%"></textarea>
+				</div>
+			</div>
+			<ul class="actions">
+				<li><input type="submit" value="Send Message" class="primary" /></li>
+				<li><input type="reset" value="Reset" /></li>
+			</ul>
+		</form>
+		<ul class="icons">
+			<li><a href="https://facebook.com/lapierre92" target="_blank" rel="noopener" title="Facebook" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+			<li><a href="https://instagram.com/jaylapse" target="_blank" rel="noopener" title="Instagram" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+			</ul>
+	</article>
+
+<!-- Elements -->
+	<article id="elements">
+		<h2 class="major">Elements</h2>
+
+		<section>
+			<h3 class="major">Text</h3>
+			<p>This is <b>bold</b> and this is <strong>strong</strong>. This is <i>italic</i> and this is <em>emphasized</em>.
+			This is <sup>superscript</sup> text and this is <sub>subscript</sub> text.
+			This is <u>underlined</u> and this is code: <code>for (;;) { ... }</code>. Finally, <a href="#">this is a link</a>.</p>
+			<hr />
+			<h2>Heading Level 2</h2>
+			<h3>Heading Level 3</h3>
+			<h4>Heading Level 4</h4>
+			<h5>Heading Level 5</h5>
+			<h6>Heading Level 6</h6>
+			<hr />
+			<h4>Blockquote</h4>
+			<blockquote>Fringilla nisl. Donec accumsan interdum nisi, quis tincidunt felis sagittis eget tempus euismod. Vestibulum ante ipsum primis in faucibus vestibulum. Blandit adipiscing eu felis iaculis volutpat ac adipiscing accumsan faucibus. Vestibulum ante ipsum primis in faucibus lorem ipsum dolor sit amet nullam adipiscing eu felis.</blockquote>
+			<h4>Preformatted</h4>
+			<pre><code>i = 0;
+
+while (!deck.isInOrder()) {
+print 'Iteration ' + i;
+deck.shuffle();
+i++;
+}
+
+print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
+			</section>
+
+			<section>
+				<h3 class="major">Lists</h3>
+
+				<h4>Unordered</h4>
+				<ul>
+					<li>Dolor pulvinar etiam.</li>
+					<li>Sagittis adipiscing.</li>
+					<li>Felis enim feugiat.</li>
+				</ul>
+
+				<h4>Alternate</h4>
+				<ul class="alt">
+					<li>Dolor pulvinar etiam.</li>
+					<li>Sagittis adipiscing.</li>
+					<li>Felis enim feugiat.</li>
+				</ul>
+
+				<h4>Ordered</h4>
+				<ol>
+					<li>Dolor pulvinar etiam.</li>
+					<li>Etiam vel felis viverra.</li>
+					<li>Felis enim feugiat.</li>
+					<li>Dolor pulvinar etiam.</li>
+					<li>Etiam vel felis lorem.</li>
+					<li>Felis enim et feugiat.</li>
+				</ol>
+				<h4>Icons</h4>
+				<ul class="icons">
+					<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+					<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+					<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+					<li><a href="#" class="icon brands fa-github"><span class="label">Github</span></a></li>
+				</ul>
+
+				<h4>Actions</h4>
+				<ul class="actions">
+					<li><a href="#" class="button primary">Default</a></li>
+					<li><a href="#" class="button">Default</a></li>
+				</ul>
+				<ul class="actions stacked">
+					<li><a href="#" class="button primary">Default</a></li>
+					<li><a href="#" class="button">Default</a></li>
+				</ul>
+			</section>
+
+			<section>
+				<h3 class="major">Table</h3>
+				<h4>Default</h4>
+				<div class="table-wrapper">
+					<table>
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Description</th>
+								<th>Price</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Item One</td>
+								<td>Ante turpis integer aliquet porttitor.</td>
+								<td>29.99</td>
+							</tr>
+							<tr>
+								<td>Item Two</td>
+								<td>Vis ac commodo adipiscing arcu aliquet.</td>
+								<td>19.99</td>
+							</tr>
+							<tr>
+								<td>Item Three</td>
+								<td> Morbi faucibus arcu accumsan lorem.</td>
+								<td>29.99</td>
+							</tr>
+							<tr>
+								<td>Item Four</td>
+								<td>Vitae integer tempus condimentum.</td>
+								<td>19.99</td>
+							</tr>
+							<tr>
+								<td>Item Five</td>
+								<td>Ante turpis integer aliquet porttitor.</td>
+								<td>29.99</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td colspan="2"></td>
+								<td>100.00</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+
+				<h4>Alternate</h4>
+				<div class="table-wrapper">
+					<table class="alt">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Description</th>
+								<th>Price</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Item One</td>
+								<td>Ante turpis integer aliquet porttitor.</td>
+								<td>29.99</td>
+							</tr>
+							<tr>
+								<td>Item Two</td>
+								<td>Vis ac commodo adipiscing arcu aliquet.</td>
+								<td>19.99</td>
+							</tr>
+							<tr>
+								<td>Item Three</td>
+								<td> Morbi faucibus arcu accumsan lorem.</td>
+								<td>29.99</td>
+							</tr>
+							<tr>
+								<td>Item Four</td>
+								<td>Vitae integer tempus condimentum.</td>
+								<td>19.99</td>
+							</tr>
+							<tr>
+								<td>Item Five</td>
+								<td>Ante turpis integer aliquet porttitor.</td>
+								<td>29.99</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td colspan="2"></td>
+								<td>100.00</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+			</section>
+
+			<section>
+				<h3 class="major">Buttons</h3>
+				<ul class="actions">
+					<li><a href="#" class="button primary">Primary</a></li>
+					<li><a href="#" class="button">Default</a></li>
+				</ul>
+				<ul class="actions">
+					<li><a href="#" class="button">Default</a></li>
+					<li><a href="#" class="button small">Small</a></li>
+				</ul>
+				<ul class="actions">
+					<li><a href="#" class="button primary icon solid fa-download">Icon</a></li>
+					<li><a href="#" class="button icon solid fa-download">Icon</a></li>
+				</ul>
+				<ul class="actions">
+					<li><span class="button primary disabled">Disabled</span></li>
+					<li><span class="button disabled">Disabled</span></li>
+				</ul>
+			</section>
+
+			<section>
+				<h3 class="major">Form</h3>
+				<form method="post" action="#">
+					<div class="fields">
+						<div class="field half">
+							<label for="demo-name">Name</label>
+							<input type="text" name="demo-name" id="demo-name" value="" placeholder="Jane Doe" />
+						</div>
+						<div class="field half">
+							<label for="demo-email">Email</label>
+							<input type="email" name="demo-email" id="demo-email" value="" placeholder="jane@untitled.tld" />
+						</div>
+						<div class="field">
+							<label for="demo-category">Category</label>
+							<select name="demo-category" id="demo-category">
+								<option value="">-</option>
+								<option value="1">Manufacturing</option>
+								<option value="1">Shipping</option>
+								<option value="1">Administration</option>
+								<option value="1">Human Resources</option>
+							</select>
+						</div>
+						<div class="field half">
+							<input type="radio" id="demo-priority-low" name="demo-priority" checked>
+							<label for="demo-priority-low">Low</label>
+						</div>
+						<div class="field half">
+							<input type="radio" id="demo-priority-high" name="demo-priority">
+							<label for="demo-priority-high">High</label>
+						</div>
+						<div class="field half">
+							<input type="checkbox" id="demo-copy" name="demo-copy">
+							<label for="demo-copy">Email me a copy</label>
+						</div>
+						<div class="field half">
+							<input type="checkbox" id="demo-human" name="demo-human" checked>
+							<label for="demo-human">Not a robot</label>
+						</div>
+						<div class="field">
+							<label for="demo-message">Message</label>
+							<textarea name="demo-message" id="demo-message" placeholder="Enter your message" rows="6"></textarea>
+						</div>
+					</div>
+					<ul class="actions">
+						<li><input type="submit" value="Send Message" class="primary" /></li>
+						<li><input type="reset" value="Reset" /></li>
+					</ul>
+				</form>
+			</section>
+
+		</article>
+
+</div>
+
+<!-- Footer -->
+<footer id="footer">
+	<p class="copyright">&copy; James Lapierre 2025</p>
+</footer>
+
+</div>
+
+<!-- BG -->
+<div id="bg"></div>
+
+<!-- Scripts -->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/browser.min.js"></script>
+<script src="assets/js/breakpoints.min.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/main.js"></script>
+
 </body>
 </html>
