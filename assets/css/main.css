@@ -1929,3 +1929,11 @@ input, select, textarea {
 		max-height: 60vh;
 	}
 	}
+
+@media screen and (max-width: 700px) {
+  h1.major, h2.major, h3.major, h4.major, h5.major, h6.major {
+    width: 100% !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+}
