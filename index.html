@@ -306,123 +306,19 @@
     <button class="gallery-switch" data-gallery="home">Home</button>
     <button class="gallery-switch" data-gallery="thunderbay">Thunder Bay ON (March 2025)</button>
     <button class="gallery-switch" data-gallery="paris">Paris, Texas (May 2025)</button>
-  </div>
-  <div id="gallery-header" style="text-align:center;font-size:1.4rem;font-weight:600;margin-bottom:1.2rem;"></div>
-  <div id="gallery-photos" class="gallery-cards-container"></div>
-  <div id="gallery-videos" class="gallery-videos-container"></div>
-  <div id="videoModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
-    <div style="position:relative;max-width:90vw;max-height:90vh;">
-      <button onclick="closeVideoModal()" style="position:absolute;top:-2.5rem;right:0;font-size:2rem;background:none;border:none;color:#fff;cursor:pointer;">&times;</button>
-      <iframe id="modalVideo" src="" allow="autoplay" allowfullscreen style="width:70vw;height:40vw;max-width:900px;max-height:70vh;border-radius:10px;"></iframe>
-    </div>
-  </div>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox-plus-jquery.min.js"></script>
-  <script>
-    // Gallery config
-    const galleryConfigs = {
-      home: {
-        folder: '/gallery/Home/',
-        maxPhotos: 100,
-        title: 'Home',
-        header: 'Believe it or not, I do go home, sometimes.',
-        imgPrefix: 'photo',
-        imgExt: '.JPG',
-        videoIds: [] // Add Google Drive video IDs here
-      },
-      thunderbay: {
-        folder: '/gallery/Thunder Bay ON/',
-        maxPhotos: 100,
-        title: 'Thunder Bay, Ontario (March 2025)',
-        header: 'Home of the Sleeping Giant.',
-        imgPrefix: 'photo',
-        imgExt: '.JPG',
-        videoIds: ["1AXyQr-5OTnAH3pE_cdKlZjuBwX8Ao5XE","1uWjbaF6b8xyhUS25SW3UMGTpigzHNKSE","1yMOUzLwTqFjXpGcGOQsLPdujIlVqESk0"]
-      },
-      paris: {
-        folder: '/gallery/Texas 2025/',
-        maxPhotos: 100,
-        title: 'Paris, Texas (May 2025)',
-        header: 'Who knew America had its own Eiffel Tower?',
-        imgPrefix: 'photo',
-        imgExt: '.JPG',
-        videoIds: ['1wVzoLGK_uKmeLYUkr8c2qKriKqlpIzAo', '1k6QZ_ZEAvaJZnoCYRV2QdqXPaWNqP8Xa','1FLorcgRgLDE71TPq609oWGV5AYSSHaWu',
-      				'1ZpJFGDEkEiOS64foRitawebxxxVxAhOx','1JkORrlEO-nIOyPP3YYbMRes3lvXAfpW0']
-      }
-    };
-    function loadGallery(galleryKey) {
-      const config = galleryConfigs[galleryKey];
-      document.getElementById('gallery-header').textContent = config.header || '';
-      const container = document.getElementById('gallery-photos');
-      const videoContainer = document.getElementById('gallery-videos');
-      container.innerHTML = '';
-      videoContainer.innerHTML = '';
-      let loaded = 0;
-      // Photos
-      for (let i = 1; i <= config.maxPhotos; i++) {
-        let filename = i === 1 ? `${config.imgPrefix}${config.imgExt}` : `${config.imgPrefix} (${i})${config.imgExt}`;
-        let img = new Image();
-        img.onload = function() {
-          const div = document.createElement('div');
-          div.className = 'gallery-card';
-          div.innerHTML = `<a href="${config.folder + filename}" data-lightbox="gallery" target="_blank" data-title="${config.title} Photo ${i}"><img src="${config.folder + filename}" alt="${config.title} Photo ${i}" class="gallery-card-img" /></a>`;
-          container.appendChild(div);
-          loaded++;
-          if (loaded === config.maxPhotos) {
-            if (window.lightbox && typeof window.lightbox.init === 'function') {
-              window.lightbox.init();
-            }
-          }
-        };
-        img.onerror = function(){};
-        img.src = config.folder + filename;
-      }
-      // Videos
-      if (config.videoIds && config.videoIds.length > 0) {
-        config.videoIds.forEach((id, idx) => {
-          const div = document.createElement('div');
-          div.className = 'gallery-card';
-          div.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" adjumax-height=95vh max-width=90vw allow="autoplay" allowfullscreen title="Video ${idx + 1}"></iframe>`;
-          div.style.cursor = 'pointer';
-          div.onclick = function() { openVideoModal(id); };
-          videoContainer.appendChild(div);
-        });
-      }
-    }
-    // Video modal logic
-    function openVideoModal(id) {
-      const modal = document.getElementById('videoModal');
-      const iframe = document.getElementById('modalVideo');
-      iframe.src = `https://drive.google.com/file/d/${id}/preview`;
-      modal.style.display = 'flex';
-    }
-    function closeVideoModal() {
-      const modal = document.getElementById('videoModal');
-      const iframe = document.getElementById('modalVideo');
-      iframe.src = '';
-      modal.style.display = 'none';
-    }
-    document.getElementById('videoModal').addEventListener('click', function(e) {
-      if (e.target === this) closeVideoModal();
-    });
-    // Switch gallery on button click
-    document.querySelectorAll('.gallery-switch').forEach(btn => {
-      btn.onclick = function() {
-        document.querySelectorAll('.gallery-switch').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        loadGallery(btn.dataset.gallery);
-      };
-    });
-    // Load default gallery
-    //loadGallery('home');
+
     
-    // Lightbox2 options
-    lightbox.option({
-      'resizeDuration': 200,
-      'wrapAround': true
+  </div>
+<script>
+  document.querySelectorAll('.gallery-switch').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const gallery = this.getAttribute('data-gallery');
+      localStorage.setItem('selectedGallery', gallery);
+      window.location.href = '/gallery/index.html';
     });
-  </script>
+  });
+</script>
+
 </article>
 
 <!-- About -->
