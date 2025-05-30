@@ -76,12 +76,10 @@
 		return date.toLocaleDateString(undefined, options);
 		}
 	</script>
-
+  <h2 class="major"><span class="fas fa-plane-departure"></span> My Travel Itinerary </h2>
   <body>
 	<div id="nav-placeholder"></div>
     <main>
-      <h1 class="major"><span class="fas fa-plane-departure"></span> My Travel Itinerary 
-	</h1>
       <div id="countdown"></div>
       <div class="itinerary-container" style="position:relative;">
         <div id="adminSection" class="sticky-form" style="display:none;">
@@ -104,7 +102,7 @@
           <button id="unfoldAllBtn" type="button" title="Unfold All"><i class="fa-solid fa-chevron-down"></i></button>
         </div>
         <div class="entries-list" id="itineraryList"></div>
-        <button id="adminLoginBtn" style="position:fixed;bottom:24px;right:24px;z-index:9999;opacity:0.5;">Admin Login</button>
+        <button id="adminLoginBtn" style="position:fixed;bottom:6px;right:6px;z-index:9999;opacity:0.5;">Editor</button>
       </div>
     </main>
 
@@ -123,7 +121,7 @@
       function checkAdmin() {
         isAdmin = localStorage.getItem('itineraryAdmin') === 'true';
         adminSection.style.display = isAdmin ? 'block' : 'none';
-        adminLoginBtn.textContent = isAdmin ? 'Logout Admin' : 'Admin Login';
+        adminLoginBtn.textContent = isAdmin ? 'Logout' : 'Editor';
         loadItineraries();
       }
       adminLoginBtn.addEventListener('click', function() {
@@ -384,8 +382,8 @@
       if (config.videoIds && config.videoIds.length > 0) {
         config.videoIds.forEach((id, idx) => {
           const div = document.createElement('div');
-          div.className = 'gallery-iframe-container';
-          div.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" width=720 height=405px allow="autoplay" allowfullscreen title="Video ${idx + 1}"></iframe>`;
+          div.className = 'gallery-card';
+          div.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" adjumax-height=95vh max-width=90vw allow="autoplay" allowfullscreen title="Video ${idx + 1}"></iframe>`;
           div.style.cursor = 'pointer';
           div.onclick = function() { openVideoModal(id); };
           videoContainer.appendChild(div);
@@ -417,7 +415,8 @@
       };
     });
     // Load default gallery
-    loadGallery('home');
+    //loadGallery('home');
+    
     // Lightbox2 options
     lightbox.option({
       'resizeDuration': 200,

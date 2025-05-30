@@ -1923,9 +1923,9 @@ input, select, textarea {
 	}
 	@media (max-width: 700px) {
 	#videoModal iframe {
-		width: 95vw;
-		height: 54vw;
-		max-width: 98vw;
-		max-height: 50vh;
+		width: 100vw;
+		max-width: 100vw;
+		height: 56vw;
+		max-height: 60vh;
 	}
 	}
