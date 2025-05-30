@@ -181,7 +181,7 @@
           const collapsed = isPast ? 'collapsed' : 'collapsed';
           div.innerHTML = `
             <div class="entry-header" style="display:flex;align-items:flex-start;gap:0.2rem;cursor:pointer;flex-direction:column;">
-              <h3 style="${isPast ? 'color:#800020;' : ''}">
+              <h3 style="${isPast ? 'text-decoration:line-through;' : ''}">
                 ${item.destination}
               </h3>
             </div>
