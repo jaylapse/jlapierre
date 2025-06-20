@@ -49,7 +49,7 @@
 
 <!-- Itinerary -->
 <article id="itinerary">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2tu6p+U6GkG6aQpQbQ4Q4Q4Q4Q4=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2tu6p+U6GkG6aQpQbQ4Q4Q4Q4=" crossorigin=""/>
 
 	<!-- Leaflet JS -->
 	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j6kG6aQpQbQ4Q4Q4=" crossorigin=""></script>
@@ -116,6 +116,19 @@
       const adminLoginBtn = document.getElementById('adminLoginBtn');
       let isAdmin = false;
       let editId = null;
+      let showPastTrips = false;
+
+      // Add the toggle button above the itinerary list
+      const toggleBtn = document.createElement('button');
+      toggleBtn.textContent = 'Show Past Trips';
+      toggleBtn.className = 'button small';
+      toggleBtn.style.margin = '0 0 1rem 0';
+      toggleBtn.onclick = function() {
+        showPastTrips = !showPastTrips;
+        toggleBtn.textContent = showPastTrips ? 'Hide Past Trips' : 'Show Past Trips';
+        loadItineraries();
+      };
+      list.parentNode.insertBefore(toggleBtn, list);
 
       // Admin mode logic
       function checkAdmin() {
@@ -152,7 +165,7 @@
         return array.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
       }
 
-      // Replace all localStorage itinerary logic with Firestore
+      // Firestore Logic
       async function fetchItineraries() {
         const snapshot = await db.collection('itineraries').orderBy('startDate').get();
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -171,17 +184,23 @@
         const items = await fetchItineraries();
         list.innerHTML = '';
         const today = new Date().toISOString().slice(0, 10);
-        items.forEach((item, index) => {
+        let filtered = items;
+        if (!showPastTrips) {
+          filtered = items.filter(item => item.endDate >= today);
+        }
+        filtered.forEach((item, index) => {
           const div = document.createElement('div');
           div.className = 'entry';
           div.style.position = 'relative';
-          // Highlight past entries by changing h3 color only
           const isPast = item.endDate < today;
-          // Collapsible logic
+          const isCurrent = item.startDate <= today && item.endDate >= today;
           const collapsed = isPast ? 'collapsed' : 'collapsed';
           div.innerHTML = `
             <div class="entry-header" style="display:flex;align-items:flex-start;gap:0.2rem;cursor:pointer;flex-direction:column;">
-              <h3 style="${isPast ? 'text-decoration:line-through;' : ''}">
+              <h3 style="
+                ${isPast ? 'text-decoration:line-through;' : ''}
+                ${isCurrent ? 'color:#3ecf4a;' : ''}
+              ">
                 ${item.destination}
               </h3>
             </div>
@@ -195,7 +214,7 @@
             </div>
           `;
           // Add separator except after last entry
-          if (index < items.length - 1) {
+          if (index < filtered.length - 1) {
             const sep = document.createElement('div');
             sep.className = 'entry-separator';
             list.appendChild(div);
@@ -203,9 +222,7 @@
           } else {
             list.appendChild(div);
           }
-          // Toggle logic: clicking the header toggles details
           div.querySelector('.entry-header').addEventListener('click', function(e) {
-            // Prevent map icon click from toggling
             if (e.target.closest('a')) return;
             const details = div.querySelector('.entry-details');
             if (details.style.display === 'none') {
@@ -215,7 +232,7 @@
             }
           });
         });
-        updateCountdown(items);
+        updateCountdown(filtered);
       }
 
       form.addEventListener('submit', async e => {

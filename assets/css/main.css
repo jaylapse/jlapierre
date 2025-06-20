@@ -1982,3 +1982,19 @@ input, select, textarea {
     word-break: break-word;
   }
 }
+
+/* Reduce gap between trip titles and separators in itinerary */
+.entry {
+  margin-bottom: 0.5rem; /* Reduce space below each entry */
+}
+
+.entry-separator {
+  margin: 0.5rem 0;      /* Reduce space above/below separator */
+  border-bottom: 1px solid #333;
+}
+.entry-details {
+  margin-top: 0.2rem !important; /* Reduce space above details */
+}
+.entry-header {
+  margin-bottom: 0 rem !important; /* Reduce space below header */
+}
