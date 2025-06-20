@@ -1105,6 +1105,7 @@ input, select, textarea {
 		-ms-transform: scale(1.0);
 		transform: scale(1.0);
 		-webkit-backface-visibility: hidden;
+		backface-visibility: hidden;
 		position: fixed;
 		top: 0;
 		left: 0;
@@ -1655,7 +1656,7 @@ input, select, textarea {
 
 /* --- Gallery Styles  --- */
 /* Grid layout for image gallery */
-#gallery {
+.gallery-page #gallery {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* More columns, responsive */
   gap: 1.2rem;
@@ -1667,7 +1668,7 @@ input, select, textarea {
   box-shadow: 0 4px 24px rgba(0,0,0,0.18);
 }
 
-#gallery a {
+.gallery-page #gallery a {
   display: block;
   border-radius: 10px;
   overflow: hidden;
@@ -1676,7 +1677,7 @@ input, select, textarea {
   background: #181a1b;
 }
 
-#gallery a img {
+.gallery-page #gallery a img {
   width: 100%;
   height: 220px;
   object-fit: cover;
@@ -1686,23 +1687,23 @@ input, select, textarea {
   display: block;
 }
 
-#gallery a:hover, #gallery a:focus {
+.gallery-page #gallery a:hover, #gallery a:focus {
   box-shadow: 0 6px 24px rgba(78,168,222,0.18), 0 2px 8px rgba(0,0,0,0.18);
   transform: translateY(-4px) scale(1.03);
 }
 
-#gallery a img:hover, #gallery a img:focus {
+.gallery-page #gallery a img:hover, #gallery a img:focus {
   transform: scale(1.07);
   box-shadow: 0 8px 32px rgba(78,168,222,0.18);
 }
 
 /* Hover effect on gallery images */
-#gallery a img:hover {
+.gallery-page #gallery a img:hover {
   transform: scale(1.05);  /* Subtle zoom */
 }
 
 /* Video icon thumbnails in gallery row */
-.gallery-photo-row a div {
+.gallery-page .gallery-photo-row a div {
   width: 100%;
   max-width: 1080px;
   height: auto;
@@ -1717,262 +1718,159 @@ input, select, textarea {
   transition: transform 0.2s ease;
 }
 
-.gallery-photo-row a div:hover {
+.gallery-page .gallery-photo-row a div:hover {
   transform: scale(1.05);
 }
 
-.gallery-photo-row {
+.gallery-page .gallery-photo-row {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 1rem;
 }
 
-/* Gallery Cards */
-
-	/* Add or update this for a flexible grid gallery layout */
-.gallery-cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.2rem;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto 2rem auto;
-  padding: 0 1rem;
+/* --- Gallery Slideshow Styles (scoped to .gallery-page) --- */
+.gallery-page .container {
+  position: relative;
+}
+.gallery-page .mySlides {
+  display: none;
+}
+.gallery-page .cursor {
+  cursor: pointer;
+}
+.gallery-page .prev,
+.gallery-page .next {
+  cursor: pointer;
+  position: absolute;
+  top: 40%;
+  width: auto;
+  padding: 16px;
+  margin-top: -50px;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.gallery-page .next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+.gallery-page .prev:hover,
+.gallery-page .next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+.gallery-page .numbertext {
+  color: #f2f2f2;
+  font-size: 12px;
+  padding: 8px 12px;
+  position: absolute;
+  top: 0;
+}
+.gallery-page .caption-container {
+  text-align: center;
+  background-color: #222;
+  padding: 2px 16px;
+  color: white;
+}
+.gallery-page .row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.gallery-page .column {
+  float: left;
+  width: 16.66%;
+}
+.gallery-page .demo {
+  opacity: 0.6;
+}
+.gallery-page .active,
+.gallery-page .demo:hover {
+  opacity: 1;
 }
 
-.gallery-card {
-  background: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* Slideshow image style */
+.gallery-page .slideshow-img {
   width: 100%;
-  max-width: 220px;
+  max-width: 600px;
+  height: 350px;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  background: #181a1b;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: block;
   margin: 0 auto;
 }
-
-.gallery-card-img {
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 0;
-  display: block;
-  box-shadow: none;
+@media (max-width: 700px) {
+  .gallery-page .slideshow-img {
+    height: 48vw;
+    max-width: 98vw;
+  }
 }
 
-#gallery-header.major {
-  width: 100% !important;
-  display: block;
+/* Gallery specific styles */
+.gallery-page .container {
+  position: relative;
+}
+.gallery-page .mySlides {
+  display: none;
+}
+.gallery-page .cursor {
+  cursor: pointer;
+}
+.gallery-page .prev,
+.gallery-page .next {
+  cursor: pointer;
+  position: absolute;
+  top: 40%;
+  width: auto;
+  padding: 16px;
+  margin-top: -50px;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.gallery-page .next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+.gallery-page .prev:hover,
+.gallery-page .next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+.gallery-page .numbertext {
+  color: #f2f2f2;
+  font-size: 12px;
+  padding: 8px 12px;
+  position: absolute;
+  top: 0;
+}
+.gallery-page .caption-container {
   text-align: center;
-  margin-left: 0;
-  margin-right: 0;
+  background-color: #222;
+  padding: 2px 16px;
+  color: white;
 }
-
-@media (max-width: 600px) {
-  .gallery-cards-container {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.7rem;
-    padding: 0 0.3rem;
-  }
-  .gallery-card {
-    max-width: 100%;
-    padding: 0.5rem;
-  }
-  .gallery-card-img {
-    height: 90px;
-  }
+.gallery-page .row:after {
+  content: "";
+  display: table;
+  clear: both;
 }
-
-.gallery-videos-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.2rem;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto 2rem auto;
-  padding: 0 1rem;
+.gallery-page .column {
+  float: left;
+  width: 16.66%;
 }
-
-.gallery-card iframe {
-  width: 100%;
-  height: 140px;
-  border-radius: 10px;
-  background: #111;
-  display: block;
+.gallery-page .demo {
+  opacity: 0.6;
 }
-
-@media (max-width: 600px) {
-  .gallery-videos-container {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.7rem;
-    padding: 0 0.3rem;
-  }
-  .gallery-card iframe {
-    height: 90px;
-  }
-}
-
-
-/* Itinerary */
-
-#map { height: 350px; width: 100%; margin-bottom: 1.5rem; border-radius: 10px; }
-      .timeline-container { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
-      .timeline-btn { background: #23272a; color: #eee; border: none; border-radius: 4px; padding: 0.5rem 1rem; cursor: pointer; font-size: 1.2rem; }
-      .timeline-dot { width: 18px; height: 18px; border-radius: 50%; background: #4ea8de; margin: 0 8px; display: inline-block; opacity: 0.5; border: 2px solid #23272a; transition: opacity 0.2s, border 0.2s; }
-      .timeline-dot.active { opacity: 1; border: 2px solid #ff3860; }
-
-      .entry-separator {
-        width: 100%;
-        height: 4px;
-        background: rgba(78,168,222,0.18);
-        border-radius: 2px;
-        margin: 0.5rem 0 1.5rem 0; /* Reduced top and bottom margin */
-        border: none;
-      }
-      input[type="text"],
-      input[type="url"],
-      input[type="date"],
-      textarea {
-        background: #23272a;
-        color: #eee;
-        border: 1px solid #333;
-        border-radius: 6px;
-        padding: 0.6rem;
-        font-size: 1rem;
-        width: 100%;
-        box-sizing: border-box;
-        margin-bottom: 1rem;
-        transition: border 0.2s, background 0.2s;
-      }
-      input[type="text"]:focus,
-      input[type="url"]:focus,
-      input[type="date"]:focus,
-      textarea:focus {
-        border: 1.5px solid #4ea8de;
-        background: #262b31;
-        outline: none;
-      }
-      #adminLoginBtn {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        z-index: 9999;
-        opacity: .1;
-        font-size: 0.5rem;
-        padding: 0rem .3rem;
-        border-radius: 12px;
-        background: #23272a;
-        color: #eee;
-        border: none;
-        transition: opacity 0.2s, background 0.2s;
-      }
-      #adminLoginBtn:hover {
-        opacity: 0.7;
-        background: #4ea8de;
-        color: #fff;
-      }
-
-	        .fold-controls {
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
-        position: static;
-        top: unset;
-        right: unset;
-        z-index: 10;
-      }
-      .fold-controls button {
-        background: #23272a;
-        color: #eee;
-        border: none;
-        border-radius: 4px;
-        width: 1.5rem;
-        height: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.10);
-        cursor: pointer;
-        transition: background 0.2s, color 0.2s, transform 0.1s;
-      }
-      .fold-controls button:hover {
-        background: #4ea8de;
-        color: #fff;
-        transform: scale(1.08);
-      }
-      @media (max-width: 700px) {
-        .fold-controls {
-          margin-bottom: 0.2rem;
-        }
-      }
-
-
-/* --- Video Modal Styles --- */
-	#videoModal {
-	display: none;
-	position: fixed;
-	z-index: 2000;
-	left: 0;
-	top: 0;
-	width: 100vw;
-	height: 100vh;
-	background: rgba(0,0,0,0.85);
-	justify-content: center;
-	align-items: center;
-	}
-	#videoModal.active {
-	display: flex;
-	}
-	#videoModal .modal-content {
-	position: relative;
-	background: #181a1b;
-	border-radius: 10px;
-	padding: 1rem;
-	box-shadow: 0 4px 24px rgba(0,0,0,0.25);
-	max-width: 90vw;
-	max-height: 80vh;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	}
-	#videoModal iframe {
-	width: 70vw;
-	height: 40vw;
-	max-width: 900px;
-	max-height: 60vh;
-	border: none;
-	border-radius: 8px;
-	background: #000;
-	}
-	#videoModal .close-btn {
-	position: absolute;
-	top: 0.5rem;
-	right: 0.7rem;
-	font-size: 2rem;
-	color: #eee;
-	background: none;
-	border: none;
-	cursor: pointer;
-	z-index: 10;
-	}
-	@media (max-width: 700px) {
-	#videoModal iframe {
-		width: 100vw;
-		max-width: 100vw;
-		height: 56vw;
-		max-height: 60vh;
-	}
-	}
-
-@media screen and (max-width: 700px) {
-  h1.major, h2.major, h3.major, h4.major, h5.major, h6.major {
-    width: 100% !important;
-    white-space: normal !important;
-    word-break: break-word;
-  }
+.gallery-page .active,
+.gallery-page .demo:hover {
+  opacity: 1;
 }

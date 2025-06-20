@@ -7,168 +7,82 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" />
   <link rel="stylesheet" href="/assets/css/main.css" />
 </head>
-<body>
+
+<body class="gallery-page">
 <div id="bg"></div>
 <div id="wrapper">
   <h1 style="text-align: center">Galleries</h1>
-  <div style="display:flex;gap:0.7rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;">
-    <button class="gallery-switch small" data-gallery="home">Home</button>
-    <button class="gallery-switch small" data-gallery="thunderbay">Thunder Bay ON (March 2025)</button>
-    <button class="gallery-switch small" data-gallery="paris">Paris, Texas (May 2025)</button>
-    <button class="button small" id="back-to-main">&larr; Back</button>
-  </div>
-  <h3 id="gallery-header" class="major" style="text-align:center;"></h3>
-  <div id="gallery-photos" class="gallery-cards-container"></div>
-  <div id="gallery-videos" class="gallery-videos-container"></div>
-  <div id="videoModal">
-    <div class="modal-content">
-      <button onclick="closeVideoModal()">&times;</button>
-      <iframe id="modalVideo" src="" allow="autoplay" allowfullscreen></iframe>
-    </div>
-  </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox-plus-jquery.min.js"></script>
-  <script>
-    // Gallery config
-    const galleryConfigs = {
-      home: {
-        folder: '/gallery/Home/',
-        maxPhotos: 100,
-        title: 'Home',
-        header: 'Home sweet home',
-        imgPrefix: 'photo',
-        imgExt: '.JPG',
-        videoIds: []
-      },
-      thunderbay: {
-        folder: '/gallery/Thunder Bay ON/',
-        maxPhotos: 100,
-        title: 'Thunder Bay, Ontario (March 2025)',
-        header: 'Home of the Sleeping Giant.',
-        imgPrefix: 'photo',
-        imgExt: '.JPG',
-        videoIds: ["1AXyQr-5OTnAH3pE_cdKlZjuBwX8Ao5XE","1uWjbaF6b8xyhUS25SW3UMGTpigzHNKSE","1yMOUzLwTqFjXpGcGOQsLPdujIlVqESk0"]
-      },
-      paris: {
-        folder: '/gallery/Texas 2025/',
-        maxPhotos: 100,
-        title: 'Paris, Texas (May 2025)',
-        header: 'Who knew America had its own Eiffel Tower?',
-        imgPrefix: 'photo',
-        imgExt: '.JPG',
-        videoIds: [
-          '1wVzoLGK_uKmeLYUkr8c2qKriKqlpIzAo',
-          '1k6QZ_ZEAvaJZnoCYRV2QdqXPaWNqP8Xa',
-          '1FLorcgRgLDE71TPq609oWGV5AYSSHaWu',
-          '1ZpJFGDEkEiOS64foRitawebxxxVxAhOx',
-          '1JkORrlEO-nIOyPP3YYbMRes3lvXAfpW0'
-        ]
-      }
-    };
 
-    // Load gallery
+  <div id="back-to-main-btn" style="position:fixed;top:18px;right:24px;z-index:1000;">
+    <button style="background:none;border:none;font-size:1.5rem;color:#fff;cursor:pointer;line-height:1;" title="Back to main" onclick="window.location.href='/index.html#galleries'">&times;</button>
+  </div>
+
+  <div id="gallery-buttons" style="display:flex;gap:0.7rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;"></div>
+  <div class="container" id="slideshow-container"></div>
+
+  <!-- ✅ Load your generated gallery configs -->
+  <script src="/assets/js/gallery-data.js"></script>
+
+  <script>
+    // Dynamically create gallery buttons
+    const btnContainer = document.getElementById('gallery-buttons');
+    for (const key in galleryConfigs) {
+      const btn = document.createElement('button');
+      btn.className = 'gallery-switch small';
+      btn.dataset.gallery = key;
+      btn.textContent = galleryConfigs[key].label || key;
+      btn.onclick = function() { loadGallery(key); };
+      btnContainer.appendChild(btn);
+    }
+
     function loadGallery(galleryKey) {
       const config = galleryConfigs[galleryKey];
-      // Set header
-      document.getElementById('gallery-header').textContent = config.header || '';
-      // Set active button
-      document.querySelectorAll('.gallery-switch').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.gallery === galleryKey);
-      });
-      // Photos
-      const container = document.getElementById('gallery-photos');
-      container.innerHTML = '';
-      let loaded = 0, found = 0;
-      for (let i = 1; i <= config.maxPhotos; i++) {
-        let filename = i === 1 ? `${config.imgPrefix}${config.imgExt}` : `${config.imgPrefix} (${i})${config.imgExt}`;
-        let img = new Image();
-        img.onload = function() {
-          found++;
-          const div = document.createElement('div');
-          div.className = 'gallery-card';
-          div.innerHTML = `<a href="${config.folder + filename}" data-lightbox="gallery" data-title="${config.title} Photo ${i}"><img src="${config.folder + filename}" alt="${config.title} Photo ${i}" class="gallery-card-img" /></a>`;
-          container.appendChild(div);
-        };
-        img.onerror = function(){};
-        img.src = config.folder + filename;
+      const images = config.images;
+      let slides = '', thumbs = '';
+      for (let i = 0; i < images.length; i++) {
+        slides += `<div class='mySlides'><div class='numbertext'>${i+1} / ${images.length}</div><img src='${config.folder + images[i].src}' style='width:100%'></div>`;
+        thumbs += `<div class='column'><img class='demo cursor' src='${config.folder + images[i].thumb}' style='width:100%' onclick='currentSlide(${i+1})'></div>`;
       }
-
-// Videos (use thumbnail instead of iframe)
-const videoContainer = document.getElementById('gallery-videos');
-videoContainer.innerHTML = '';
-if (config.videoIds && config.videoIds.length > 0) {
-  config.videoIds.forEach((id, idx) => {
-    const div = document.createElement('div');
-    div.className = 'gallery-card video-card';
-    // Use a Google Drive thumbnail (replace with your own if you have custom thumbs)
-    const thumbUrl = `https://drive.google.com/thumbnail?id=${id}`;
-    div.innerHTML = `
-      <div style="position:relative;cursor:pointer;">
-        <img src="${thumbUrl}" alt="Video ${idx + 1}" class="gallery-card-img" style="filter:brightness(0.7);">
-        <span style="
-          position:absolute;
-          left:50%;top:50%;
-          transform:translate(-50%,-50%);
-          font-size:2.5rem;
-          color:#fff;
-          text-shadow:0 2px 8px #000;
-          pointer-events:none;">
-          &#9658;
-        </span>
-      </div>
-    `;
-    div.onclick = function() { openVideoModal(id); };
-    videoContainer.appendChild(div);
-  });
-}
+      document.getElementById('slideshow-container').innerHTML = `
+        ${slides}
+        <a class='prev' onclick='plusSlides(-1)'>❮</a>
+        <a class='next' onclick='plusSlides(1)'>❯</a>
+        <div class='caption-container'><p id='caption'></p></div>
+        <div class='row'>${thumbs}</div>
+      `;
+      slideIndex = 1;
+      showSlides(slideIndex);
     }
 
-    // Video modal logic
-    function openVideoModal(id) {
-      const modal = document.getElementById('videoModal');
-      const iframe = document.getElementById('modalVideo');
-      iframe.src = `https://drive.google.com/file/d/${id}/preview`;
-      modal.style.display = 'flex';
+    let slideIndex = 1;
+    function plusSlides(n) { showSlides(slideIndex += n); }
+    function currentSlide(n) { showSlides(slideIndex = n); }
+    function showSlides(n) {
+      let slides = document.getElementsByClassName('mySlides');
+      let dots = document.getElementsByClassName('demo');
+      let captionText = document.getElementById('caption');
+      if (n > slides.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = slides.length}
+      for (let i = 0; i < slides.length; i++) {
+        slides[i].style.display = 'none';
+      }
+      for (let i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(' active', '');
+      }
+      slides[slideIndex-1].style.display = 'block';
+      dots[slideIndex-1].className += ' active';
+      if (captionText) captionText.innerHTML = '';
     }
-    function closeVideoModal() {
-      const modal = document.getElementById('videoModal');
-      const iframe = document.getElementById('modalVideo');
-      iframe.src = '';
-      modal.style.display = 'none';
-    }
-    document.getElementById('videoModal').addEventListener('click', function(e) {
-      if (e.target === this) closeVideoModal();
-    });
 
-    // Gallery switching
-    document.querySelectorAll('.gallery-switch').forEach(btn => {
-      btn.onclick = function() {
-        localStorage.setItem('selectedGallery', btn.dataset.gallery);
-        loadGallery(btn.dataset.gallery);
-      };
-    });
-
-    // On page load, load the selected gallery from localStorage (default to 'home')
-    const selectedGallery = localStorage.getItem('selectedGallery') || 'home';
-    loadGallery(selectedGallery);
-
-    // Lightbox2 options
-    lightbox.option({
-      'resizeDuration': 200,
-      'wrapAround': true
-    });
-
-
-  document.getElementById('back-to-main').onclick = function() {
-  window.location.href = '/index.html#galleries';
-    };
+    // Load default gallery on page load
+    loadGallery('home');
   </script>
-  
 
+</div>
 
 <!-- Footer -->
 <footer id="footer">
-	<p class="copyright">&copy; James Lapierre 2025</p>
+  <p class="copyright">&copy; James Lapierre 2025</p>
 </footer>
 
 <!-- Scripts -->
