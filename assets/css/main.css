@@ -23,14 +23,18 @@ section, summary, time, mark, audio, video {
 	border: 0;
 	font-size: 100%;
 	font: inherit;
-	vertical-align: baseline;}
+	vertical-align: baseline;
+}
 
 article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
-	display: block;}
+	display: block;
+}
 
 body {
 	line-height: 1;
+	-webkit-text-size-adjust: none;
+	background: #1b1f22;
 }
 
 ol, ul {
@@ -41,18 +45,16 @@ blockquote, q {
 	quotes: none;
 }
 
-	blockquote:before, blockquote:after, q:before, q:after {
-		content: '';
-		content: none;
-	}
+blockquote:before, blockquote:after, q:before, q:after {
+	content: '';
+	content: none;
+}
 
 table {
 	border-collapse: collapse;
 	border-spacing: 0;
-}
-
-body {
-	-webkit-text-size-adjust: none;
+	margin: 0 0 2rem 0;
+	width: 100%;
 }
 
 mark {
@@ -92,10 +94,6 @@ input, select, textarea {
 
 	*, *:before, *:after {
 		box-sizing: inherit;
-	}
-
-	body {
-		background: #1b1f22;
 	}
 
 		body.is-preload *, body.is-preload *:before, body.is-preload *:after {
@@ -935,66 +933,61 @@ input, select, textarea {
 		overflow-x: auto;
 	}
 
-	table {
-		margin: 0 0 2rem 0;
-		width: 100%;
+	table tbody tr {
+		border: solid 1px #ffffff;
+		border-left: 0;
+		border-right: 0;
 	}
 
-		table tbody tr {
+		table tbody tr:nth-child(2n + 1) {
+			background-color: rgba(255, 255, 255, 0.075);
+		}
+
+	table td {
+		padding: 0.75em 0.75em;
+	}
+
+	table th {
+		color: #ffffff;
+		font-size: 0.9em;
+		font-weight: 600;
+		padding: 0 0.75em 0.75em 0.75em;
+		text-align: left;
+	}
+
+	table thead {
+		border-bottom: solid 2px #ffffff;
+	}
+
+	table tfoot {
+		border-top: solid 2px #ffffff;
+	}
+
+	table.alt {
+		border-collapse: separate;
+	}
+
+		table.alt tbody tr td {
 			border: solid 1px #ffffff;
-			border-left: 0;
-			border-right: 0;
+			border-left-width: 0;
+			border-top-width: 0;
 		}
 
-			table tbody tr:nth-child(2n + 1) {
-				background-color: rgba(255, 255, 255, 0.075);
+			table.alt tbody tr td:first-child {
+				border-left-width: 1px;
 			}
 
-		table td {
-			padding: 0.75em 0.75em;
+		table.alt tbody tr:first-child td {
+			border-top-width: 1px;
 		}
 
-		table th {
-			color: #ffffff;
-			font-size: 0.9em;
-			font-weight: 600;
-			padding: 0 0.75em 0.75em 0.75em;
-			text-align: left;
+		table.alt thead {
+			border-bottom: 0;
 		}
 
-		table thead {
-			border-bottom: solid 2px #ffffff;
+		table.alt tfoot {
+			border-top: 0;
 		}
-
-		table tfoot {
-			border-top: solid 2px #ffffff;
-		}
-
-		table.alt {
-			border-collapse: separate;
-		}
-
-			table.alt tbody tr td {
-				border: solid 1px #ffffff;
-				border-left-width: 0;
-				border-top-width: 0;
-			}
-
-				table.alt tbody tr td:first-child {
-					border-left-width: 1px;
-				}
-
-			table.alt tbody tr:first-child td {
-				border-top-width: 1px;
-			}
-
-			table.alt thead {
-				border-bottom: 0;
-			}
-
-			table.alt tfoot {
-				border-top: 0;
-			}
 
 /* Button */
 
@@ -1745,14 +1738,17 @@ input, select, textarea {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto 2rem auto;
-  padding: 0 1rem;
+  padding: 1.2rem 1rem 2rem 1rem;
+  background: rgba(26,26,26,0.95); /* Add a subtle dark fill behind the grid */
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
 }
 
 .gallery-card {
-  background: rgba(27, 31, 34, 0.85);
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
-  padding: 0.5rem;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1765,8 +1761,9 @@ input, select, textarea {
   width: 100%;
   height: 140px;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 0;
   display: block;
+  box-shadow: none;
 }
 
 #gallery-header.major {
@@ -1792,16 +1789,6 @@ input, select, textarea {
   }
 }
 
-.gallery-videos-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.2rem;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto 2rem auto;
-  padding: 0 1rem;
-}
-
 .gallery-card iframe {
   width: 100%;
   height: 140px;
@@ -1811,11 +1798,6 @@ input, select, textarea {
 }
 
 @media (max-width: 600px) {
-  .gallery-videos-container {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.7rem;
-    padding: 0 0.3rem;
-  }
   .gallery-card iframe {
     height: 90px;
   }
@@ -1835,7 +1817,7 @@ input, select, textarea {
         height: 4px;
         background: rgba(78,168,222,0.18);
         border-radius: 2px;
-        margin: 2.2rem 0 1.2rem 0;
+        margin: 0.5rem 0 1.5rem 0; /* Reduced top and bottom margin */
         border: none;
       }
       input[type="text"],
@@ -1981,20 +1963,4 @@ input, select, textarea {
     white-space: normal !important;
     word-break: break-word;
   }
-}
-
-/* Reduce gap between trip titles and separators in itinerary */
-.entry {
-  margin-bottom: 0.5rem; /* Reduce space below each entry */
-}
-
-.entry-separator {
-  margin: 0.5rem 0;      /* Reduce space above/below separator */
-  border-bottom: 1px solid #333;
-}
-.entry-details {
-  margin-top: 0.2rem !important; /* Reduce space above details */
-}
-.entry-header {
-  margin-bottom: 0 rem !important; /* Reduce space below header */
 }
