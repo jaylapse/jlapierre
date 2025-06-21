@@ -319,13 +319,90 @@
 <!-- Galleries -->
 <article id="galleries">
   <h2 class="major"><i class="fa-solid fa-folder-open fa-icon"></i> Photo Galleries</h2>
-  <div style="display:flex;gap:1.2rem;justify-content:center;margin-bottom:2rem;flex-wrap:wrap;">
-    <button class="gallery-switch" data-gallery="home">Home</button>
-    <button class="gallery-switch" data-gallery="thunderbay">Thunder Bay ON (March 2025)</button>
-    <button class="gallery-switch" data-gallery="paris">Paris, Texas (May 2025)</button>
+<div id="bg"></div>
+<div id="wrapper">
 
-    
-  </div>
+
+
+  <div id="gallery-buttons" style="display:flex;gap:0.7rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;"></div>
+  <div class="container" id="slideshow-container"></div>
+
+  <!-- ✅ Load your generated gallery configs -->
+  <script src="/assets/js/gallery-data.js"></script>
+
+  <script>
+    // Dynamically create gallery buttons
+    const btnContainer = document.getElementById('gallery-buttons');
+    for (const key in galleryConfigs) {
+      const btn = document.createElement('button');
+      btn.className = 'gallery-switch small';
+      btn.dataset.gallery = key;
+      btn.textContent = galleryConfigs[key].label || key;
+      btn.onclick = function() { loadGallery(key); };
+      btnContainer.appendChild(btn);
+    }
+
+    function loadGallery(galleryKey) {
+      const config = galleryConfigs[galleryKey];
+      const images = config.images;
+      let slides = '', thumbs = '';
+      for (let i = 0; i < images.length; i++) {
+        if (images[i].type === 'video') {
+          // Local or hosted video file
+          if (images[i].video) {
+            slides += `<div class='mySlides'><div class='numbertext'>${i+1} / ${images.length}</div><video class='slideshow-img' controls poster='${config.folder + images[i].thumb}'><source src='${config.folder + images[i].video}' type='video/mp4'>Your browser does not support the video tag.</video></div>`;
+          } else if (images[i].youtube) {
+            // YouTube embed
+            slides += `<div class='mySlides'><div class='numbertext'>${i+1} / ${images.length}</div><div class='slideshow-img' style='position:relative;padding-bottom:56.25%;height:0;'><iframe src='https://www.youtube.com/embed/${images[i].youtube}' frameborder='0' allowfullscreen style='position:absolute;top:0;left:0;width:100%;height:100%;'></iframe></div></div>`;
+          }
+          thumbs += `<div class='column' style='position:relative;'><img class='demo cursor' src='${config.folder + images[i].thumb}' onclick='currentSlide(${i+1})'><span style='position:absolute;top:6px;left:6px;font-size:1.2em;color:#fff;background:rgba(0,0,0,0.5);border-radius:50%;padding:2px 6px;'>▶</span></div>`;
+        } else {
+          // Image
+          slides += `<div class='mySlides'><div class='numbertext'>${i+1} / ${images.length}</div><img src='${config.folder + images[i].src}' class='slideshow-img'></div>`;
+          thumbs += `<div class='column'><img class='demo cursor' src='${config.folder + images[i].thumb}' onclick='currentSlide(${i+1})'></div>`;
+        }
+      }
+      document.getElementById('slideshow-container').innerHTML = `
+        ${slides}
+        <a class='prev' onclick='plusSlides(-1)'>❮</a>
+        <a class='next' onclick='plusSlides(1)'>❯</a>
+        <div class='row'>${thumbs}</div>
+      `;
+      slideIndex = 1;
+      showSlides(slideIndex);
+    }
+
+    let slideIndex = 1;
+    function plusSlides(n) { showSlides(slideIndex += n); }
+    function currentSlide(n) { showSlides(slideIndex = n); }
+    function showSlides(n) {
+      let slides = document.getElementsByClassName('mySlides');
+      let dots = document.getElementsByClassName('demo');
+      let captionText = document.getElementById('caption');
+      if (n > slides.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = slides.length}
+      for (let i = 0; i < slides.length; i++) {
+        slides[i].style.display = 'none';
+      }
+      for (let i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(' active', '');
+      }
+      slides[slideIndex-1].style.display = 'block';
+      dots[slideIndex-1].className += ' active';
+      if (captionText) captionText.innerHTML = '';
+    }
+
+    // Keyboard navigation for slideshow
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowLeft') plusSlides(-1);
+      if (e.key === 'ArrowRight') plusSlides(1);
+    });
+
+    // Load default gallery on page load
+    loadGallery('home');
+  </script>
+
+</div>
 <script>
   document.querySelectorAll('.gallery-switch').forEach(btn => {
     btn.addEventListener('click', function() {
