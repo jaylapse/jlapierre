@@ -13,7 +13,7 @@
 <div id="wrapper">
   <h1 style="text-align: center">Galleries</h1>
 
-  <div id="back-to-main-btn" style="position:fixed;top:18px;right:24px;z-index:1000;">
+  <div id="back-to-main-btn" style="position:fixed;top:18px;right:24px;z-index:1000;scale: 0.6;">
     <button style="background:none;border:none;font-size:1.5rem;color:#fff;cursor:pointer;line-height:1;" title="Back to main" onclick="window.location.href='/index.html#galleries'">&times;</button>
   </div>
 
@@ -40,14 +40,13 @@
       const images = config.images;
       let slides = '', thumbs = '';
       for (let i = 0; i < images.length; i++) {
-        slides += `<div class='mySlides'><div class='numbertext'>${i+1} / ${images.length}</div><img src='${config.folder + images[i].src}' style='width:100%'></div>`;
-        thumbs += `<div class='column'><img class='demo cursor' src='${config.folder + images[i].thumb}' style='width:100%' onclick='currentSlide(${i+1})'></div>`;
+        slides += `<div class='mySlides'><div class='numbertext'>${i+1} / ${images.length}</div><img src='${config.folder + images[i].src}' class='slideshow-img'></div>`;
+        thumbs += `<div class='column'><img class='demo cursor' src='${config.folder + images[i].thumb}' onclick='currentSlide(${i+1})'></div>`;
       }
       document.getElementById('slideshow-container').innerHTML = `
         ${slides}
         <a class='prev' onclick='plusSlides(-1)'>❮</a>
         <a class='next' onclick='plusSlides(1)'>❯</a>
-        <div class='caption-container'><p id='caption'></p></div>
         <div class='row'>${thumbs}</div>
       `;
       slideIndex = 1;
@@ -73,6 +72,12 @@
       dots[slideIndex-1].className += ' active';
       if (captionText) captionText.innerHTML = '';
     }
+
+    // Keyboard navigation for slideshow
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowLeft') plusSlides(-1);
+      if (e.key === 'ArrowRight') plusSlides(1);
+    });
 
     // Load default gallery on page load
     loadGallery('home');
