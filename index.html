@@ -53,8 +53,6 @@
 
 	<!-- Leaflet JS -->
 	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j6kG6aQpQbQ4Q4Q4=" crossorigin=""></script>
-	<script src="assets/js/gallery-data.js"></script>
-
 	<!-- Firebase SDK -->
 	<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -321,87 +319,20 @@
 <!-- Galleries -->
 <article id="galleries">
   <h2 class="major"><i class="fa-solid fa-folder-open fa-icon"></i> Photo Galleries</h2>
-
-  <!-- Gallery selector buttons container -->
-  <div id="gallery-buttons" style="display:flex;gap:1rem;justify-content:center;margin-bottom:2rem;flex-wrap:wrap;"></div>
-
-  <!-- Slideshow container initially empty -->
-  <div class="container" id="slideshow-container"></div>
-</article>
-
+  <div style="display:flex;gap:1.2rem;justify-content:center;margin-bottom:2rem;flex-wrap:wrap;">
+    <button class="gallery-switch" data-gallery="home">Enter</button>
+    <!-- <button class="gallery-switch" data-gallery="thunderbay">Thunder Bay ON (March 2025)</button>
+    <button class="gallery-switch" data-gallery="paris">Paris, Texas (May 2025)</button> -->
+  </div>
 <script>
-  // Create gallery buttons
-  const btnContainer = document.getElementById('gallery-buttons');
-  for (const key in galleryConfigs) {
-    const btn = document.createElement('button');
-    btn.className = 'gallery-switch small';
-    btn.textContent = galleryConfigs[key].label;
-    btn.onclick = () => loadGallery(key);
-    btnContainer.appendChild(btn);
-  }
-
-  // Reuse your loadGallery/slideshow logic
-  function loadGallery(galleryKey) {
-    const config = galleryConfigs[galleryKey];
-    const images = config.images;
-    let slides = '', thumbs = '';
-
-    images.forEach((item, idx) => {
-      if (item.type === 'video') {
-        slides += `
-          <div class="mySlides">
-            <div class="numbertext">${idx+1} / ${images.length}</div>
-            <video class="slideshow-img" controls poster="${config.folder + item.thumb}">
-              <source src="${config.folder + item.video}" type="video/mp4">
-            </video>
-          </div>`;
-        thumbs += `
-          <div class="column">
-            <img class="demo cursor" src="${config.folder + item.thumb}" onclick="currentSlide(${idx+1})">
-            <span class="video-play">▶</span>
-          </div>`;
-      } else {
-        slides += `
-          <div class="mySlides">
-            <div class="numbertext">${idx+1} / ${images.length}</div>
-            <img src="${config.folder + item.src}" class="slideshow-img">
-          </div>`;
-        thumbs += `
-          <div class="column">
-            <img class="demo cursor" src="${config.folder + item.thumb}" onclick="currentSlide(${idx+1})">
-          </div>`;
-      }
+  document.querySelectorAll('.gallery-switch').forEach(btn => {
+    btn.addEventListener('click', function() {
+      window.location.href = '/gallery/index.html';
     });
-
-    document.getElementById('slideshow-container').innerHTML = `
-      ${slides}
-      <a class="prev" onclick="plusSlides(-1)">❮</a>
-      <a class="next" onclick="plusSlides(1)">❯</a>
-      <div class="row">${thumbs}</div>`;
-
-    slideIndex = 1;
-    showSlides(1);
-  }
-
-  // Slideshow controls (same as before)
-  let slideIndex = 1;
-  function plusSlides(n) { showSlides(slideIndex += n); }
-  function currentSlide(n) { showSlides(slideIndex = n); }
-  function showSlides(n) {
-    const slides = document.getElementsByClassName('mySlides');
-    const dots = document.getElementsByClassName('demo');
-    if (n > slides.length) slideIndex = 1;
-    if (n < 1) slideIndex = slides.length;
-    for (const s of slides) s.style.display = 'none';
-    for (const d of dots) d.className = d.className.replace(' active', '');
-    slides[slideIndex - 1].style.display = 'block';
-    dots[slideIndex - 1].className += ' active';
-  }
-
-  // Initialize with default gallery:
-  loadGallery(Object.keys(galleryConfigs)[0]);
+  });
 </script>
 
+</article>
 
 <!-- About -->
 	<article id="about">
