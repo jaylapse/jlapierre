@@ -29,7 +29,7 @@ const galleryConfigs = {
   },
   misclocations: {
     label: 'Misc Locations',
-    folder: '/gallery/Misc Locations/',
+    folder: 'Misc Locations/',
     images: [
       { type: "image", src: "2022_12_16 (705).jpg", thumb: "2022_12_16 (705) (small).jpg" },
       { type: "image", src: "2022_12_16 (713).jpg", thumb: "2022_12_16 (713) (small).jpg" },
