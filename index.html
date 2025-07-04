@@ -263,8 +263,8 @@
         const items = await fetchItineraries();
         const item = items.find(i => i.id === id);
         document.getElementById('destination').value = item.destination;
-        document.getElementById('startDate').value = item.startDate;
-        document.getElementById('endDate').value = item.endDate;
+        document.getElementById('startDate').value = item.startDate; // Ensure this is a date input
+        document.getElementById('endDate').value = item.endDate;     // Ensure this is a date input
         document.getElementById('details').value = item.details;
         document.getElementById('galleryLink').value = item.galleryLink || '';
         editId = id;
