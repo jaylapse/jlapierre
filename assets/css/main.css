@@ -1953,3 +1953,16 @@ input, select, textarea {
 .gallery-page .demo:hover {
   opacity: 1;
 }
+
+/* Make itinerary form input text and placeholder white for readability */
+#itineraryForm input,
+#itineraryForm textarea,
+#itineraryForm select {
+  color: #fff !important;
+  background: rgba(30,30,30,0.95);
+}
+#itineraryForm input::placeholder,
+#itineraryForm textarea::placeholder {
+  color: #fff !important;
+  opacity: 0.8;
+}
