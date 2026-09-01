@@ -51,7 +51,7 @@ button,input,select{font:inherit}
 .avatar .label{font-size:14px;color:var(--muted);text-align:center}
 .rules{display:grid;gap:8px}
 .rule{padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface3)}
-#homeBtn{display:block;text-decoration:none;color:inherit;margin-top:40px}
+.controls{margin-top:40px}
 #back-to-main-btn{position:fixed;top:14px;left:14px;z-index:1000}
 #back-to-main-btn button{background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:999px;padding:0.5rem 1rem;font-size:.75rem;letter-spacing:.05em;text-transform:uppercase;color:#fff;cursor:pointer;line-height:1}
 #back-to-main-btn button:hover{background:rgba(0,0,0,.8)}
@@ -65,7 +65,6 @@ button,input,select{font:inherit}
 </div>
 <div class="wrap">
   <aside class="sidebar">
-    <a href="https://jlapierre.ca/" id="homeBtn">JLapierre</a>
     <div class="controls">
       <div class="field"><input id="search" type="text" placeholder="Search games" /></div>
       <div class="field"><select id="mechanic"><option value="all">All</option><option value="word">Word</option><option value="survey">Survey</option><option value="number">Number</option><option value="draft">Draft</option></select></div>
@@ -165,7 +164,6 @@ button,input,select{font:inherit}
   }
   function loadGame(id){state.activeId=id; if(id!=='headbandz'){ state.headbandzCategory=null; state.headbandzNames=[] } renderBoard()}
   document.addEventListener('click', function(e){ var el=e.target; while(el&&el!==document){ var load=el.getAttribute&&el.getAttribute('data-load'); if(load){ loadGame(load); return } if(el.id==='newHeadbandzNames' && state.activeId==='headbandz'){ var g=currentGame(); var pool=null; for(var j=0;j<g.pools.length;j++) if(g.pools[j].title===state.headbandzCategory) pool=g.pools[j]; state.headbandzNames=drawTwoDistinct(pool.items); renderBoard(); return } el=el.parentNode } });
-  byId('homeBtn').onclick=clearScreen;
   byId('newBoardBtn').onclick=function(){ var g=currentGame(); if(g){ if(g.id==='headbandz'){ state.headbandzCategory=null; state.headbandzNames=[] } nextBoard(g); renderBoard() } };
   byId('search').oninput=renderNav; byId('mechanic').onchange=renderNav;
   renderNav(); clearScreen();
