@@ -23,7 +23,10 @@ window.GAMES_LIBRARY.push({
       {name:'Category rounds', detail:'Make the number related to age, jersey number, or score.'},
       {name:'Blind turn', detail:'Players may only ask one question before making a guess.'},
       {name:'Steal rule', detail:'If one player misses, the opponent gets one last guess.'},
-      {name:'Tournament mode', detail:'Play three rounds and total the wins.'}
+      {name:'Tournament mode', detail:'Play three rounds and total the wins.'},
+      {name:'Team mode', detail:'Play in pairs, discussing each guess before answering.'},
+      {name:'Reverse round', detail:'The winner picks the next starting range, like 0-50.'},
+      {name:'Silent guess', detail:'Players write guesses down instead of saying them aloud.'}
     ]}
   ]
 });

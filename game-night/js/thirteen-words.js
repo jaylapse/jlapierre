@@ -4,14 +4,14 @@ window.GAMES_LIBRARY.push({
   name:'13 Words',
   mechanic:'word',
   format:'10 targets on one board',
-  summary:'Ten connected targets appear at once for rapid clue rounds with easy board rotation.',
+  summary:'Ten connected targets appear at once for rapid clue rounds, drawn randomly from a bigger themed pool.',
   notes:[
-    'Each board now stays within one theme so the targets feel connected.',
-    'Add more boards here whenever you want fresh categories.',
+    'Each board draws 10 random targets from a themed pool, so boards vary between rounds.',
+    'Add more items to a category, or more categories, whenever you want fresh material.',
     'This host-first version keeps the target list visible.'
   ],
   pools:[
-    { title:'Superheroes and comic characters', subtitle:'10 clue targets', items:[
+    { title:'Superheroes and comic characters', subtitle:'16 targets, 10 shown', items:[
       {name:'Spider-Man', detail:'Marvel superhero'},
       {name:'Batman', detail:'DC superhero'},
       {name:'Iron Man', detail:'Marvel superhero'},
@@ -21,9 +21,15 @@ window.GAMES_LIBRARY.push({
       {name:'Wonder Woman', detail:'DC superhero'},
       {name:'The Flash', detail:'DC superhero'},
       {name:'Hulk', detail:'Marvel superhero'},
-      {name:'Captain America', detail:'Marvel superhero'}
-    ]},
-    { title:'Video games', subtitle:'10 clue targets', items:[
+      {name:'Captain America', detail:'Marvel superhero'},
+      {name:'Green Lantern', detail:'DC superhero'},
+      {name:'Aquaman', detail:'DC superhero'},
+      {name:'Doctor Strange', detail:'Marvel superhero'},
+      {name:'Thor', detail:'Marvel superhero'},
+      {name:'Wolverine', detail:'Marvel antihero'},
+      {name:'Catwoman', detail:'DC antihero'}
+    ], draw:10 },
+    { title:'Video games', subtitle:'16 targets, 10 shown', items:[
       {name:'Minecraft', detail:'Sandbox game'},
       {name:'Fortnite', detail:'Battle royale'},
       {name:'Mario Kart', detail:'Racing game'},
@@ -33,9 +39,15 @@ window.GAMES_LIBRARY.push({
       {name:'Pokémon', detail:'Creature-collecting RPG'},
       {name:'Call of Duty', detail:'Shooter franchise'},
       {name:'Elden Ring', detail:'Action RPG'},
-      {name:'Sonic the Hedgehog', detail:'Platformer'}
-    ]},
-    { title:'Movies', subtitle:'10 clue targets', items:[
+      {name:'Sonic the Hedgehog', detail:'Platformer'},
+      {name:'Halo', detail:'Sci-fi shooter'},
+      {name:'Overwatch', detail:'Team shooter'},
+      {name:'Roblox', detail:'User-generated game platform'},
+      {name:'The Sims', detail:'Life simulation'},
+      {name:'Animal Crossing', detail:'Life simulation'},
+      {name:'Apex Legends', detail:'Battle royale'}
+    ], draw:10 },
+    { title:'Movies', subtitle:'16 targets, 10 shown', items:[
       {name:'Titanic', detail:'Romance / disaster'},
       {name:'Star Wars', detail:'Space opera'},
       {name:'Jurassic Park', detail:'Adventure / sci-fi'},
@@ -45,9 +57,15 @@ window.GAMES_LIBRARY.push({
       {name:'Barbie', detail:'Comedy / fantasy'},
       {name:'Finding Nemo', detail:'Animated adventure'},
       {name:'Frozen', detail:'Animated musical'},
-      {name:'John Wick', detail:'Action thriller'}
-    ]},
-    { title:'TV shows', subtitle:'10 clue targets', items:[
+      {name:'John Wick', detail:'Action thriller'},
+      {name:'Avengers: Endgame', detail:'Superhero epic'},
+      {name:'The Dark Knight', detail:'Superhero thriller'},
+      {name:'Inception', detail:'Sci-fi thriller'},
+      {name:'Shrek', detail:'Animated comedy'},
+      {name:'The Matrix', detail:'Sci-fi action'},
+      {name:'Oppenheimer', detail:'Historical drama'}
+    ], draw:10 },
+    { title:'TV shows', subtitle:'16 targets, 10 shown', items:[
       {name:'The Office', detail:'Workplace comedy'},
       {name:'Friends', detail:'Sitcom'},
       {name:'Breaking Bad', detail:'Crime drama'},
@@ -57,9 +75,15 @@ window.GAMES_LIBRARY.push({
       {name:'Wednesday', detail:'Mystery / fantasy'},
       {name:'Peaky Blinders', detail:'Crime drama'},
       {name:'The Last of Us', detail:'Post-apocalyptic drama'},
-      {name:'Game of Thrones', detail:'Fantasy drama'}
-    ]},
-    { title:'Sports stars', subtitle:'10 clue targets', items:[
+      {name:'Game of Thrones', detail:'Fantasy drama'},
+      {name:'The Crown', detail:'Historical drama'},
+      {name:'Ted Lasso', detail:'Sports comedy'},
+      {name:'House of the Dragon', detail:'Fantasy drama'},
+      {name:'The Bear', detail:'Kitchen drama'},
+      {name:'Yellowstone', detail:'Family drama'},
+      {name:'Only Murders in the Building', detail:'Mystery comedy'}
+    ], draw:10 },
+    { title:'Sports stars', subtitle:'16 targets, 10 shown', items:[
       {name:'Lionel Messi', detail:'Soccer'},
       {name:'Cristiano Ronaldo', detail:'Soccer'},
       {name:'LeBron James', detail:'Basketball'},
@@ -69,7 +93,41 @@ window.GAMES_LIBRARY.push({
       {name:'Simone Biles', detail:'Gymnastics'},
       {name:'Tom Brady', detail:'Football'},
       {name:'Shohei Ohtani', detail:'Baseball'},
-      {name:'Michael Jordan', detail:'Basketball'}
-    ]}
+      {name:'Michael Jordan', detail:'Basketball'},
+      {name:'Patrick Mahomes', detail:'Football'},
+      {name:'Novak Djokovic', detail:'Tennis'},
+      {name:'Caitlin Clark', detail:'Basketball'},
+      {name:'Erling Haaland', detail:'Soccer'},
+      {name:'Kylian Mbappé', detail:'Soccer'},
+      {name:'Naomi Osaka', detail:'Tennis'}
+    ], draw:10 },
+    { title:'Board games & tabletop', subtitle:'12 targets, 10 shown', items:[
+      {name:'Monopoly', detail:'Property trading game'},
+      {name:'Scrabble', detail:'Word game'},
+      {name:'Chess', detail:'Strategy game'},
+      {name:'Catan', detail:'Resource trading game'},
+      {name:'Uno', detail:'Card game'},
+      {name:'Clue', detail:'Mystery game'},
+      {name:'Risk', detail:'War strategy game'},
+      {name:'Jenga', detail:'Stacking game'},
+      {name:'Yahtzee', detail:'Dice game'},
+      {name:'Trivial Pursuit', detail:'Trivia game'},
+      {name:'Codenames', detail:'Word association game'},
+      {name:'Candy Land', detail:"Kids' board game"}
+    ], draw:10 },
+    { title:'Historical figures', subtitle:'12 targets, 10 shown', items:[
+      {name:'Abraham Lincoln', detail:'U.S. president'},
+      {name:'Cleopatra', detail:'Egyptian ruler'},
+      {name:'Albert Einstein', detail:'Physicist'},
+      {name:'Martin Luther King Jr.', detail:'Civil rights leader'},
+      {name:'Nelson Mandela', detail:'South African president'},
+      {name:'Julius Caesar', detail:'Roman general'},
+      {name:'Marie Curie', detail:'Scientist'},
+      {name:'Genghis Khan', detail:'Mongol conqueror'},
+      {name:'Napoleon Bonaparte', detail:'French emperor'},
+      {name:'Amelia Earhart', detail:'Aviator'},
+      {name:'Rosa Parks', detail:'Civil rights activist'},
+      {name:'Leonardo da Vinci', detail:'Artist and inventor'}
+    ], draw:10 }
   ]
 });
