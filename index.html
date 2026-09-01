@@ -14,6 +14,12 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <style>
+    /* The header's connector tick centers on the nav box itself; with an
+       even number of nav items it lands on a button border instead of a
+       button's center, reading as a stray misaligned line. Suppress it. */
+    #header nav:before{ display:none; }
+    </style>
 	</head>
 	<body class="is-preload">
 
@@ -40,6 +46,7 @@
 								<li><a href="./itinerary/index.html">Itinerary</a></li>
 								<li><a href="./gallery/index.html">Galleries</a></li>
 								<li><a href="./game-night/GameNight.html">Game Night</a></li>
+								<li><a href="./yarntoss/index.html">YarnToss</a></li>
 							</ul>
 						</nav>
 					</header>
