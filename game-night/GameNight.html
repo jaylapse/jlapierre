@@ -112,7 +112,7 @@ button,input,select{font:inherit}
   var state = {
     activeId: null, boardIndex: {}, lastPoolIndex: {}, sampledItems: {},
     playerCount: 2, currentPlayerIndex: 0,
-    headbandzUsedNames: [], headbandzCurrentName: null,
+    headbandzUsedNames: [], headbandzCurrentName: null, headbandzRevealed: false,
     chainAssignments: [], chainRevealed: 1, chainRoundOver: false,
     majorityIndex: 0, majorityRevealed: false
   };
@@ -173,6 +173,7 @@ button,input,select{font:inherit}
     state.currentPlayerIndex = 0;
     state.headbandzUsedNames = [];
     state.headbandzCurrentName = null;
+    state.headbandzRevealed = false;
     state.chainAssignments = [];
     state.chainRevealed = 1;
     state.chainRoundOver = false;
@@ -200,18 +201,15 @@ button,input,select{font:inherit}
   function renderHeadbandz(g, pool){
     if (!state.headbandzCurrentName) drawHeadbandzName(pool);
     var nm = state.headbandzCurrentName;
+    var body = state.headbandzRevealed
+      ? '<div class="avatar-row" style="grid-template-columns:1fr">'
+        + '<div class="avatar"><div class="circle" style="background:linear-gradient(135deg,hsl('+avatarHue(nm.name)+',65%,60%),hsl('+((avatarHue(nm.name)+40)%360)+',70%,50%))">'+esc(initials(nm.name))+'</div>'
+        + '<div><strong>'+esc(nm.name)+'</strong></div>'
+        + '<div class="label">Everyone else describes this name</div></div></div>'
+        + '<div class="host-actions" style="margin-top:12px"><button class="btn" id="headbandzNextBtn" type="button">Got it — Next name</button></div>'
+      : '<div class="host-actions" style="margin-top:12px"><button class="btn" id="headbandzRevealBtn" type="button">Tap to reveal name</button></div>';
     return '<section class="round"><div class="round-top"><div><h3>'+esc(pool.title)+'</h3><p>'+esc(pool.subtitle||'')+'</p></div>'
-      + '<div class="pill-row"><span class="pill">Headbandz</span><span class="pill">Player '+(state.currentPlayerIndex+1)+' of '+state.playerCount+'</span></div></div>'
-      + '<div class="avatar-row" style="grid-template-columns:1fr">'
-      + '<div class="avatar"><div class="circle" style="background:linear-gradient(135deg,hsl('+avatarHue(nm.name)+',65%,60%),hsl('+((avatarHue(nm.name)+40)%360)+',70%,50%))">'+esc(initials(nm.name))+'</div>'
-      + '<div><strong>'+esc(nm.name)+'</strong></div>'
-      + '<div class="label">Everyone else describes this - Player '+(state.currentPlayerIndex+1)+' guesses</div></div></div>'
-      + '<div class="host-actions" style="margin-top:12px"><button class="btn" id="headbandzNextBtn" type="button">Got it — Next Player</button></div></section>';
-  }
-  function headbandzNextPlayer(){
-    state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.playerCount;
-    state.headbandzCurrentName = null;
-    renderBoard();
+      + '<div class="pill-row"><span class="pill">Headbandz</span></div></div>' + body + '</section>';
   }
 
   // ---- Chain Game: one full word chain per player, drawn fresh each round.
@@ -304,7 +302,8 @@ button,input,select{font:inherit}
     while(el&&el!==document){
       var load=el.getAttribute&&el.getAttribute('data-load');
       if(load){ loadGame(load); return }
-      if(el.id==='headbandzNextBtn'){ headbandzNextPlayer(); return }
+      if(el.id==='headbandzRevealBtn'){ state.headbandzRevealed=true; renderBoard(); return }
+      if(el.id==='headbandzNextBtn'){ state.headbandzCurrentName=null; state.headbandzRevealed=false; renderBoard(); return }
       if(el.id==='chainCorrectBtn'){ state.chainRevealed++; renderBoard(); return }
       if(el.id==='chainMissBtn' || el.id==='chainAdvanceBtn'){ chainAdvancePlayer(); return }
       if(el.id==='chainNewRoundBtn'){ state.chainAssignments=[]; renderBoard(); return }
