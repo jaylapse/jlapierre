@@ -8,8 +8,10 @@ Usage:
   ADMIN_EMAIL=... ADMIN_PASSWORD=... python3 sync-calendar-itinerary.py events.json
 
 events.json is a list of objects:
-  { "gcalEventId": str, "destination": str, "startDate": "YYYY-MM-DD",
+  { "gcalEventId": str, "destination": str, "location": str, "startDate": "YYYY-MM-DD",
     "endDate": "YYYY-MM-DD", "details": str }
+"location" is the calendar event's location, used for the itinerary's "View on
+map" link; pass "" if the event has none (the site falls back to destination).
 
 Entries this script creates are tagged with gcalEventId/source fields so
 future runs can update or delete them. Itinerary entries added manually
@@ -24,7 +26,7 @@ import urllib.request
 API_KEY = "AIzaSyCrXvaiwHdc5whQHuhk6SR7EutV_MY7HWE"
 PROJECT_ID = "jlapierre-9ed45"
 BASE = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents"
-SYNCED_FIELDS = ("destination", "startDate", "endDate", "details")
+SYNCED_FIELDS = ("destination", "location", "startDate", "endDate", "details")
 
 
 def request(method, url, token=None, body=None):

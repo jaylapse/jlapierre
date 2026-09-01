@@ -249,7 +249,7 @@
           <div class="entry-details">
             <div class="entry-details-inner">
               <p>${item.details}</p>
-              <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}" target="_blank" title="View on Google Maps"><i class="fa-solid fa-map-location-dot"></i> View on map</a>
+              <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location || item.destination)}" target="_blank" title="View on Google Maps"><i class="fa-solid fa-map-location-dot"></i> View on map</a>
               ${isAdmin ? `<div class="actions"><button class="button small" onclick="editItinerary('${item.id}')">Edit</button> <button class="button small" onclick="deleteItinerary('${item.id}')">Delete</button></div>` : ''}
             </div>
           </div>
