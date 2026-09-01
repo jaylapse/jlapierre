@@ -144,6 +144,17 @@
     const lightboxMedia = document.getElementById('lightboxMedia');
     const lightboxCounter = document.getElementById('lightboxCounter');
 
+    // Gallery labels are admin-entered text rendered via innerHTML below -
+    // escape them first so a label containing a quote can't break out of
+    // an attribute or be interpreted as markup.
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
     function slugify(label) {
       return label.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'gallery';
     }
@@ -250,7 +261,7 @@
         return;
       }
       const currentGallery = galleries.find(g => g.id === currentGalleryId);
-      const galleryLabel = currentGallery ? currentGallery.label : 'Gallery';
+      const galleryLabel = escapeHtml(currentGallery ? currentGallery.label : 'Gallery');
       photoGrid.innerHTML = currentImages.map((item, i) => `
         <div class='column thumb-wrap'>
           <img class='demo cursor' src='${thumbUrlFor(item)}' alt='${galleryLabel} ${item.resourceType === 'video' ? 'video' : 'photo'} ${i + 1}' onclick='openLightbox(${i})'>
@@ -306,7 +317,7 @@
       const item = currentImages[lightboxIndex];
       if (!item) return;
       const currentGallery = galleries.find(g => g.id === currentGalleryId);
-      const galleryLabel = currentGallery ? currentGallery.label : 'Gallery';
+      const galleryLabel = escapeHtml(currentGallery ? currentGallery.label : 'Gallery');
       if (item.resourceType === 'video') {
         lightboxMedia.innerHTML = `<video src='${cloudinaryUrl(item.url, 'q_auto')}' controls autoplay playsinline></video>`;
       } else {

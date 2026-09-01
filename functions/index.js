@@ -77,7 +77,7 @@ exports.refreshItinerary = onRequest({ cors: true }, async (req, res) => {
           location,
           startDate,
           endDate,
-          details: lines.length ? lines.join("<br>") : e.summary || "",
+          details: lines.length ? lines.join("\n") : e.summary || "",
         };
       });
 

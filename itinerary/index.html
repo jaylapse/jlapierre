@@ -155,6 +155,17 @@
       const [y, m, d] = dateStr.split('-').map(Number);
       return new Date(y, m - 1, d);
     }
+    // Calendar/admin-entered text is rendered via innerHTML below (so a real
+    // line break can sit between the location and description lines) -
+    // escape it first so it can't be interpreted as markup.
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
     function formatDate(dateStr) {
       const options = { day: 'numeric', month: 'long', year: 'numeric' };
       return parseLocalDate(dateStr).toLocaleDateString(undefined, options);
@@ -246,7 +257,7 @@
         div.innerHTML = `
           <div class="entry-header">
             <div class="entry-title">
-              <h3${isPast ? ' class="strike"' : ''}>${item.destination}</h3>
+              <h3${isPast ? ' class="strike"' : ''}>${escapeHtml(item.destination)}</h3>
               <div class="entry-dates">${formatDate(item.startDate)} - ${formatDate(item.endDate)}</div>
             </div>
             <div class="entry-right">
@@ -256,7 +267,7 @@
           </div>
           <div class="entry-details">
             <div class="entry-details-inner">
-              <p>${item.details}</p>
+              <p>${escapeHtml(item.details).replace(/\n/g, '<br>')}</p>
               <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location || item.destination)}" target="_blank" title="View on Google Maps"><i class="fa-solid fa-map-location-dot"></i> View on map</a>
               ${isAdmin ? `<div class="actions"><button class="button small" onclick="editItinerary('${item.id}')">Edit</button> <button class="button small" onclick="deleteItinerary('${item.id}')">Delete</button></div>` : ''}
             </div>
