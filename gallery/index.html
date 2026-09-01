@@ -249,9 +249,11 @@
         photoGrid.innerHTML = `<p style="text-align:center;color:#999;width:100%;">No photos yet${isAdmin ? ' — click "Upload Photos/Videos" to add some.' : '.'}</p>`;
         return;
       }
+      const currentGallery = galleries.find(g => g.id === currentGalleryId);
+      const galleryLabel = currentGallery ? currentGallery.label : 'Gallery';
       photoGrid.innerHTML = currentImages.map((item, i) => `
         <div class='column thumb-wrap'>
-          <img class='demo cursor' src='${thumbUrlFor(item)}' onclick='openLightbox(${i})'>
+          <img class='demo cursor' src='${thumbUrlFor(item)}' alt='${galleryLabel} ${item.resourceType === 'video' ? 'video' : 'photo'} ${i + 1}' onclick='openLightbox(${i})'>
           ${item.resourceType === 'video' ? `<span class='video-badge'><i class="fa-solid fa-play"></i></span>` : ''}
           ${isAdmin ? `<button class='thumb-delete' title='Delete' onclick='deletePhoto("${item.id}")'>&times;</button>` : ''}
         </div>
@@ -303,10 +305,12 @@
     function renderLightbox() {
       const item = currentImages[lightboxIndex];
       if (!item) return;
+      const currentGallery = galleries.find(g => g.id === currentGalleryId);
+      const galleryLabel = currentGallery ? currentGallery.label : 'Gallery';
       if (item.resourceType === 'video') {
         lightboxMedia.innerHTML = `<video src='${cloudinaryUrl(item.url, 'q_auto')}' controls autoplay playsinline></video>`;
       } else {
-        lightboxMedia.innerHTML = `<img src='${cloudinaryUrl(item.url, 'q_auto,f_auto')}'>`;
+        lightboxMedia.innerHTML = `<img src='${cloudinaryUrl(item.url, 'q_auto,f_auto')}' alt='${galleryLabel} photo ${lightboxIndex + 1}'>`;
       }
       lightboxCounter.textContent = `${lightboxIndex + 1} / ${currentImages.length}`;
     }
