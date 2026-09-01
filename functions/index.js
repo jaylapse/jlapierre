@@ -1,9 +1,10 @@
 const { onRequest } = require("firebase-functions/v2/https");
-const admin = require("firebase-admin");
+const { initializeApp } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
 const { google } = require("googleapis");
 
-admin.initializeApp();
-const db = admin.firestore();
+initializeApp();
+const db = getFirestore();
 
 // Real-world traffic here is a handful of family members occasionally
 // clicking a button - this cooldown is what actually keeps costs at zero
