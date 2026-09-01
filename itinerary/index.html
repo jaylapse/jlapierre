@@ -122,6 +122,9 @@
         </form>
       </div>
       <div class="fold-controls">
+        <button id="refreshCalendarBtn" class="button small" type="button" style="margin-right:auto;">
+          <i class="fa-solid fa-rotate"></i> Refresh from calendar
+        </button>
         <button id="foldAllBtn" type="button" title="Fold All"><i class="fa-solid fa-chevron-up"></i></button>
         <button id="unfoldAllBtn" type="button" title="Unfold All"><i class="fa-solid fa-chevron-down"></i></button>
       </div>
@@ -320,6 +323,35 @@
       const diff = Math.ceil((new Date(next.startDate) - new Date()) / (1000 * 60 * 60 * 24));
       countdownDiv.textContent = `Next trip: ${next.destination} in ${diff} day${diff !== 1 ? 's' : ''} (${formatDate(next.startDate)})`;
     }
+
+    // "Refresh from calendar" - calls the refreshItinerary Cloud Function, which
+    // does the real Calendar API fetch server-side (using its own service account,
+    // no visitor auth needed) and rate-limits itself so repeat clicks are free.
+    const REFRESH_FN_URL = 'https://us-central1-jlapierre-9ed45.cloudfunctions.net/refreshItinerary';
+    const refreshBtn = document.getElementById('refreshCalendarBtn');
+    refreshBtn.addEventListener('click', async function() {
+      refreshBtn.disabled = true;
+      const original = refreshBtn.innerHTML;
+      refreshBtn.innerHTML = '<i class="fa-solid fa-rotate fa-spin"></i> Checking...';
+      try {
+        const resp = await fetch(REFRESH_FN_URL, { method: 'POST' });
+        const data = await resp.json();
+        if (data.status === 'cooldown') {
+          refreshBtn.innerHTML = 'Already up to date';
+        } else if (data.status === 'ok') {
+          refreshBtn.innerHTML = 'Updated!';
+          loadItineraries();
+        } else {
+          refreshBtn.innerHTML = 'Refresh failed - try again later';
+        }
+      } catch (err) {
+        refreshBtn.innerHTML = 'Refresh failed - try again later';
+      }
+      setTimeout(function() {
+        refreshBtn.disabled = false;
+        refreshBtn.innerHTML = original;
+      }, 3000);
+    });
 
     // Fold/Unfold All logic
     document.getElementById('foldAllBtn').onclick = function() {
