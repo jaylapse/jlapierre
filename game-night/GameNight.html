@@ -51,9 +51,9 @@ button,input,select{font:inherit}
 .avatar .label{font-size:14px;color:var(--muted);text-align:center}
 .rules{display:grid;gap:8px}
 .rule{padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface3)}
-#homeBtn{display:block;text-decoration:none;color:inherit}
-#back-to-main-btn{position:fixed;top:14px;right:14px;z-index:1000}
-#back-to-main-btn button{background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:50%;width:2.1rem;height:2.1rem;font-size:1.3rem;color:#fff;cursor:pointer;line-height:1}
+#homeBtn{display:block;text-decoration:none;color:inherit;margin-top:40px}
+#back-to-main-btn{position:fixed;top:14px;left:14px;z-index:1000}
+#back-to-main-btn button{background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:999px;padding:0.5rem 1rem;font-size:.75rem;letter-spacing:.05em;text-transform:uppercase;color:#fff;cursor:pointer;line-height:1}
 #back-to-main-btn button:hover{background:rgba(0,0,0,.8)}
 .site-footer{text-align:center;padding:14px;font-size:.6rem;letter-spacing:.2rem;text-transform:uppercase;opacity:.6;color:var(--text)}
 @media (max-width:1100px){.wrap,.workspace{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--border)}}
@@ -61,7 +61,7 @@ button,input,select{font:inherit}
 </head>
 <body>
 <div id="back-to-main-btn">
-  <button title="Back to main" onclick="window.location.href='/index.html'">&times;</button>
+  <button title="Back to main" onclick="window.location.href='/index.html'">Home</button>
 </div>
 <div class="wrap">
   <aside class="sidebar">
