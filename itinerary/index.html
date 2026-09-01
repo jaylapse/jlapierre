@@ -92,8 +92,8 @@
 <div id="bg"></div>
 <div id="wrapper">
 
-  <div id="back-to-main-btn" style="position:fixed;top:18px;right:24px;z-index:1000;scale: 0.6;">
-    <button style="background:none;border:none;font-size:1.5rem;color:#fff;cursor:pointer;line-height:1;" title="Back to main" onclick="window.location.href='/index.html'">&times;</button>
+  <div id="back-to-main-btn" style="position:fixed;top:18px;left:24px;z-index:1000;">
+    <button style="background:rgba(0,0,0,0.55);border:none;border-radius:999px;padding:0.4rem 0.9rem;font-size:0.85rem;color:#fff;cursor:pointer;line-height:1;" title="Back to main" onclick="window.location.href='/index.html'">Home</button>
   </div>
 
   <div class="page-panel">
@@ -147,10 +147,17 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // "YYYY-MM-DD" strings parse as UTC midnight via `new Date(str)`, which
+    // displays as the previous day in any timezone behind UTC. Build the
+    // Date from local components instead so the calendar date shown always
+    // matches the date stored.
+    function parseLocalDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
     function formatDate(dateStr) {
-      const date = new Date(dateStr);
       const options = { day: 'numeric', month: 'long', year: 'numeric' };
-      return date.toLocaleDateString(undefined, options);
+      return parseLocalDate(dateStr).toLocaleDateString(undefined, options);
     }
 
     const form = document.getElementById('itineraryForm');
@@ -318,7 +325,7 @@
         return;
       }
       const next = upcoming[0];
-      const diff = Math.ceil((new Date(next.startDate) - new Date()) / (1000 * 60 * 60 * 24));
+      const diff = Math.ceil((parseLocalDate(next.startDate) - new Date()) / (1000 * 60 * 60 * 24));
       countdownDiv.textContent = `Next trip: ${next.destination} in ${diff} day${diff !== 1 ? 's' : ''} (${formatDate(next.startDate)})`;
     }
 
