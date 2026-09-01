@@ -16,6 +16,55 @@
        header+main+footer layout; this page has too few elements for that, which
        stretches large gaps between them. Stack from the top instead. */
     #wrapper { justify-content: flex-start; min-height: 0; }
+
+    .itinerary-container { max-width: 640px; margin: 0 auto; width: 100%; }
+
+    .fold-controls { display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .fold-controls button {
+      background: #23272a; color: #eee; border: none; border-radius: 4px;
+      width: 1.6rem; height: 1.6rem; display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.1s;
+    }
+    .fold-controls button:hover { background: #4ea8de; color: #fff; transform: scale(1.08); }
+    .entries-list { display: flex; flex-direction: column; gap: 0.9rem; margin-top: 0.5rem; }
+
+    .entry {
+      background: rgba(255, 255, 255, 0.04);
+      border-left: 4px solid #4ea8de;
+      border-radius: 8px;
+      padding: 0.9rem 1.2rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      transition: background 0.2s;
+    }
+    .entry:hover { background: rgba(255, 255, 255, 0.07); }
+    .entry.current { border-left-color: #3ecf4a; }
+    .entry.past { border-left-color: #555; opacity: 0.6; }
+
+    .entry-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.75rem; cursor: pointer;
+    }
+    .entry-title { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+    .entry-title h3 { margin: 0; font-size: 1.1rem; }
+    .entry-title h3.strike { text-decoration: line-through; }
+    .entry-dates { font-size: 0.85rem; color: #999; }
+    .entry-badge {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;
+      background: #3ecf4a; color: #12210f; padding: 2px 8px; border-radius: 999px;
+      font-weight: 600; white-space: nowrap;
+    }
+    .entry-right { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+    .entry-chevron { color: #888; transition: transform 0.2s; }
+    .entry.expanded .entry-chevron { transform: rotate(180deg); }
+
+    .entry-details { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+    .entry.expanded .entry-details { max-height: 40rem; }
+    .entry-details-inner {
+      padding-top: 0.75rem; margin-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .entry-details-inner .actions { margin-top: 0.6rem; }
   </style>
 </head>
 
@@ -155,43 +204,34 @@
       if (!showPastTrips) {
         filtered = items.filter(item => item.endDate >= today);
       }
-      filtered.forEach((item, index) => {
+      filtered.forEach((item) => {
         const div = document.createElement('div');
-        div.className = 'entry';
-        div.style.position = 'relative';
         const isPast = item.endDate < today;
         const isCurrent = item.startDate <= today && item.endDate >= today;
+        div.className = 'entry' + (isCurrent ? ' current' : '') + (isPast ? ' past' : '');
         div.innerHTML = `
-          <div class="entry-header" style="display:flex;align-items:flex-start;gap:0.2rem;cursor:pointer;flex-direction:column;">
-            <h3 style="
-              ${isPast ? 'text-decoration:line-through;' : ''}
-              ${isCurrent ? 'color:#3ecf4a;' : ''}
-            ">
-              ${item.destination}
-            </h3>
-          </div>
-          <div class="entry-details" style="display:none;margin-top:0.5rem;">
-            <div style="font-size:1rem;color:#bbb;margin-bottom:0.2rem;">
-              ${formatDate(item.startDate)} - ${formatDate(item.endDate)}
-              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}" target="_blank" title="View on Google Maps" style="margin-left:8px;color:#4ea8de;"><i class="fa-solid fa-map-location-dot"></i></a>
+          <div class="entry-header">
+            <div class="entry-title">
+              <h3${isPast ? ' class="strike"' : ''}>${item.destination}</h3>
+              <div class="entry-dates">${formatDate(item.startDate)} - ${formatDate(item.endDate)}</div>
             </div>
-            <p>${item.details}</p>
-            ${isAdmin ? `<button onclick="editItinerary('${item.id}')">Edit</button> <button onclick="deleteItinerary('${item.id}')">Delete</button>` : ''}
+            <div class="entry-right">
+              ${isCurrent ? `<span class="entry-badge">Current Trip</span>` : ''}
+              <i class="fa-solid fa-chevron-down entry-chevron"></i>
+            </div>
+          </div>
+          <div class="entry-details">
+            <div class="entry-details-inner">
+              <p>${item.details}</p>
+              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}" target="_blank" title="View on Google Maps" style="color:#4ea8de;"><i class="fa-solid fa-map-location-dot"></i> View on map</a>
+              ${isAdmin ? `<div class="actions"><button class="button small" onclick="editItinerary('${item.id}')">Edit</button> <button class="button small" onclick="deleteItinerary('${item.id}')">Delete</button></div>` : ''}
+            </div>
           </div>
         `;
-        // Add separator except after last entry
-        if (index < filtered.length - 1) {
-          const sep = document.createElement('div');
-          sep.className = 'entry-separator';
-          list.appendChild(div);
-          list.appendChild(sep);
-        } else {
-          list.appendChild(div);
-        }
+        list.appendChild(div);
         div.querySelector('.entry-header').addEventListener('click', function(e) {
           if (e.target.closest('a')) return;
-          const details = div.querySelector('.entry-details');
-          details.style.display = details.style.display === 'none' ? 'block' : 'none';
+          div.classList.toggle('expanded');
         });
       });
       updateCountdown(filtered);
@@ -257,19 +297,19 @@
 
     // Fold/Unfold All logic
     document.getElementById('foldAllBtn').onclick = function() {
-      document.querySelectorAll('.entry .entry-details').forEach(d => { d.style.display = 'none'; });
+      document.querySelectorAll('.entry').forEach(el => el.classList.remove('expanded'));
     };
     document.getElementById('unfoldAllBtn').onclick = function() {
-      document.querySelectorAll('.entry .entry-details').forEach(d => { d.style.display = 'block'; });
+      document.querySelectorAll('.entry').forEach(el => el.classList.add('expanded'));
     };
   </script>
 
-</div>
+  <!-- Footer -->
+  <footer id="footer">
+    <p class="copyright" id="footerAdminTrigger">&copy; James Lapierre 2025</p>
+  </footer>
 
-<!-- Footer -->
-<footer id="footer">
-  <p class="copyright" id="footerAdminTrigger">&copy; James Lapierre 2025</p>
-</footer>
+</div>
 
 <!-- Scripts -->
 <script src="/assets/js/jquery.min.js"></script>
