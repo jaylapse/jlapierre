@@ -1,7 +1,8 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { google } = require("googleapis");
+const crypto = require("crypto");
 
 initializeApp();
 const db = getFirestore();
@@ -147,6 +148,77 @@ exports.refreshItinerary = onRequest(
       res.json({ status: "ok", created, updated, deleted });
     } catch (err) {
       console.error("refreshItinerary failed:", err);
+      res.status(500).json({ status: "error" });
+    }
+  }
+);
+
+// Per-source cooldown, not a single global lock like refreshItinerary above -
+// different visitors legitimately want to post near each other in time (e.g.
+// right after a game night), so this throttles each IP independently instead
+// of serializing everyone behind one shared window.
+const GUESTBOOK_COOLDOWN_MS = 30 * 1000;
+const GUESTBOOK_NAME_MAX = 80;
+const GUESTBOOK_MESSAGE_MAX = 1000;
+
+exports.submitGuestbookEntry = onRequest(
+  { cors: ["https://jlapierre.ca"], maxInstances: 1, timeoutSeconds: 30 },
+  async (req, res) => {
+    if (req.method !== "POST") {
+      res.status(405).json({ status: "error" });
+      return;
+    }
+
+    const body = req.body || {};
+    // Honeypot - a field real visitors never see or fill, but naive bots
+    // that auto-fill every input do. Pretend success without writing
+    // anything, so the bot doesn't learn it was caught.
+    if (body.website) {
+      res.json({ status: "ok" });
+      return;
+    }
+
+    const name = (body.name || "").toString().trim().slice(0, GUESTBOOK_NAME_MAX);
+    const message = (body.message || "").toString().trim().slice(0, GUESTBOOK_MESSAGE_MAX);
+    if (!name || !message) {
+      res.status(400).json({ status: "error", reason: "missing_fields" });
+      return;
+    }
+
+    try {
+      // Hash rather than store the raw IP long-term - only need it to key
+      // the rate limit, not to retain identifying info.
+      const ip = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || req.ip || "unknown";
+      const ipHash = crypto.createHash("sha256").update(ip).digest("hex").slice(0, 24);
+      const rateRef = db.collection("_meta").doc("guestbookRate_" + ipHash);
+      const now = Date.now();
+
+      const claim = await db.runTransaction(async (tx) => {
+        const rateSnap = await tx.get(rateRef);
+        const lastPostMs = rateSnap.exists ? rateSnap.data().lastPostMs || 0 : 0;
+
+        if (now - lastPostMs < GUESTBOOK_COOLDOWN_MS) {
+          return { claimed: false, secondsRemaining: Math.ceil((GUESTBOOK_COOLDOWN_MS - (now - lastPostMs)) / 1000) };
+        }
+
+        tx.set(rateRef, { lastPostMs: now }, { merge: true });
+        return { claimed: true };
+      });
+
+      if (!claim.claimed) {
+        res.status(429).json({ status: "cooldown", secondsRemaining: claim.secondsRemaining });
+        return;
+      }
+
+      const docRef = await db.collection("guestbook").add({
+        name,
+        message,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+
+      res.json({ status: "ok", entry: { id: docRef.id, name, message } });
+    } catch (err) {
+      console.error("submitGuestbookEntry failed:", err);
       res.status(500).json({ status: "error" });
     }
   }

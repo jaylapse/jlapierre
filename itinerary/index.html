@@ -100,6 +100,7 @@
     <h1 class="major" style="text-align:center"><span class="fas fa-plane-departure"></span> Travel</h1>
 
     <div id="countdown" style="text-align:center;margin-bottom:1rem;"></div>
+    <div id="weatherWidget" style="text-align:center;margin-bottom:1rem;font-size:0.9rem;color:#ddd;"></div>
 
     <div class="itinerary-container" style="position:relative;">
       <div id="adminSection" class="sticky-form" style="display:none;">
@@ -262,6 +263,7 @@
         });
       });
       updateCountdown(filtered);
+      updateWeather(filtered);
     }
 
     form.addEventListener('submit', async e => {
@@ -320,6 +322,57 @@
       const next = upcoming[0];
       const diff = Math.ceil((new Date(next.startDate) - new Date()) / (1000 * 60 * 60 * 24));
       countdownDiv.textContent = `Next trip: ${next.destination} in ${diff} day${diff !== 1 ? 's' : ''} (${formatDate(next.startDate)})`;
+    }
+
+    // Open-Meteo - free, keyless, no secret to protect. WMO weather codes
+    // per https://open-meteo.com/en/docs, condensed to the common ones.
+    const WEATHER_CODES = {
+      0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+      45: 'Foggy', 48: 'Foggy',
+      51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle',
+      56: 'Freezing drizzle', 57: 'Freezing drizzle',
+      61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
+      66: 'Freezing rain', 67: 'Freezing rain',
+      71: 'Light snow', 73: 'Snow', 75: 'Heavy snow', 77: 'Snow grains',
+      80: 'Rain showers', 81: 'Rain showers', 82: 'Violent rain showers',
+      85: 'Snow showers', 86: 'Heavy snow showers',
+      95: 'Thunderstorm', 96: 'Thunderstorm with hail', 99: 'Thunderstorm with hail',
+    };
+
+    let lastWeatherKey = null;
+    async function updateWeather(items) {
+      const widget = document.getElementById('weatherWidget');
+      const today = new Date().toISOString().slice(0, 10);
+      const current = items.find(item => item.startDate <= today && item.endDate >= today);
+      const target = current || items.find(item => item.startDate > today);
+      if (!target) {
+        widget.textContent = '';
+        lastWeatherKey = null;
+        return;
+      }
+
+      const place = target.location || target.destination;
+      const key = target.id + '|' + place;
+      if (key === lastWeatherKey) return;
+      lastWeatherKey = key;
+
+      try {
+        const geoResp = await fetch(`https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(place)}`);
+        const geoData = await geoResp.json();
+        const hit = geoData.results && geoData.results[0];
+        if (!hit) { widget.textContent = ''; return; }
+
+        const weatherResp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${hit.latitude}&longitude=${hit.longitude}&current=temperature_2m,weather_code&timezone=auto`);
+        const weatherData = await weatherResp.json();
+        const cur = weatherData.current;
+        if (!cur) { widget.textContent = ''; return; }
+
+        const desc = WEATHER_CODES[cur.weather_code] || '';
+        const label = current ? 'Right now in' : 'Currently in';
+        widget.textContent = `${label} ${target.destination}: ${Math.round(cur.temperature_2m)}°C${desc ? ', ' + desc : ''}`;
+      } catch (err) {
+        widget.textContent = '';
+      }
     }
 
     // "Refresh from calendar" - calls the refreshItinerary Cloud Function, which

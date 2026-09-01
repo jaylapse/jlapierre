@@ -19,6 +19,18 @@
        even number of nav items it lands on a button border instead of a
        button's center, reading as a stray misaligned line. Suppress it. */
     #header nav:before{ display:none; }
+
+    .guestbook-list { display: flex; flex-direction: column; gap: 0.7rem; margin-top: 1rem; }
+    .guestbook-entry {
+      background: rgba(10, 14, 18, 0.4);
+      border-left: 4px solid #4ea8de;
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+    .guestbook-entry .guestbook-name { font-weight: 600; margin-right: 0.4rem; }
+    .guestbook-entry .guestbook-date { font-size: 0.75rem; color: #aaa; }
+    .guestbook-entry .guestbook-message { margin: 0.3rem 0 0; white-space: pre-wrap; }
     </style>
 	</head>
 	<body class="is-preload">
@@ -82,12 +94,12 @@
 		</table>
 		
 		<h2><i class=""></i> Message Me</h2>
-	
-		<form action="https://formspree.io/f/meognnzq" method="POST">
+
+		<form id="contactForm" action="https://formspree.io/f/meognnzq" method="POST">
 			<div class="fields">
 				<div class="field half">
 					<label for="name">Name</label>
-					<input type="text" name="name" id="name" />
+					<input type="text" name="name" id="name" required />
 				</div>
 				<div class="field half">
 					<label for="email">Email</label>
@@ -95,18 +107,27 @@
 				</div>
 				<div class="field">
 					<label for="message">Message</label>
-					<textarea name="message" id="message" rows="4" style="max-width: 100%; max-height:100%; min-width: 100%"></textarea>
+					<textarea name="message" id="message" rows="4" required style="max-width: 100%; max-height:100%; min-width: 100%"></textarea>
+				</div>
+				<!-- Honeypot - hidden from real visitors via CSS, but naive bots fill every field they find. -->
+				<div class="field" style="position:absolute;left:-9999px;" aria-hidden="true">
+					<label for="website">Website</label>
+					<input type="text" name="website" id="website" tabindex="-1" autocomplete="off" />
 				</div>
 			</div>
 			<ul class="actions">
 				<li><input type="submit" value="Send Message" class="primary" /></li>
 				<li><input type="reset" value="Reset" /></li>
 			</ul>
+			<p id="contactStatus" style="margin-top:0.75rem;"></p>
 		</form>
 		<ul class="icons">
 			<li><a href="https://facebook.com/lapierre92" target="_blank" rel="noopener" title="Facebook" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
 			<li><a href="https://instagram.com/jaylapse" target="_blank" rel="noopener" title="Instagram" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
 			</ul>
+
+		<h2><i class=""></i> Notes from Visitors</h2>
+		<div id="guestbookList" class="guestbook-list"></div>
 	</article>
 
 </div>
@@ -120,6 +141,134 @@
 
 <!-- BG -->
 <div id="bg"></div>
+
+<!-- Firebase (guestbook) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCrXvaiwHdc5whQHuhk6SR7EutV_MY7HWE",
+    authDomain: "jlapierre-9ed45.firebaseapp.com",
+    projectId: "jlapierre-9ed45",
+    storageBucket: "jlapierre-9ed45.firebasestorage.app",
+    messagingSenderId: "747343028064",
+    appId: "1:747343028064:web:2ef67506c81c09103ac805",
+    measurementId: "G-EFMF6L65H5"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const gbDb = firebase.firestore();
+
+  const GUESTBOOK_FN_URL = 'https://us-central1-jlapierre-9ed45.cloudfunctions.net/submitGuestbookEntry';
+  const FORMSPREE_URL = 'https://formspree.io/f/meognnzq';
+
+  const guestbookList = document.getElementById('guestbookList');
+  const contactForm = document.getElementById('contactForm');
+  const contactStatus = document.getElementById('contactStatus');
+
+  function formatGuestbookDate(ts) {
+    if (!ts) return '';
+    const date = ts.toDate ? ts.toDate() : new Date(ts);
+    return date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  // Built with textContent, not innerHTML - guestbook entries are visitor-
+  // supplied text and must never be interpreted as markup.
+  function renderGuestbookEntry(entry, prepend) {
+    const div = document.createElement('div');
+    div.className = 'guestbook-entry';
+
+    const header = document.createElement('div');
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'guestbook-name';
+    nameSpan.textContent = entry.name;
+    header.appendChild(nameSpan);
+    if (entry.dateLabel) {
+      const dateSpan = document.createElement('span');
+      dateSpan.className = 'guestbook-date';
+      dateSpan.textContent = entry.dateLabel;
+      header.appendChild(dateSpan);
+    }
+    div.appendChild(header);
+
+    const msg = document.createElement('p');
+    msg.className = 'guestbook-message';
+    msg.textContent = entry.message;
+    div.appendChild(msg);
+
+    if (prepend && guestbookList.firstChild) {
+      guestbookList.insertBefore(div, guestbookList.firstChild);
+    } else {
+      guestbookList.appendChild(div);
+    }
+  }
+
+  async function loadGuestbook() {
+    try {
+      const snapshot = await gbDb.collection('guestbook').orderBy('createdAt', 'desc').limit(50).get();
+      guestbookList.innerHTML = '';
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        renderGuestbookEntry({ name: data.name, message: data.message, dateLabel: formatGuestbookDate(data.createdAt) });
+      });
+    } catch (err) {
+      // Public read, should basically never fail - leave the list empty rather than break the page.
+    }
+  }
+  loadGuestbook();
+
+  // Sends to Formspree (email, unchanged) and the guestbook function (on-page
+  // display) independently - one failing shouldn't block the other, so the
+  // status message reflects whichever combination actually happened.
+  contactForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const submitBtn = contactForm.querySelector('input[type="submit"]');
+    submitBtn.disabled = true;
+    contactStatus.textContent = 'Sending...';
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const message = document.getElementById('message').value.trim();
+    const website = document.getElementById('website').value;
+
+    const formspreeBody = new FormData();
+    formspreeBody.append('name', name);
+    formspreeBody.append('email', email);
+    formspreeBody.append('message', message);
+
+    const formspreeSend = fetch(FORMSPREE_URL, {
+      method: 'POST',
+      headers: { Accept: 'application/json' },
+      body: formspreeBody,
+    });
+    const guestbookSend = fetch(GUESTBOOK_FN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, message, website }),
+    }).then((r) => r.json());
+
+    const [formspreeOutcome, gbOutcome] = await Promise.allSettled([formspreeSend, guestbookSend]);
+    const emailOk = formspreeOutcome.status === 'fulfilled' && formspreeOutcome.value.ok;
+    const gbResult = gbOutcome.status === 'fulfilled' ? gbOutcome.value : { status: 'error' };
+
+    if (gbResult.status === 'ok' && gbResult.entry) {
+      renderGuestbookEntry({ name: gbResult.entry.name, message: gbResult.entry.message, dateLabel: 'Just now' }, true);
+      contactForm.reset();
+      contactStatus.textContent = emailOk
+        ? 'Thanks for the note!'
+        : 'Posted! (Could not email James directly, but your note is up.)';
+    } else if (gbResult.status === 'cooldown') {
+      contactStatus.textContent = `You're posting a bit fast - try again in ${gbResult.secondsRemaining}s.`;
+    } else if (emailOk) {
+      contactForm.reset();
+      contactStatus.textContent = 'Message sent to James! (Could not post to the guestbook right now.)';
+    } else {
+      contactStatus.textContent = 'Something went wrong - please try again in a moment.';
+    }
+
+    submitBtn.disabled = false;
+    setTimeout(() => { contactStatus.textContent = ''; }, 6000);
+  });
+</script>
 
 <!-- Scripts -->
 <script src="assets/js/jquery.min.js"></script>
