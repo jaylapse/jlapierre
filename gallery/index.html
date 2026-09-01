@@ -21,7 +21,7 @@
       position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.65); color:#fff;
       border:none; border-radius:50%; width:1.5rem; height:1.5rem; cursor:pointer; font-size:1rem; line-height:1;
     }
-    #uploadStatus, #migrateStatus { text-align:center; font-size:0.9rem; color:#bbb; margin:0.4rem 0; }
+    #uploadStatus, #migrateStatus { text-align:center; font-size:0.9rem; color:#bbb; margin:0.4rem 0; white-space:pre-line; }
     .gallery-switch.active { outline:2px solid #4ea8de; }
   </style>
 </head>
@@ -267,6 +267,8 @@
       }
       if (!confirm('Import all legacy galleries into the new system? This uploads every photo to Cloudinary and can take several minutes. Safe to re-run - it skips galleries that were already imported.')) return;
       migrateBtn.disabled = true;
+      let errorCount = 0;
+      const errorLines = [];
       const existing = await db.collection('galleries').get();
       const existingLabels = new Set(existing.docs.map(d => d.data().label));
       for (const key in galleryConfigs) {
@@ -285,6 +287,7 @@
           migrateStatus.textContent = `"${cfg.label}": uploading ${i + 1} of ${images.length}...`;
           try {
             const resp = await fetch(encodeURI(cfg.folder + images[i].src));
+            if (!resp.ok) throw new Error(`fetch ${resp.status} for ${cfg.folder + images[i].src}`);
             const blob = await resp.blob();
             const file = new File([blob], images[i].src, { type: blob.type });
             const result = await uploadToCloudinary(file);
@@ -295,11 +298,14 @@
             });
           } catch (err) {
             console.error('Migration error for', images[i].src, err);
-            migrateStatus.textContent = `Error uploading ${images[i].src}: ${err.message}`;
+            errorCount++;
+            errorLines.push(`${cfg.label}/${images[i].src}: ${err.message}`);
           }
         }
       }
-      migrateStatus.textContent = 'Import complete.';
+      migrateStatus.textContent = errorCount
+        ? `Import finished with ${errorCount} error(s) - see console for details:\n${errorLines.join('\n')}`
+        : 'Import complete.';
       migrateBtn.disabled = false;
       await loadGalleries();
     });
