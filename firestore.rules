@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /itineraries/{itineraryId} {
+      // Itinerary is public to view...
+      allow read: if true;
+      // ...but only a signed-in (admin) user can add/edit/delete entries.
+      allow write: if request.auth != null;
+    }
+  }
+}

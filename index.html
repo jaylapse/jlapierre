@@ -57,6 +57,7 @@
 	<!-- Firebase SDK -->
 	<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 	<script>
 		const firebaseConfig = {
 		apiKey: "AIzaSyCrXvaiwHdc5whQHuhk6SR7EutV_MY7HWE",
@@ -131,26 +132,28 @@
       };
       list.parentNode.insertBefore(toggleBtn, list);
 
-      // Admin mode logic
-      function checkAdmin() {
-        isAdmin = localStorage.getItem('itineraryAdmin') === 'true';
+      // Admin mode logic - backed by real Firebase Authentication rather than a
+      // client-side password, so admin access is actually enforced by Firestore
+      // security rules (see firestore.rules) and not just hidden in the JS.
+      adminLoginBtn.addEventListener('click', function() {
+        if (isAdmin) {
+          firebase.auth().signOut();
+        } else {
+          const email = prompt('Admin email:');
+          if (!email) return;
+          const pw = prompt('Admin password:');
+          if (!pw) return;
+          firebase.auth().signInWithEmailAndPassword(email, pw)
+            .catch(function(err) {
+              alert('Login failed: ' + err.message);
+            });
+        }
+      });
+      firebase.auth().onAuthStateChanged(function(user) {
+        isAdmin = !!user;
         adminSection.style.display = isAdmin ? 'block' : 'none';
         adminLoginBtn.textContent = isAdmin ? 'Logout' : 'Editor';
         loadItineraries();
-      }
-      adminLoginBtn.addEventListener('click', function() {
-        if (isAdmin) {
-          localStorage.removeItem('itineraryAdmin');
-          checkAdmin();
-        } else {
-          const pw = prompt('Enter admin password:');
-          if (pw === 'letmein') {
-            localStorage.setItem('itineraryAdmin', 'true');
-            checkAdmin();
-          } else {
-            alert('Incorrect password.');
-          }
-        }
       });
 
       // Prevent end date before start date
@@ -293,10 +296,6 @@
         const diff = Math.ceil((new Date(next.startDate) - new Date()) / (1000*60*60*24));
         countdownDiv.textContent = `Next trip: ${next.destination} in ${diff} day${diff !== 1 ? 's' : ''} (${formatDate(next.startDate)})`;
       }
-
-      window.onload = function() {
-        checkAdmin();
-      };
 
       // Fold/Unfold All logic
       document.getElementById('foldAllBtn').onclick = function() {
