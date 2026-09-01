@@ -150,7 +150,11 @@
     const db = firebase.firestore();
 
     function formatDate(dateStr) {
-      const date = new Date(dateStr);
+      // Date-only strings ("2026-09-08") parse as UTC midnight; rendering
+      // that with toLocaleDateString in a timezone behind UTC (e.g.
+      // Eastern) rolls it back to the previous day. Anchor to local
+      // midnight instead so the displayed date matches the stored one.
+      const date = new Date(dateStr + 'T00:00:00');
       const options = { day: 'numeric', month: 'long', year: 'numeric' };
       return date.toLocaleDateString(undefined, options);
     }
@@ -321,7 +325,7 @@
         return;
       }
       const next = upcoming[0];
-      const diff = Math.ceil((new Date(next.startDate) - new Date()) / (1000 * 60 * 60 * 24));
+      const diff = Math.ceil((new Date(next.startDate + 'T00:00:00') - new Date()) / (1000 * 60 * 60 * 24));
       countdownDiv.textContent = `Next trip: ${next.destination} in ${diff} day${diff !== 1 ? 's' : ''} (${formatDate(next.startDate)})`;
     }
 
