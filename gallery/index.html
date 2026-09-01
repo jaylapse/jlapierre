@@ -31,6 +31,17 @@
        stretches large gaps between them. Stack from the top instead. */
     #wrapper { justify-content: flex-start; min-height: 0; }
 
+    /* Homepage sections get their readability backdrop from #main article in
+       main.css - this page isn't built from that template structure, so
+       without it the thumbnails and buttons sit directly on the busy photo
+       background. Give it the same solid panel treatment, just wider to fit
+       the grid comfortably. */
+    .page-panel {
+      width: 60rem; max-width: 100%; margin: 0 auto;
+      padding: 2rem 2.5rem 2.5rem; background-color: rgba(27, 31, 34, 0.85);
+      border-radius: 4px;
+    }
+
     /* Lightbox */
     .lightbox {
       position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:10000;
@@ -64,23 +75,25 @@
 <body class="gallery-page">
 <div id="bg"></div>
 <div id="wrapper">
-  <h1 style="text-align: center">Galleries</h1>
-
   <div id="back-to-main-btn" style="position:fixed;top:18px;right:24px;z-index:1000;scale: 0.6;">
     <button style="background:none;border:none;font-size:1.5rem;color:#fff;cursor:pointer;line-height:1;" title="Back to main" onclick="window.location.href='/index.html#galleries'">&times;</button>
   </div>
 
-  <div id="gallery-buttons" style="display:flex;gap:0.7rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;"></div>
+  <div class="page-panel">
+    <h1 style="text-align: center">Galleries</h1>
 
-  <div class="admin-bar hidden" id="adminBar">
-    <button class="button small" id="newGalleryBtn"><i class="fa-solid fa-plus"></i> New Gallery</button>
-    <button class="button small" id="uploadPhotosBtn" style="display:none;"><i class="fa-solid fa-upload"></i> Upload Photos/Videos</button>
-    <input type="file" id="photoInput" accept="image/*,video/*" multiple style="display:none;">
-  </div>
-  <div id="uploadStatus"></div>
+    <div id="gallery-buttons" style="display:flex;gap:0.7rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;"></div>
 
-  <div class="container">
-    <div class="row" id="photo-grid"></div>
+    <div class="admin-bar hidden" id="adminBar">
+      <button class="button small" id="newGalleryBtn"><i class="fa-solid fa-plus"></i> New Gallery</button>
+      <button class="button small" id="uploadPhotosBtn" style="display:none;"><i class="fa-solid fa-upload"></i> Upload Photos/Videos</button>
+      <input type="file" id="photoInput" accept="image/*,video/*" multiple style="display:none;">
+    </div>
+    <div id="uploadStatus"></div>
+
+    <div class="container">
+      <div class="row" id="photo-grid"></div>
+    </div>
   </div>
 
   <!-- Lightbox popup -->
