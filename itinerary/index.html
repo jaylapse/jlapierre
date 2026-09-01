@@ -52,7 +52,6 @@
       <button id="unfoldAllBtn" type="button" title="Unfold All"><i class="fa-solid fa-chevron-down"></i></button>
     </div>
     <div class="entries-list" id="itineraryList"></div>
-    <button class="button" id="adminLoginBtn" style="position:fixed;bottom:6px;right:6px;z-index:9999;opacity:0.5;">Editor</button>
   </div>
 
   <!-- Firebase -->
@@ -83,7 +82,6 @@
     const adminSection = document.getElementById('adminSection');
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
-    const adminLoginBtn = document.getElementById('adminLoginBtn');
     let isAdmin = false;
     let editId = null;
     let showPastTrips = false;
@@ -103,7 +101,11 @@
     // Admin mode logic - backed by real Firebase Authentication rather than a
     // client-side password, so admin access is actually enforced by Firestore
     // security rules (see firestore.rules) and not just hidden in the JS.
-    adminLoginBtn.addEventListener('click', function() {
+    // Triggered by clicking the footer copyright text - no visible "login" button,
+    // so it doesn't invite casual visitors to poke at it. Delegated on document.body
+    // since the footer is parsed after this script runs.
+    document.body.addEventListener('click', function(e) {
+      if (!e.target.closest('#footerAdminTrigger')) return;
       if (isAdmin) {
         firebase.auth().signOut();
       } else {
@@ -120,7 +122,6 @@
     firebase.auth().onAuthStateChanged(function(user) {
       isAdmin = !!user;
       adminSection.style.display = isAdmin ? 'block' : 'none';
-      adminLoginBtn.textContent = isAdmin ? 'Logout' : 'Editor';
       loadItineraries();
     });
 
@@ -267,7 +268,7 @@
 
 <!-- Footer -->
 <footer id="footer">
-  <p class="copyright">&copy; James Lapierre 2025</p>
+  <p class="copyright" id="footerAdminTrigger">&copy; James Lapierre 2025</p>
 </footer>
 
 <!-- Scripts -->
