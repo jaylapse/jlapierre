@@ -100,7 +100,8 @@
     <h1 class="major" style="text-align:center"><span class="fas fa-plane-departure"></span> Travel</h1>
 
     <div id="countdown" style="text-align:center;margin-bottom:1rem;"></div>
-    <div id="weatherWidget" style="text-align:center;margin-bottom:1rem;font-size:0.9rem;color:#ddd;"></div>
+    <div id="weatherWidget" style="text-align:center;margin-bottom:0.3rem;font-size:0.9rem;color:#ddd;"></div>
+    <div id="weatherForecast" style="text-align:center;margin-bottom:1rem;font-size:0.8rem;color:#bbb;display:flex;justify-content:center;flex-wrap:wrap;gap:0.8rem;"></div>
 
     <div class="itinerary-container" style="position:relative;">
       <div id="adminSection" class="sticky-form" style="display:none;">
@@ -365,11 +366,13 @@
     let lastWeatherKey = null;
     async function updateWeather(items) {
       const widget = document.getElementById('weatherWidget');
+      const forecastEl = document.getElementById('weatherForecast');
       const today = new Date().toISOString().slice(0, 10);
       const current = items.find(item => item.startDate <= today && item.endDate >= today);
       const target = current || items.find(item => item.startDate > today);
       if (!target) {
         widget.textContent = '';
+        forecastEl.innerHTML = '';
         lastWeatherKey = null;
         return;
       }
@@ -379,18 +382,45 @@
       if (key === lastWeatherKey) return;
       lastWeatherKey = key;
 
+      widget.textContent = '';
+      forecastEl.innerHTML = '';
+
       try {
         const hit = await geocode(place);
-        if (!hit) { widget.textContent = ''; return; }
+        if (!hit) return;
 
         const weatherResp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${hit.latitude}&longitude=${hit.longitude}&current=temperature_2m,weather_code&timezone=auto`);
         const weatherData = await weatherResp.json();
         const cur = weatherData.current;
-        if (!cur) { widget.textContent = ''; return; }
+        if (!cur) return;
 
         const desc = WEATHER_CODES[cur.weather_code] || '';
         const label = current ? 'Right now in' : 'Currently in';
         widget.textContent = `${label} ${target.destination}: ${Math.round(cur.temperature_2m)}°C${desc ? ', ' + desc : ''}`;
+
+        // Separate request, separate try/catch - Open-Meteo's daily forecast
+        // only covers ~16 days out and 400s the whole response outside that
+        // window, which shouldn't take down the "current conditions" line above.
+        try {
+          const forecastStart = target.startDate > today ? target.startDate : today;
+          const forecastResp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${hit.latitude}&longitude=${hit.longitude}&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&start_date=${forecastStart}&end_date=${target.endDate}`);
+          const forecastData = await forecastResp.json();
+          const daily = forecastData.daily;
+          if (daily && daily.time) {
+            daily.time.forEach((dateStr, i) => {
+              const hi = Math.round(daily.temperature_2m_max[i]);
+              const lo = Math.round(daily.temperature_2m_min[i]);
+              const dDesc = WEATHER_CODES[daily.weather_code[i]] || '';
+              const dayLabel = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+              const span = document.createElement('span');
+              span.textContent = `${dayLabel}: ${hi}°/${lo}°C${dDesc ? ' ' + dDesc : ''}`;
+              forecastEl.appendChild(span);
+            });
+          }
+        } catch (forecastErr) {
+          // Trip too far out for the forecast window, or request failed -
+          // just leave the forecast row empty.
+        }
       } catch (err) {
         widget.textContent = '';
       }
