@@ -27,7 +27,10 @@ button,input,select{font:inherit}
 .host-header h2{margin:0 0 6px;font-size:28px;font-weight:600}
 .host-header p{margin:0;color:var(--muted)}
 .host-actions{display:flex;gap:8px;flex-wrap:wrap}
-.host-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.host-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:36px;min-height:32px;padding:0;flex:none}
+.stepper span{min-width:1.4em;text-align:center;font-size:18px;font-weight:600}
 .mini-card{padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--surface2)}
 .mini-card strong{display:block;font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
 .board{display:grid;gap:12px}
@@ -75,7 +78,18 @@ button,input,select{font:inherit}
     <div class="workspace">
       <section class="box section">
         <div class="host-header"><div><h2 id="activeTitle">&nbsp;</h2><p id="activeSummary">&nbsp;</p></div><div class="host-actions"><button class="btn" id="newBoardBtn" type="button">New board</button></div></div>
-        <div class="host-meta"><div class="mini-card"><strong>Format</strong><span id="formatLabel">Host board</span></div><div class="mini-card"><strong>Board</strong><span id="boardLabel">Board 1</span></div></div>
+        <div class="host-meta">
+          <div class="mini-card"><strong>Format</strong><span id="formatLabel">Host board</span></div>
+          <div class="mini-card"><strong>Board</strong><span id="boardLabel">Board 1</span></div>
+          <div class="mini-card" id="playersCard" style="display:none">
+            <strong>Players</strong>
+            <div class="stepper">
+              <button class="btn" id="playersMinus" type="button">−</button>
+              <span id="playersCount">2</span>
+              <button class="btn" id="playersPlus" type="button">+</button>
+            </div>
+          </div>
+        </div>
         <div id="boardArea" class="board"></div>
       </section>
       <aside class="box panel"><h2 style="margin:0 0 10px">Host notes</h2><div class="side-list" id="hostNotes"></div></aside>
@@ -95,7 +109,13 @@ button,input,select{font:inherit}
 <script>
 (function(){
   var source = window.GAMES_LIBRARY || [];
-  var state = { activeId: null, boardIndex: {}, lastPoolIndex: {}, headbandzCategory: null, headbandzNames: [] };
+  var state = {
+    activeId: null, boardIndex: {}, lastPoolIndex: {}, sampledItems: {},
+    playerCount: 2, currentPlayerIndex: 0,
+    headbandzUsedNames: [], headbandzCurrentName: null,
+    chainAssignments: [], chainRevealed: 1, chainRoundOver: false,
+    majorityIndex: 0, majorityRevealed: false
+  };
   function byId(i){return document.getElementById(i)}
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
   function getGame(id){for(var i=0;i<source.length;i++) if(source[i].id===id) return source[i]; return source[0]}
@@ -131,40 +151,171 @@ button,input,select{font:inherit}
     return idx;
   }
   function currentPool(g){
-    if (state.boardIndex[g.id] === undefined) state.boardIndex[g.id] = pickPoolIndex(g);
+    if (state.boardIndex[g.id] === undefined) { state.boardIndex[g.id] = pickPoolIndex(g); state.sampledItems[g.id] = undefined; }
     var pool = g.pools[state.boardIndex[g.id] % g.pools.length];
-    var items = pool.items;
     // A pool with "draw" set has a bigger item bank than shown at once - sample
-    // fresh each time instead of always showing the same fixed list.
-    if (pool.draw && pool.draw < items.length) items = sampleN(items, pool.draw);
-    return { title: pool.title, subtitle: pool.subtitle, items: items };
+    // once per board and cache it, so re-rendering the same board (e.g.
+    // stepping through prompts one at a time) doesn't silently reshuffle it.
+    if (state.sampledItems[g.id] === undefined) {
+      state.sampledItems[g.id] = (pool.draw && pool.draw < pool.items.length) ? sampleN(pool.items, pool.draw) : pool.items;
+    }
+    return { title: pool.title, subtitle: pool.subtitle, items: state.sampledItems[g.id] };
   }
-  function nextBoard(g){ state.boardIndex[g.id] = pickPoolIndex(g); }
+  function nextBoard(g){ state.boardIndex[g.id] = pickPoolIndex(g); state.sampledItems[g.id] = undefined; }
   function initials(name){return name.split(/\s+/).filter(Boolean).slice(0,2).map(function(p){return p[0].toUpperCase()}).join('')}
   function avatarHue(name){var h=0; for(var i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%360; return h}
-  function drawTwoDistinct(items){if(!items||items.length<2) return items||[]; var a=Math.floor(Math.random()*items.length), b=Math.floor(Math.random()*(items.length-1)); if(b>=a) b+=1; return [items[a], items[b]]}
   function renderNav(){var q=byId('search').value.toLowerCase(), m=byId('mechanic').value, out=[]; for(var i=0;i<source.length;i++){var g=source[i], hay=(g.name+' '+g.summary+' '+g.mechanic).toLowerCase(); if(q&&hay.indexOf(q)===-1) continue; if(m!=='all'&&g.mechanic!==m) continue; out.push('<button class="btn'+(g.id===state.activeId?' active':'')+'" type="button" data-load="'+esc(g.id)+'">'+esc(g.name)+'</button>')} byId('gameNav').innerHTML=out.join('')}
-  function clearScreen(){state.activeId=null; byId('activeTitle').innerHTML='&nbsp;'; byId('activeSummary').innerHTML='&nbsp;'; byId('formatLabel').textContent='Host board'; byId('boardLabel').textContent='Board 1'; byId('boardArea').innerHTML='<div class="empty"></div>'; byId('hostNotes').innerHTML=''; renderNav()}
-  function renderBoard(){var g=currentGame(); if(!g){clearScreen(); return} var p=currentPool(g), items=[]; byId('activeTitle').textContent=g.name; byId('activeSummary').textContent=g.summary; byId('formatLabel').textContent=g.format; byId('boardLabel').textContent=p.title; for(var i=0;i<p.items.length;i++){var it=p.items[i]; var detailText=it.birthdate?String(ageFromBirthdate(it.birthdate)):it.detail; items.push('<div class="item"><strong>'+esc(it.name)+'</strong>'+(detailText?'<small>'+esc(detailText)+'</small>':'')+'</div>')}
+
+  // ---- Turn state shared by any game with usesPlayers:true (Headbandz,
+  // Chain Game). Resets whenever a game loads or the player count changes;
+  // the count itself carries over between games. ----
+  function resetTurnState(){
+    state.currentPlayerIndex = 0;
+    state.headbandzUsedNames = [];
+    state.headbandzCurrentName = null;
+    state.chainAssignments = [];
+    state.chainRevealed = 1;
+    state.chainRoundOver = false;
+    state.majorityIndex = 0;
+    state.majorityRevealed = false;
+  }
+  function setPlayerCount(n){
+    n = Math.max(2, Math.min(10, n));
+    if (n === state.playerCount) return;
+    state.playerCount = n;
+    resetTurnState();
+    renderBoard();
+  }
+
+  // ---- Headbandz: one name per turn, drawn from the current category and
+  // never repeated within a round unless the category runs out. ----
+  function drawHeadbandzName(pool){
+    var used = state.headbandzUsedNames;
+    var available = pool.items.filter(function(it){ return used.indexOf(it.name) === -1; });
+    if (!available.length) { used.length = 0; available = pool.items.slice(); }
+    var pick = available[Math.floor(Math.random() * available.length)];
+    used.push(pick.name);
+    state.headbandzCurrentName = pick;
+  }
+  function renderHeadbandz(g, pool){
+    if (!state.headbandzCurrentName) drawHeadbandzName(pool);
+    var nm = state.headbandzCurrentName;
+    return '<section class="round"><div class="round-top"><div><h3>'+esc(pool.title)+'</h3><p>'+esc(pool.subtitle||'')+'</p></div>'
+      + '<div class="pill-row"><span class="pill">Headbandz</span><span class="pill">Player '+(state.currentPlayerIndex+1)+' of '+state.playerCount+'</span></div></div>'
+      + '<div class="avatar-row" style="grid-template-columns:1fr">'
+      + '<div class="avatar"><div class="circle" style="background:linear-gradient(135deg,hsl('+avatarHue(nm.name)+',65%,60%),hsl('+((avatarHue(nm.name)+40)%360)+',70%,50%))">'+esc(initials(nm.name))+'</div>'
+      + '<div><strong>'+esc(nm.name)+'</strong></div>'
+      + '<div class="label">Everyone else describes this - Player '+(state.currentPlayerIndex+1)+' guesses</div></div></div>'
+      + '<div class="host-actions" style="margin-top:12px"><button class="btn" id="headbandzNextBtn" type="button">Got it — Next Player</button></div></section>';
+  }
+  function headbandzNextPlayer(){
+    state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.playerCount;
+    state.headbandzCurrentName = null;
+    renderBoard();
+  }
+
+  // ---- Chain Game: one full word chain per player, drawn fresh each round.
+  // Players go in order, revealing their own chain one link at a time until
+  // they miss; the round ends once every player has had a turn. ----
+  function ensureChainRound(g){
+    if (state.chainAssignments.length === state.playerCount) return;
+    var chains = sampleN(g.pools[0].items, state.playerCount).map(function(it){ return it.name.split(' -> '); });
+    state.chainAssignments = chains;
+    state.currentPlayerIndex = 0;
+    state.chainRevealed = 1;
+    state.chainRoundOver = false;
+  }
+  function renderChainGame(g){
+    ensureChainRound(g);
+    if (state.chainRoundOver) {
+      return '<section class="round"><div class="round-top"><div><h3>Round complete</h3>'
+        + '<p>Every player has had a turn with their chain.</p></div></div>'
+        + '<div class="host-actions"><button class="btn" id="chainNewRoundBtn" type="button">New Round</button></div></section>';
+    }
+    var chain = state.chainAssignments[state.currentPlayerIndex];
+    var revealed = chain.slice(0, state.chainRevealed).join(' → ');
+    var atEnd = state.chainRevealed >= chain.length;
+    return '<section class="round">'
+      + '<div class="round-top"><div><h3>Chain Game</h3><p>Player '+(state.currentPlayerIndex+1)+' of '+state.playerCount+' — link '+state.chainRevealed+' of '+chain.length+'</p></div></div>'
+      + '<div class="items"><div class="item"><strong>'+esc(revealed)+(atEnd?'':' → •••')+'</strong></div></div>'
+      + '<div class="host-actions">'
+      + (atEnd
+          ? '<button class="btn" id="chainAdvanceBtn" type="button">Chain complete — Next Player</button>'
+          : '<button class="btn" id="chainCorrectBtn" type="button">Correct — Reveal Next</button><button class="btn" id="chainMissBtn" type="button">Miss — Next Player</button>')
+      + '</div></section>';
+  }
+  // ---- Majority Rules: one prompt at a time, answer hidden until tapped. ----
+  function renderMajorityRules(g, p){
+    if (state.majorityIndex >= p.items.length) state.majorityIndex = 0;
+    var it = p.items[state.majorityIndex];
+    return '<section class="round">'
+      + '<div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>Prompt '+(state.majorityIndex+1)+' of '+p.items.length+'</p></div>'
+      + '<div class="pill-row"><span class="pill">'+esc(g.format)+'</span><span class="pill">'+esc(g.mechanic)+'</span></div></div>'
+      + '<div class="items"><div class="item"><strong>'+esc(it.name)+'</strong>'
+      + (state.majorityRevealed ? '<small>'+esc(it.detail)+'</small>' : '')
+      + '</div></div>'
+      + '<div class="host-actions" style="margin-top:12px">'
+      + (state.majorityRevealed
+          ? '<button class="btn" id="majorityNextBtn" type="button">Next prompt</button>'
+          : '<button class="btn" id="majorityRevealBtn" type="button">Tap to reveal answer</button>')
+      + '</div></section>';
+  }
+  function chainAdvancePlayer(){
+    state.currentPlayerIndex++;
+    if (state.currentPlayerIndex >= state.playerCount) { state.chainRoundOver = true; }
+    else { state.chainRevealed = 1; }
+    renderBoard();
+  }
+
+  function clearScreen(){state.activeId=null; byId('activeTitle').innerHTML='&nbsp;'; byId('activeSummary').innerHTML='&nbsp;'; byId('formatLabel').textContent='Host board'; byId('boardLabel').textContent='Board 1'; byId('playersCard').style.display='none'; byId('boardArea').innerHTML='<div class="empty"></div>'; byId('hostNotes').innerHTML=''; renderNav()}
+  function renderBoard(){
+    var g=currentGame();
+    if(!g){clearScreen(); return}
+    byId('activeTitle').textContent=g.name; byId('activeSummary').textContent=g.summary; byId('formatLabel').textContent=g.format;
+    byId('playersCard').style.display = g.usesPlayers ? '' : 'none';
+    byId('playersCount').textContent = state.playerCount;
     var content='';
     if(g.id==='headbandz'){
-      var cats=g.pools.map(function(x){return x.title});
-      if(!state.headbandzCategory || cats.indexOf(state.headbandzCategory)===-1) state.headbandzCategory=g.pools[Math.floor(Math.random()*g.pools.length)].title;
-      var pool=null;
-      for(var k=0;k<g.pools.length;k++) if(g.pools[k].title===state.headbandzCategory) pool=g.pools[k];
-      if(!state.headbandzNames.length || state.headbandzNames.length!==2){ state.headbandzNames=drawTwoDistinct(pool.items) }
-      var a1=state.headbandzNames[0], a2=state.headbandzNames[1];
-      content='<section class="round"><div class="round-top"><div><h3>'+esc(pool.title)+'</h3><p>'+esc(pool.subtitle||'')+'</p></div><div class="pill-row"><span class="pill">Headbandz</span><span class="pill">'+esc(g.mechanic)+'</span></div></div><div class="host-actions" style="margin-bottom:12px"><button class="btn" id="newHeadbandzNames" type="button">New names</button></div><div class="avatar-row"><div class="avatar"><div class="circle" style="background:linear-gradient(135deg,hsl('+avatarHue(a1.name)+',65%,60%),hsl('+((avatarHue(a1.name)+40)%360)+',70%,50%))">'+esc(initials(a1.name))+'</div><div><strong>'+esc(a1.name)+'</strong></div><div class="label">Player 1</div></div><div class="avatar"><div class="circle" style="background:linear-gradient(135deg,hsl('+avatarHue(a2.name)+',65%,60%),hsl('+((avatarHue(a2.name)+40)%360)+',70%,50%))">'+esc(initials(a2.name))+'</div><div><strong>'+esc(a2.name)+'</strong></div><div class="label">Player 2</div></div></div></section>';
-    } else if(g.id==='zero-to-hundred' || g.id==='i-can-eat-that' || g.id==='got-it'){
-      content='<section class="round"><div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>'+esc(p.subtitle||'')+'</p></div><div class="pill-row"><span class="pill">'+esc(g.format)+'</span><span class="pill">'+esc(g.mechanic)+'</span></div></div><div class="rules">'+items.map(function(x){return x.replace('item','rule')}).join('')+'</div></section>';
+      var pool = currentPool(g);
+      byId('boardLabel').textContent = pool.title;
+      content = renderHeadbandz(g, pool);
+    } else if(g.id==='chain-game'){
+      byId('boardLabel').textContent = 'Round in progress';
+      content = renderChainGame(g);
+    } else if(g.id==='majority-rules'){
+      var mp = currentPool(g);
+      byId('boardLabel').textContent = mp.title;
+      content = renderMajorityRules(g, mp);
     } else {
-      content='<section class="round"><div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>'+esc(p.subtitle||'')+'</p></div><div class="pill-row"><span class="pill">'+esc(g.format)+'</span><span class="pill">'+esc(g.mechanic)+'</span></div></div><div class="items">'+items.join('')+'</div></section>';
+      var p=currentPool(g), items=[];
+      byId('boardLabel').textContent=p.title;
+      for(var i=0;i<p.items.length;i++){var it=p.items[i]; var detailText=it.birthdate?String(ageFromBirthdate(it.birthdate)):it.detail; items.push('<div class="item"><strong>'+esc(it.name)+'</strong>'+(detailText?'<small>'+esc(detailText)+'</small>':'')+'</div>')}
+      if(g.id==='zero-to-hundred' || g.id==='i-can-eat-that' || g.id==='got-it'){
+        content='<section class="round"><div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>'+esc(p.subtitle||'')+'</p></div><div class="pill-row"><span class="pill">'+esc(g.format)+'</span><span class="pill">'+esc(g.mechanic)+'</span></div></div><div class="rules">'+items.map(function(x){return x.replace('item','rule')}).join('')+'</div></section>';
+      } else {
+        content='<section class="round"><div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>'+esc(p.subtitle||'')+'</p></div><div class="pill-row"><span class="pill">'+esc(g.format)+'</span><span class="pill">'+esc(g.mechanic)+'</span></div></div><div class="items">'+items.join('')+'</div></section>';
+      }
     }
     byId('boardArea').innerHTML=content; byId('hostNotes').innerHTML=g.notes.map(function(n){return '<div class="side-note"><strong>'+esc(g.name)+'</strong><span>'+esc(n)+'</span></div>'}).join(''); renderNav();
   }
-  function loadGame(id){state.activeId=id; if(id!=='headbandz'){ state.headbandzCategory=null; state.headbandzNames=[] } renderBoard()}
-  document.addEventListener('click', function(e){ var el=e.target; while(el&&el!==document){ var load=el.getAttribute&&el.getAttribute('data-load'); if(load){ loadGame(load); return } if(el.id==='newHeadbandzNames' && state.activeId==='headbandz'){ var g=currentGame(); var pool=null; for(var j=0;j<g.pools.length;j++) if(g.pools[j].title===state.headbandzCategory) pool=g.pools[j]; state.headbandzNames=drawTwoDistinct(pool.items); renderBoard(); return } el=el.parentNode } });
-  byId('newBoardBtn').onclick=function(){ var g=currentGame(); if(g){ if(g.id==='headbandz'){ state.headbandzCategory=null; state.headbandzNames=[] } nextBoard(g); renderBoard() } };
+  function loadGame(id){ state.activeId=id; resetTurnState(); renderBoard(); }
+  document.addEventListener('click', function(e){
+    var el=e.target;
+    while(el&&el!==document){
+      var load=el.getAttribute&&el.getAttribute('data-load');
+      if(load){ loadGame(load); return }
+      if(el.id==='headbandzNextBtn'){ headbandzNextPlayer(); return }
+      if(el.id==='chainCorrectBtn'){ state.chainRevealed++; renderBoard(); return }
+      if(el.id==='chainMissBtn' || el.id==='chainAdvanceBtn'){ chainAdvancePlayer(); return }
+      if(el.id==='chainNewRoundBtn'){ state.chainAssignments=[]; renderBoard(); return }
+      if(el.id==='majorityRevealBtn'){ state.majorityRevealed=true; renderBoard(); return }
+      if(el.id==='majorityNextBtn'){ state.majorityIndex++; state.majorityRevealed=false; renderBoard(); return }
+      if(el.id==='playersMinus'){ setPlayerCount(state.playerCount-1); return }
+      if(el.id==='playersPlus'){ setPlayerCount(state.playerCount+1); return }
+      el=el.parentNode;
+    }
+  });
+  byId('newBoardBtn').onclick=function(){ var g=currentGame(); if(!g) return; resetTurnState(); nextBoard(g); renderBoard(); };
   byId('search').oninput=renderNav; byId('mechanic').onchange=renderNav;
   renderNav(); clearScreen();
 })();

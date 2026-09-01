@@ -3,12 +3,13 @@ window.GAMES_LIBRARY.push({
   id:'headbandz',
   name:'Headbandz',
   mechanic:'word',
-  format:'2 names per board',
-  summary:'Draw two random names from a themed category of famous people.',
+  format:'One name per turn',
+  usesPlayers:true,
+  summary:'One random name from a themed category is drawn for whoever\'s turn it is; everyone else describes it to them.',
   notes:[
-    'Each round picks a random category, then draws two random names from it.',
-    'The site shows only two names at a time for the current round.',
-    'Use the New names button to redraw two different names from the same category, or New board to jump to a different category.'
+    'Set the player count above - each turn shows one name for the current player, drawn from a random category.',
+    'Everyone else describes the name out loud until the current player guesses it (or the group gives up).',
+    'Tap Got it to pass to the next player with a fresh name, or New board to jump to a different category.'
   ],
   pools:[
     { title:'Actors & Entertainers', subtitle:'40 names', items:[
