@@ -111,9 +111,11 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
-    // ---- Fill these in after creating a free Cloudinary account (see setup notes) ----
     const CLOUDINARY_CLOUD_NAME = 'yvn0wmms';
-    const CLOUDINARY_UPLOAD_PRESET = 'jlapierre';
+    // Uploads are signed server-side (see getUploadSignature below) rather
+    // than using Cloudinary's unsigned-preset flow, so a visitor reading
+    // this page's source can't upload directly to the account themselves.
+    const SIGNATURE_FN_URL = 'https://us-central1-jlapierre-9ed45.cloudfunctions.net/getUploadSignature';
 
     const firebaseConfig = {
       apiKey: "AIzaSyCrXvaiwHdc5whQHuhk6SR7EutV_MY7HWE",
@@ -173,10 +175,24 @@
       return cloudinaryUrl(item.url, 'w_300,h_300,c_fill,q_auto,f_auto');
     }
 
+    async function getUploadAuth() {
+      const user = firebase.auth().currentUser;
+      if (!user) throw new Error('Not signed in');
+      const idToken = await user.getIdToken();
+      const resp = await fetch(SIGNATURE_FN_URL, {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
+      if (!resp.ok) throw new Error('Could not authorize upload');
+      return resp.json();
+    }
+
     async function uploadToCloudinary(file) {
+      const { timestamp, signature, apiKey } = await getUploadAuth();
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      formData.append('api_key', apiKey);
+      formData.append('timestamp', timestamp);
+      formData.append('signature', signature);
       // "auto" detects image vs video automatically so one upload flow handles both.
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, {
         method: 'POST',
