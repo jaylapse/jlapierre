@@ -27,16 +27,20 @@
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.75);
     }
     /* Smaller, lighter text needs a heavier treatment to stay legible - a
-       thicker layered glow plus full white and a bit of weight. */
-    .entry-dates {
-      color: #fff;
-      font-weight: 600;
+       thicker layered glow plus full white/near-white and some weight. */
+    .entry-dates,
+    .entry-details-inner p,
+    .map-link {
       text-shadow:
         0 1px 2px rgba(0, 0, 0, 1),
         0 0 3px rgba(0, 0, 0, 1),
         0 0 8px rgba(0, 0, 0, 0.95),
-        0 0 14px rgba(0, 0, 0, 0.8);
+        0 0 14px rgba(0, 0, 0, 0.85);
     }
+    .entry-dates { color: #fff; font-weight: 600; font-size: 0.9rem; }
+    .entry-details-inner p { color: #f2f2f2; margin: 0 0 0.6rem; }
+    .map-link { color: #7ec3e6; font-weight: 600; text-decoration: none; }
+    .map-link:hover { text-decoration: underline; }
 
     .itinerary-container { max-width: 640px; margin: 0 auto; width: 100%; }
 
@@ -69,7 +73,6 @@
     .entry-title { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
     .entry-title h3 { margin: 0; font-size: 1.1rem; }
     .entry-title h3.strike { text-decoration: line-through; }
-    .entry-dates { font-size: 0.85rem; }
     .entry-badge {
       font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;
       background: #3ecf4a; color: #12210f; padding: 2px 8px; border-radius: 999px;
@@ -246,7 +249,7 @@
           <div class="entry-details">
             <div class="entry-details-inner">
               <p>${item.details}</p>
-              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}" target="_blank" title="View on Google Maps" style="color:#4ea8de;"><i class="fa-solid fa-map-location-dot"></i> View on map</a>
+              <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}" target="_blank" title="View on Google Maps"><i class="fa-solid fa-map-location-dot"></i> View on map</a>
               ${isAdmin ? `<div class="actions"><button class="button small" onclick="editItinerary('${item.id}')">Edit</button> <button class="button small" onclick="deleteItinerary('${item.id}')">Delete</button></div>` : ''}
             </div>
           </div>
