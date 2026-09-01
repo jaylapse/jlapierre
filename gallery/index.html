@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Photo Galleries</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" />
   <link rel="stylesheet" href="/assets/css/main.css" />
   <link
     rel="stylesheet"
@@ -21,8 +20,40 @@
       position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.65); color:#fff;
       border:none; border-radius:50%; width:1.5rem; height:1.5rem; cursor:pointer; font-size:1rem; line-height:1;
     }
+    .video-badge {
+      position:absolute; bottom:4px; left:4px; font-size:1.1em; color:#fff;
+      background:rgba(0,0,0,0.55); border-radius:50%; padding:1px 6px; pointer-events:none;
+    }
     #uploadStatus { text-align:center; font-size:0.9rem; color:#bbb; margin:0.4rem 0; white-space:pre-line; }
     .gallery-switch.active { outline:2px solid #4ea8de; }
+
+    /* Lightbox */
+    .lightbox {
+      position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:10000;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .lightbox.hidden { display:none; }
+    .lightbox-close {
+      position:absolute; top:14px; right:20px; background:none; border:none; color:#fff;
+      font-size:2.2rem; line-height:1; cursor:pointer; z-index:10002;
+    }
+    .lightbox-content { max-width:92vw; max-height:88vh; text-align:center; }
+    .lightbox-content img,
+    .lightbox-content video {
+      max-width:92vw; max-height:82vh; width:auto; height:auto;
+      border-radius:10px; box-shadow:0 4px 24px rgba(0,0,0,0.5); display:block; margin:0 auto;
+    }
+    .lightbox-counter { color:#ccc; font-size:0.85rem; margin-top:0.5rem; }
+    .lightbox-nav {
+      position:absolute; top:50%; transform:translateY(-50%); cursor:pointer; user-select:none;
+      color:#fff; font-weight:bold; font-size:2rem; padding:0.5rem 0.9rem; z-index:10001;
+      background:rgba(0,0,0,0.35); border-radius:4px;
+    }
+    .lightbox-prev { left:8px; }
+    .lightbox-next { right:8px; }
+    @media (max-width: 700px) {
+      .lightbox-nav { font-size:1.4rem; padding:0.4rem 0.6rem; }
+    }
   </style>
 </head>
 
@@ -39,12 +70,25 @@
 
   <div class="admin-bar hidden" id="adminBar">
     <button class="button small" id="newGalleryBtn"><i class="fa-solid fa-plus"></i> New Gallery</button>
-    <button class="button small" id="uploadPhotosBtn" style="display:none;"><i class="fa-solid fa-upload"></i> Upload Photos</button>
-    <input type="file" id="photoInput" accept="image/*" multiple style="display:none;">
+    <button class="button small" id="uploadPhotosBtn" style="display:none;"><i class="fa-solid fa-upload"></i> Upload Photos/Videos</button>
+    <input type="file" id="photoInput" accept="image/*,video/*" multiple style="display:none;">
   </div>
   <div id="uploadStatus"></div>
 
-  <div class="container" id="slideshow-container"></div>
+  <div class="container">
+    <div class="row" id="photo-grid"></div>
+  </div>
+
+  <!-- Lightbox popup -->
+  <div class="lightbox hidden" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose" title="Close">&times;</button>
+    <a class="lightbox-nav lightbox-prev" id="lightboxPrev">&#10094;</a>
+    <a class="lightbox-nav lightbox-next" id="lightboxNext">&#10095;</a>
+    <div class="lightbox-content">
+      <div id="lightboxMedia"></div>
+      <div class="lightbox-counter" id="lightboxCounter"></div>
+    </div>
+  </div>
 
   <button class="button" id="galleryEditorBtn">Editor</button>
 
@@ -74,16 +118,19 @@
     let galleries = [];
     let currentGalleryId = null;
     let currentImages = [];
-    let slideIndex = 1;
+    let lightboxIndex = 0;
 
     const galleryButtonsEl = document.getElementById('gallery-buttons');
-    const slideshowContainer = document.getElementById('slideshow-container');
+    const photoGrid = document.getElementById('photo-grid');
     const adminBar = document.getElementById('adminBar');
     const newGalleryBtn = document.getElementById('newGalleryBtn');
     const uploadPhotosBtn = document.getElementById('uploadPhotosBtn');
     const photoInput = document.getElementById('photoInput');
     const uploadStatus = document.getElementById('uploadStatus');
     const editorBtn = document.getElementById('galleryEditorBtn');
+    const lightboxEl = document.getElementById('lightbox');
+    const lightboxMedia = document.getElementById('lightboxMedia');
+    const lightboxCounter = document.getElementById('lightboxCounter');
 
     function slugify(label) {
       return label.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'gallery';
@@ -95,11 +142,20 @@
       return url.replace('/upload/', `/upload/${transform}/`);
     }
 
+    function thumbUrlFor(item) {
+      if (item.resourceType === 'video') {
+        // Cloudinary can derive a JPG poster frame from a video by swapping the extension.
+        return cloudinaryUrl(item.url, 'w_300,h_300,c_fill,q_auto').replace(/\.[a-zA-Z0-9]+$/, '.jpg');
+      }
+      return cloudinaryUrl(item.url, 'w_300,h_300,c_fill,q_auto,f_auto');
+    }
+
     async function uploadToCloudinary(file) {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+      // "auto" detects image vs video automatically so one upload flow handles both.
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, {
         method: 'POST',
         body: formData
       });
@@ -128,7 +184,7 @@
       editorBtn.textContent = isAdmin ? 'Logout' : 'Editor';
       adminBar.classList.toggle('hidden', !isAdmin);
       uploadPhotosBtn.style.display = (isAdmin && currentGalleryId) ? 'inline-flex' : 'none';
-      renderSlideshow();
+      renderGrid();
     });
 
     // ---- Galleries list ----
@@ -163,43 +219,32 @@
       await loadGalleries();
     });
 
-    // ---- Photos within the selected gallery ----
+    // ---- Photos/videos within the selected gallery ----
     async function loadGallery(galleryId) {
       currentGalleryId = galleryId;
       renderGalleryButtons();
       uploadPhotosBtn.style.display = isAdmin ? 'inline-flex' : 'none';
       const snap = await db.collection('galleries').doc(galleryId).collection('images').orderBy('createdAt').get();
       currentImages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderSlideshow();
+      renderGrid();
     }
 
-    function renderSlideshow() {
-      let slides = '', thumbs = '';
-      currentImages.forEach((img, i) => {
-        const full = cloudinaryUrl(img.url, 'q_auto,f_auto');
-        const thumb = cloudinaryUrl(img.url, 'w_300,h_300,c_fill,q_auto,f_auto');
-        slides += `<div class='mySlides'><div class='numbertext'>${i + 1} / ${currentImages.length}</div><img src='${full}' class='slideshow-img'></div>`;
-        thumbs += `<div class='column thumb-wrap'>
-            <img class='demo cursor' src='${thumb}' onclick='currentSlide(${i + 1})'>
-            ${isAdmin ? `<button class='thumb-delete' title='Delete photo' onclick='deletePhoto("${img.id}")'>&times;</button>` : ''}
-          </div>`;
-      });
+    function renderGrid() {
       if (!currentImages.length) {
-        slideshowContainer.innerHTML = `<p style="text-align:center;color:#999;">No photos yet${isAdmin ? ' — click "Upload Photos" to add some.' : '.'}</p>`;
+        photoGrid.innerHTML = `<p style="text-align:center;color:#999;width:100%;">No photos yet${isAdmin ? ' — click "Upload Photos/Videos" to add some.' : '.'}</p>`;
         return;
       }
-      slideshowContainer.innerHTML = `
-        ${slides}
-        <a class='prev' onclick='plusSlides(-1)'>&#10094;</a>
-        <a class='next' onclick='plusSlides(1)'>&#10095;</a>
-        <div class='row'>${thumbs}</div>
-      `;
-      slideIndex = 1;
-      showSlides(slideIndex);
+      photoGrid.innerHTML = currentImages.map((item, i) => `
+        <div class='column thumb-wrap'>
+          <img class='demo cursor' src='${thumbUrlFor(item)}' onclick='openLightbox(${i})'>
+          ${item.resourceType === 'video' ? `<span class='video-badge'><i class="fa-solid fa-play"></i></span>` : ''}
+          ${isAdmin ? `<button class='thumb-delete' title='Delete' onclick='deletePhoto("${item.id}")'>&times;</button>` : ''}
+        </div>
+      `).join('');
     }
 
     window.deletePhoto = async function(imageId) {
-      if (!confirm('Remove this photo from the gallery?')) return;
+      if (!confirm('Remove this from the gallery?')) return;
       await db.collection('galleries').doc(currentGalleryId).collection('images').doc(imageId).delete();
       await loadGallery(currentGalleryId);
     };
@@ -220,6 +265,7 @@
           await db.collection('galleries').doc(currentGalleryId).collection('images').add({
             url: result.secure_url,
             publicId: result.public_id,
+            resourceType: result.resource_type,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         } catch (err) {
@@ -233,23 +279,41 @@
       await loadGallery(currentGalleryId);
     });
 
-    // ---- Slideshow controls ----
-    window.plusSlides = function(n) { showSlides(slideIndex += n); };
-    window.currentSlide = function(n) { showSlides(slideIndex = n); };
-    function showSlides(n) {
-      const slides = document.getElementsByClassName('mySlides');
-      const dots = document.getElementsByClassName('demo');
-      if (!slides.length) return;
-      if (n > slides.length) slideIndex = 1;
-      if (n < 1) slideIndex = slides.length;
-      for (let i = 0; i < slides.length; i++) slides[i].style.display = 'none';
-      for (let i = 0; i < dots.length; i++) dots[i].className = dots[i].className.replace(' active', '');
-      slides[slideIndex - 1].style.display = 'block';
-      dots[slideIndex - 1].className += ' active';
+    // ---- Lightbox popup ----
+    window.openLightbox = function(i) {
+      lightboxIndex = i;
+      renderLightbox();
+      lightboxEl.classList.remove('hidden');
+    };
+    function renderLightbox() {
+      const item = currentImages[lightboxIndex];
+      if (!item) return;
+      if (item.resourceType === 'video') {
+        lightboxMedia.innerHTML = `<video src='${cloudinaryUrl(item.url, 'q_auto')}' controls autoplay playsinline></video>`;
+      } else {
+        lightboxMedia.innerHTML = `<img src='${cloudinaryUrl(item.url, 'q_auto,f_auto')}'>`;
+      }
+      lightboxCounter.textContent = `${lightboxIndex + 1} / ${currentImages.length}`;
     }
+    function closeLightbox() {
+      lightboxEl.classList.add('hidden');
+      lightboxMedia.innerHTML = ''; // stop any playing video
+    }
+    function lightboxNav(n) {
+      lightboxIndex = (lightboxIndex + n + currentImages.length) % currentImages.length;
+      renderLightbox();
+    }
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    document.getElementById('lightboxPrev').addEventListener('click', function() { lightboxNav(-1); });
+    document.getElementById('lightboxNext').addEventListener('click', function() { lightboxNav(1); });
+    lightboxEl.addEventListener('click', function(e) {
+      if (e.target === lightboxEl) closeLightbox();
+    });
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'ArrowLeft') plusSlides(-1);
-      if (e.key === 'ArrowRight') plusSlides(1);
+      if (lightboxEl.classList.contains('hidden')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') lightboxNav(-1);
+      if (e.key === 'ArrowRight') lightboxNav(1);
     });
 
     loadGalleries();
