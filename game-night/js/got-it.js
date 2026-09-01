@@ -23,7 +23,10 @@ window.GAMES_LIBRARY.push({
       {name:'Category prompts', detail:'Use themes like animals, foods, movies, or sports.'},
       {name:'Bonus match', detail:'If they match on attempt 1, award a bonus point.'},
       {name:'Steal option', detail:'If one player is very close, the other can steal with a perfect match.'},
-      {name:'Endgame', detail:'Use it as a sudden-death decider when scores are tied.'}
+      {name:'Endgame', detail:'Use it as a sudden-death decider when scores are tied.'},
+      {name:'Silent countdown', detail:'Host counts down silently with fingers to keep it fair.'},
+      {name:'Reverse round', detail:'Say the word you think the other player will NOT say.'},
+      {name:'Team huddle', detail:'Teams of two confer before answering as a pair.'}
     ]}
   ]
 });

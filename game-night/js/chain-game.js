@@ -6,7 +6,7 @@ window.GAMES_LIBRARY.push({
   format:'2 chains per board',
   summary:'Each board shows two full chains for two players to use.',
   notes:[
-    'Each board now shows exactly two chains, one for each player.',
+    'Each board shows exactly two chains, one for each player - New board now picks a random one instead of going in order.',
     'Add more boards by pasting another pool with two new chains.',
     'This game is ideal for a future answer-hiding or timer feature.'
   ],
@@ -50,6 +50,30 @@ window.GAMES_LIBRARY.push({
     { title:'Board J', subtitle:'2 full chains', items:[
       {name:'laser -> tag -> sale -> pitch -> black -> tie -> game -> face -> mask -> slip'},
       {name:'camp -> fire -> escape -> room -> temperature -> check -> mark -> down -> payment -> plan'}
+    ]},
+    { title:'Board K', subtitle:'2 full chains', items:[
+      {name:'sun -> flower -> pot -> hole -> punch -> line -> dance -> floor -> plan -> B'},
+      {name:'water -> fall -> out -> line -> up -> stairs -> case -> study -> group -> chat'}
+    ]},
+    { title:'Board L', subtitle:'2 full chains', items:[
+      {name:'play -> ground -> work -> out -> line -> backer -> yard -> sale -> price -> tag'},
+      {name:'black -> board -> game -> plan -> B -> movie -> star -> light -> house -> keeper'}
+    ]},
+    { title:'Board M', subtitle:'2 full chains', items:[
+      {name:'home -> work -> shop -> lift -> off -> line -> up -> town -> house -> keeper'},
+      {name:'light -> house -> hold -> up -> town -> ship -> wreck -> age -> old -> school'}
+    ]},
+    { title:'Board N', subtitle:'2 full chains', items:[
+      {name:'back -> pack -> age -> group -> chat -> room -> service -> desk -> job -> title'},
+      {name:'sun -> screen -> play -> ground -> work -> out -> break -> fast -> food -> truck'}
+    ]},
+    { title:'Board O', subtitle:'2 full chains', items:[
+      {name:'door -> bell -> pepper -> corn -> field -> trip -> wire -> tap -> dance -> floor'},
+      {name:'rain -> bow -> tie -> break -> down -> town -> house -> hold -> up -> town'}
+    ]},
+    { title:'Board P', subtitle:'2 full chains', items:[
+      {name:'book -> case -> study -> hall -> way -> side -> walk -> through -> out -> side'},
+      {name:'moon -> light -> house -> plant -> food -> truck -> stop -> watch -> dog -> house'}
     ]}
   ]
 });

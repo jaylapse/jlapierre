@@ -96,13 +96,38 @@ button,input,select{font:inherit}
 <script>
 (function(){
   var source = window.GAMES_LIBRARY || [];
-  var state = { activeId: null, boardIndex: {}, headbandzCategory: null, headbandzNames: [] };
+  var state = { activeId: null, boardIndex: {}, lastPoolIndex: {}, headbandzCategory: null, headbandzNames: [] };
   function byId(i){return document.getElementById(i)}
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
   function getGame(id){for(var i=0;i<source.length;i++) if(source[i].id===id) return source[i]; return source[0]}
   function currentGame(){return state.activeId ? getGame(state.activeId) : null}
-  function currentPool(g){var idx=state.boardIndex[g.id]||0; return g.pools[idx % g.pools.length]}
-  function nextBoard(g){state.boardIndex[g.id]=((state.boardIndex[g.id]||0)+1)%g.pools.length}
+  // Fisher-Yates partial shuffle - used to draw N random, non-repeating items from a pool.
+  function sampleN(arr, n){
+    var copy = arr.slice();
+    for (var i = copy.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = copy[i]; copy[i] = copy[j]; copy[j] = t;
+    }
+    return copy.slice(0, Math.min(n, copy.length));
+  }
+  // Picks a random pool index, avoiding an immediate repeat of the last one shown.
+  function pickPoolIndex(g){
+    if (g.pools.length <= 1) return 0;
+    var idx = Math.floor(Math.random() * g.pools.length);
+    if (idx === state.lastPoolIndex[g.id]) idx = (idx + 1) % g.pools.length;
+    state.lastPoolIndex[g.id] = idx;
+    return idx;
+  }
+  function currentPool(g){
+    if (state.boardIndex[g.id] === undefined) state.boardIndex[g.id] = pickPoolIndex(g);
+    var pool = g.pools[state.boardIndex[g.id] % g.pools.length];
+    var items = pool.items;
+    // A pool with "draw" set has a bigger item bank than shown at once - sample
+    // fresh each time instead of always showing the same fixed list.
+    if (pool.draw && pool.draw < items.length) items = sampleN(items, pool.draw);
+    return { title: pool.title, subtitle: pool.subtitle, items: items };
+  }
+  function nextBoard(g){ state.boardIndex[g.id] = pickPoolIndex(g); }
   function initials(name){return name.split(/\s+/).filter(Boolean).slice(0,2).map(function(p){return p[0].toUpperCase()}).join('')}
   function avatarHue(name){var h=0; for(var i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%360; return h}
   function drawTwoDistinct(items){if(!items||items.length<2) return items||[]; var a=Math.floor(Math.random()*items.length), b=Math.floor(Math.random()*(items.length-1)); if(b>=a) b+=1; return [items[a], items[b]]}
@@ -112,7 +137,7 @@ button,input,select{font:inherit}
     var content='';
     if(g.id==='headbandz'){
       var cats=g.pools.map(function(x){return x.title});
-      if(!state.headbandzCategory || cats.indexOf(state.headbandzCategory)===-1) state.headbandzCategory=g.pools[0].title;
+      if(!state.headbandzCategory || cats.indexOf(state.headbandzCategory)===-1) state.headbandzCategory=g.pools[Math.floor(Math.random()*g.pools.length)].title;
       var pool=null;
       for(var k=0;k<g.pools.length;k++) if(g.pools[k].title===state.headbandzCategory) pool=g.pools[k];
       if(!state.headbandzNames.length || state.headbandzNames.length!==2){ state.headbandzNames=drawTwoDistinct(pool.items) }

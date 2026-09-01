@@ -3,83 +3,95 @@ window.GAMES_LIBRARY.push({
   id:'fast-money',
   name:'Fast Money',
   mechanic:'survey',
-  format:'5 questions with top answers',
-  summary:'A host board with five rapid survey prompts and top answers ready to go.',
+  format:'5 random questions with top answers',
+  summary:'A host board that draws five random rapid survey prompts with top answers ready to go.',
   notes:[
-    'Add more boards to keep the game fresh between sessions.',
-    'The boards are ordered so you do not repeat prompts between rounds.',
+    'Each board now draws 5 random prompts from an 80-question pool, so rounds stay fresh.',
+    'Click New board to redraw a different set of 5.',
     'A future upgrade can hide answers until reveal.'
   ],
   pools:[
-{ title:'Board A', subtitle:'Questions 1-5', items:[
+    { title:'Fast Money prompts', subtitle:'80 questions, 5 shown', items:[
       {name:'Name something green.', detail:'Grass, money, tree, salad, frog'},
       {name:'Name an animal you would not want in a cage with you.', detail:'Lion, bear, tiger, snake, gorilla'},
       {name:'Name a food that is messy to eat.', detail:'Spaghetti, tacos, ribs, wings, sloppy joes'},
       {name:'Name something people are often late for.', detail:'Work, school, dinner, flights, appointments'},
-      {name:'Name a place where people whisper.', detail:'Library, church, movie theater, museum, courtroom'}
-    ] },
-{ title:'Board B', subtitle:'Questions 6-10', items:[
+      {name:'Name a place where people whisper.', detail:'Library, church, movie theater, museum, courtroom'},
       {name:'Name a reason someone might wake up early on purpose.', detail:'Work, gym, flight, school, fishing'},
       {name:'Name something people lose all the time.', detail:'Keys, phone, wallet, remote, socks'},
       {name:'Name a place where kids get bored quickly.', detail:'Church, grocery store, museum, long car ride, bank'},
       {name:'Name something people do while waiting in line.', detail:'Phone scrolling, talk, snack, complain, stare around'},
-      {name:'Name something you keep in your glove box.', detail:'Registration, napkins, flashlight, scraper, charger'}
-    ] },
-{ title:'Board C', subtitle:'Questions 11-15', items:[
+      {name:'Name something you keep in your glove box.', detail:'Registration, napkins, flashlight, scraper, charger'},
       {name:'Name something people forget to charge.', detail:'Phone, watch, headphones, laptop, toothbrush'},
       {name:'Name a food people pretend to like.', detail:'Olives, sushi, kale, black coffee, oysters'},
       {name:'Name something a tourist does in every city.', detail:'Take photos, buy souvenirs, eat local food, ask for directions, use maps'},
       {name:'Name a reason a date might go badly.', detail:'Awkward silence, rude behavior, late arrival, bad breath, too much phone use'},
-      {name:'Name something people check before leaving the house.', detail:'Phone, wallet, keys, outfit, weather'}
-    ] },
-{ title:'Board D', subtitle:'Questions 16-20', items:[
+      {name:'Name something people check before leaving the house.', detail:'Phone, wallet, keys, outfit, weather'},
       {name:'Name something people bring to a picnic.', detail:'Blanket, food, drinks, speaker, sunscreen'},
       {name:'Name something you do right before bed.', detail:'Brush teeth, check phone, pee, set alarm, watch TV'},
       {name:'Name a reason someone gets pulled over.', detail:'Speeding, broken light, rolling stop, texting, expired plate'},
       {name:'Name something found in a school backpack.', detail:'Notebook, pencil, laptop, snack, charger'},
-      {name:'Name something people do at weddings.', detail:'Dance, cry, eat, drink, take pictures'}
-    ] },
-{ title:'Board E', subtitle:'Questions 21-25', items:[
+      {name:'Name something people do at weddings.', detail:'Dance, cry, eat, drink, take pictures'},
       {name:'Name something that is hard to open.', detail:'Jar, pickle lid, childproof bottle, package seal, safe'},
       {name:'Name something people put on toast.', detail:'Butter, jam, peanut butter, avocado, Nutella'},
       {name:'Name a sound that wakes people up suddenly.', detail:'Alarm, thunder, crying baby, barking, phone call'},
       {name:'Name something people buy when they move into a new place.', detail:'Furniture, dishes, shower curtain, groceries, cleaning supplies'},
-      {name:'Name something people complain about at airports.', detail:'Lines, delays, prices, security, seats'}
-    ] },
-{ title:'Board F', subtitle:'Questions 26-30', items:[
+      {name:'Name something people complain about at airports.', detail:'Lines, delays, prices, security, seats'},
       {name:'Name something found in a kitchen drawer.', detail:'Spoons, pens, batteries, takeout menus, scissors'},
       {name:'Name a job where you work with your hands.', detail:'Mechanic, carpenter, chef, plumber, electrician'},
       {name:'Name something you might see on a road trip.', detail:'Gas station, rest stop, billboard, cow, truck'},
       {name:'Name something kids ask for at bedtime.', detail:'Water, story, snack, another minute, light on'},
-      {name:'Name something you would find in a bathroom cabinet.', detail:'Toothpaste, aspirin, deodorant, lotion, bandages'}
-    ] },
-{ title:'Board G', subtitle:'Questions 31-35', items:[
+      {name:'Name something you would find in a bathroom cabinet.', detail:'Toothpaste, aspirin, deodorant, lotion, bandages'},
       {name:'Name a flavor of ice cream people order often.', detail:'Vanilla, chocolate, strawberry, cookies and cream, mint chip'},
       {name:'Name something people do on social media.', detail:'Post photos, comment, scroll, like, share'},
       {name:'Name a reason to call in sick.', detail:'Fever, cold, migraine, stomach bug, appointment'},
       {name:'Name something people carry every day.', detail:'Phone, wallet, keys, bag, headphones'},
-      {name:'Name a place you’d hate to get stuck in traffic.', detail:'Bridge, tunnel, highway, parking lot, downtown'}
-    ] },
-{ title:'Board H', subtitle:'Questions 36-40', items:[
+      {name:'Name a place you’d hate to get stuck in traffic.', detail:'Bridge, tunnel, highway, parking lot, downtown'},
       {name:'Name something you might hear at a comedy show.', detail:'Laughing, applause, heckling, jokes, silence'},
       {name:'Name something people keep in the car for emergencies.', detail:'Jumper cables, flashlight, blanket, water, first aid kit'},
       {name:'Name something people use to track time.', detail:'Watch, phone, clock, timer, calendar'},
       {name:'Name a chore people avoid.', detail:'Laundry, dishes, vacuuming, cleaning bathroom, taking out trash'},
-      {name:'Name something people bring to the beach.', detail:'Towel, sunscreen, chair, water, umbrella'}
-    ] },
-{ title:'Board I', subtitle:'Questions 41-45', items:[
+      {name:'Name something people bring to the beach.', detail:'Towel, sunscreen, chair, water, umbrella'},
       {name:'Name something that smells strong.', detail:'Perfume, garbage, garlic, bleach, skunk'},
       {name:'Name something people do before a big test.', detail:'Study, cram, sleep, panic, review notes'},
       {name:'Name something people do when they are nervous.', detail:'Fidget, sweat, talk fast, laugh, avoid eye contact'},
       {name:'Name a popular pizza topping.', detail:'Pepperoni, cheese, sausage, mushrooms, olives'},
-      {name:'Name something you might see at a campsite.', detail:'Tent, fire, cooler, bug spray, sleeping bag'}
-    ] },
-{ title:'Board J', subtitle:'Questions 46-50', items:[
+      {name:'Name something you might see at a campsite.', detail:'Tent, fire, cooler, bug spray, sleeping bag'},
       {name:'Name something people keep in a junk drawer.', detail:'Receipts, batteries, tape, coins, rubber bands'},
       {name:'Name something people do on a rainy day.', detail:'Watch TV, read, sleep, cook, play games'},
       {name:'Name something people do before a flight.', detail:'Pack, check-in, weigh bags, print boarding pass, rush'},
       {name:'Name a classic sandwich filling.', detail:'Turkey, ham, peanut butter, cheese, tuna'},
-      {name:'Name something people complain about on hot days.', detail:'Sweating, humidity, sunburn, heat, bugs'}
-    ] }
+      {name:'Name something people complain about on hot days.', detail:'Sweating, humidity, sunburn, heat, bugs'},
+      {name:'Name something people do to relax after work.', detail:'Watch TV, take a bath, exercise, nap, read'},
+      {name:'Name a reason someone might cry at a wedding.', detail:'Happiness, memories, open bar, speech, nostalgia'},
+      {name:'Name something you would find in a hotel room.', detail:'Bed, TV, mini fridge, Bible, coffee maker'},
+      {name:'Name a job that requires a uniform.', detail:'Police officer, nurse, chef, firefighter, pilot'},
+      {name:'Name something people do on New Year’s Eve.', detail:'Countdown, kiss, drink, watch fireworks, make resolutions'},
+      {name:'Name something you take on a camping trip.', detail:'Tent, flashlight, sleeping bag, bug spray, matches'},
+      {name:'Name a reason people go to the doctor.', detail:'Checkup, sick, injury, prescription, physical'},
+      {name:'Name something people do with their phone at a concert.', detail:'Record video, take photos, text, post on social media, check the time'},
+      {name:'Name a food you eat with your hands.', detail:'Pizza, fries, chicken wings, tacos, sandwich'},
+      {name:'Name something people forget when packing for a trip.', detail:'Charger, toothbrush, socks, passport, phone'},
+      {name:'Name a reason to skip the gym.', detail:'Too tired, no time, sore, bad weather, sick'},
+      {name:'Name something people do at a sleepover.', detail:'Watch movies, stay up late, gossip, play games, eat snacks'},
+      {name:'Name a place people take a selfie.', detail:'Bathroom mirror, landmark, beach, concert, restaurant'},
+      {name:'Name something you would find in a first aid kit.', detail:'Band-aids, gauze, antiseptic, tweezers, pain reliever'},
+      {name:'Name a reason someone might be late to work.', detail:'Traffic, overslept, car trouble, lost keys, kids'},
+      {name:'Name something people do at a birthday party.', detail:'Sing happy birthday, blow out candles, open presents, eat cake, take photos'},
+      {name:'Name something you would bring on a road trip.', detail:'Snacks, playlist, GPS, phone charger, pillow'},
+      {name:'Name a common New Year’s resolution.', detail:'Lose weight, save money, exercise more, eat healthier, quit a bad habit'},
+      {name:'Name something people do while on hold.', detail:'Scroll phone, hum along, get frustrated, hang up, multitask'},
+      {name:'Name something you might find under a couch cushion.', detail:'Remote, coins, crumbs, phone, pen'},
+      {name:'Name a reason people return an online order.', detail:'Wrong size, doesn’t fit, changed mind, damaged, not as pictured'},
+      {name:'Name something people do at the DMV.', detail:'Wait in line, take a number, get frustrated, take a photo, fill out forms'},
+      {name:'Name something you would see at a farmers market.', detail:'Fresh produce, honey, flowers, homemade goods, live music'},
+      {name:'Name a reason a party might get shut down.', detail:'Noise complaint, too many people, underage drinking, police called, curfew'},
+      {name:'Name something people do during a power outage.', detail:'Light candles, use flashlight, play games, sleep, check the fuse box'},
+      {name:'Name something people do before a job interview.', detail:'Practice answers, pick an outfit, research the company, arrive early, review resume'},
+      {name:'Name a food people eat for breakfast.', detail:'Eggs, cereal, toast, pancakes, oatmeal'},
+      {name:'Name something you would bring to a potluck.', detail:'Casserole, dessert, salad, chips and dip, drinks'},
+      {name:'Name something people do at a car wash.', detail:'Vacuum interior, wait in line, pay, wax, dry windows'},
+      {name:'Name a reason to call in a favor.', detail:'Need a ride, need help moving, need a babysitter, need advice, need money'}
+    ], draw:5 }
   ]
 });

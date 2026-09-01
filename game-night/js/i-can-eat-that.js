@@ -23,7 +23,10 @@ window.GAMES_LIBRARY.push({
       {name:'Time cap', detail:'No bid can be lower than 30 seconds unless both agree.'},
       {name:'One challenge token', detail:'Each player gets one free pass per game night.'},
       {name:'Judge check', detail:'The host decides whether the food is fully eaten.'},
-      {name:'Score target', detail:'First to 3 points wins the match.'}
+      {name:'Score target', detail:'First to 3 points wins the match.'},
+      {name:'Spectator veto', detail:'A neutral third person can veto an unsafe food choice.'},
+      {name:'Cool-down rule', detail:'Players get one minute to recover between challenges.'},
+      {name:'Replay clause', detail:'If a food is inedible for one player, swap in a fair alternative.'}
     ]}
   ]
 });

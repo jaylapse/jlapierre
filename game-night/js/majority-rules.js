@@ -2,15 +2,15 @@ window.GAMES_LIBRARY.push({
   id:'majority-rules',
   name:'Majority Rules',
   mechanic:'survey',
-  format:'8 prompts with percentages',
-  summary:'Eight majority-choice prompts appear at once with visible results for the host.',
+  format:'8 random prompts with percentages',
+  summary:'Eight random majority-choice prompts appear at once with visible results for the host.',
   notes:[
-    'Add more prompt boards here if you want a bigger rotation.',
+    'Each board now draws 8 random prompts from a 64-prompt pool, so rounds stay fresh.',
     'The percentage values are easy to swap if you run your own polls.',
-    'This game benefits a lot from lots of boards, so it is a good file to keep expanding.'
+    'Click New board to redraw a different set of 8.'
   ],
   pools:[
-    { title:'Board A', subtitle:'8 majority prompts', items:[
+    { title:'Majority prompts', subtitle:'64 prompts, 8 shown', items:[
       {name:'Take $1M now or $10M if you must make 10 half-court shots?', detail:'$1M now - 70%'},
       {name:'Take $1M now or $10M if you must bowl 4 strikes in one game?', detail:'$1M now - 79%'},
       {name:'Take $1M now or $10M if you can only eat rice for a month?', detail:'$10M challenge - 84%'},
@@ -18,9 +18,7 @@ window.GAMES_LIBRARY.push({
       {name:'Live without music or live without movies?', detail:'Without movies - 58%'},
       {name:'Always be 10 minutes late or 20 minutes early?', detail:'20 minutes early - 73%'},
       {name:'Give up pizza or give up burgers forever?', detail:'Give up burgers - 61%'},
-      {name:'Have a rewind button or a pause button for life?', detail:'Rewind - 64%'}
-    ]},
-    { title:'Board B', subtitle:'8 majority prompts', items:[
+      {name:'Have a rewind button or a pause button for life?', detail:'Rewind - 64%'},
       {name:'Have unlimited gas or unlimited groceries?', detail:'Unlimited groceries - 57%'},
       {name:'Be the funniest person in the room or the smartest?', detail:'Funniest - 54%'},
       {name:'Win the lottery tomorrow or live to 110 in perfect health?', detail:'Lottery tomorrow - 62%'},
@@ -28,9 +26,7 @@ window.GAMES_LIBRARY.push({
       {name:'Go to the past or the future once?', detail:'Future - 67%'},
       {name:'Never use YouTube again or never use Netflix again?', detail:'Never use Netflix - 59%'},
       {name:'Always have cold hands or always have sweaty feet?', detail:'Cold hands - 71%'},
-      {name:'Eat only sweet food or only salty food?', detail:'Only salty - 69%'}
-    ]},
-    { title:'Board C', subtitle:'8 majority prompts', items:[
+      {name:'Eat only sweet food or only salty food?', detail:'Only salty - 69%'},
       {name:'Know how you die or know when you die?', detail:'Know when - 55%'},
       {name:'Lose your phone for a month or your wallet for a week?', detail:'Lose wallet - 60%'},
       {name:'Have a pet dragon or a pet dolphin?', detail:'Dragon - 63%'},
@@ -38,9 +34,7 @@ window.GAMES_LIBRARY.push({
       {name:'Never play video games again or never watch sports again?', detail:'Never watch sports - 58%'},
       {name:'Live in a mansion far away or a small place downtown?', detail:'Small place downtown - 52%'},
       {name:'Get free coffee forever or free fast food forever?', detail:'Free coffee - 65%'},
-      {name:'Have no ads ever again or free shipping forever?', detail:'No ads - 62%'}
-    ]},
-    { title:'Board D', subtitle:'8 majority prompts', items:[
+      {name:'Have no ads ever again or free shipping forever?', detail:'No ads - 62%'},
       {name:'Be able to talk to animals or speak every language?', detail:'Every language - 72%'},
       {name:'Only watch comedies or only watch action movies?', detail:'Action - 56%'},
       {name:'Vacation in the mountains or at the beach?', detail:'Beach - 66%'},
@@ -48,7 +42,39 @@ window.GAMES_LIBRARY.push({
       {name:'Give up fries or give up dessert?', detail:'Give up fries - 64%'},
       {name:'Always know the score of your favorite team or tomorrow’s weather?', detail:'Tomorrow’s weather - 53%'},
       {name:'Have one best friend forever or lots of casual friends?', detail:'One best friend - 70%'},
-      {name:'Only wear black or only wear white?', detail:'Only black - 61%'}
-    ]}
+      {name:'Only wear black or only wear white?', detail:'Only black - 61%'},
+      {name:'Live near the beach or near the mountains?', detail:'Beach - 65%'},
+      {name:'Have super strength or super speed?', detail:'Super speed - 58%'},
+      {name:'Be able to fly or be invisible?', detail:'Fly - 63%'},
+      {name:'Never eat cheese again or never eat chocolate again?', detail:'Never eat cheese - 71%'},
+      {name:'Wake up as a millionaire or wake up 10 years younger?', detail:'Millionaire - 66%'},
+      {name:'Have free flights for life or free hotels for life?', detail:'Free flights - 60%'},
+      {name:'Give up your car or give up your phone?', detail:'Give up your car - 68%'},
+      {name:'Be famous but broke or rich but unknown?', detail:'Rich but unknown - 74%'},
+      {name:'Always have to sing instead of talk or dance everywhere you walk?', detail:'Dance everywhere - 55%'},
+      {name:'Live without air conditioning or without heating?', detail:'Without heating - 52%'},
+      {name:'Have the ability to talk to animals or read minds?', detail:'Read minds - 61%'},
+      {name:'Only shop at one store forever or only eat at one restaurant forever?', detail:'One restaurant - 59%'},
+      {name:'Lose your sense of smell or your sense of taste?', detail:'Lose sense of smell - 77%'},
+      {name:'Get stuck in an elevator or stuck in traffic for 3 hours?', detail:'Stuck in traffic - 62%'},
+      {name:'Have unlimited books or unlimited movies?', detail:'Unlimited movies - 56%'},
+      {name:'Never use a microwave again or never use a dishwasher again?', detail:'Never use a microwave - 64%'},
+      {name:'Be able to skip Mondays forever or never work weekends again?', detail:'Skip Mondays - 69%'},
+      {name:'Have a personal chef or a personal driver?', detail:'Personal chef - 58%'},
+      {name:'Live in a treehouse or a houseboat?', detail:'Houseboat - 60%'},
+      {name:'Only listen to music you already know or only music you’ve never heard?', detail:'Music you already know - 53%'},
+      {name:'Have to whisper for a day or shout for a day?', detail:'Whisper - 72%'},
+      {name:'Never watch another sports game or never watch another award show?', detail:'Never watch award shows - 79%'},
+      {name:'Get one wish granted now or three wishes in ten years?', detail:'One wish now - 57%'},
+      {name:'Have a dragon that can’t fly or a horse that can fly?', detail:'Flying horse - 66%'},
+      {name:'Be the best player on a losing team or the worst on a winning team?', detail:'Best on losing team - 54%'},
+      {name:'Only communicate by text or only by phone call?', detail:'Only text - 70%'},
+      {name:'Retire at 40 with a modest income or retire at 65 wealthy?', detail:'Retire at 40 - 61%'},
+      {name:'Have perfect hair forever or perfect skin forever?', detail:'Perfect skin - 63%'},
+      {name:'Live with no internet or no air travel?', detail:'No air travel - 58%'},
+      {name:'Eat as much as you want without gaining weight or never get sick again?', detail:'Never get sick - 55%'},
+      {name:'Have to always speak in rhymes or always whisper?', detail:'Whisper - 60%'},
+      {name:'Own a house with no yard downtown or a house with a big yard far from everything?', detail:'Big yard far away - 64%'}
+    ], draw:8 }
   ]
 });
