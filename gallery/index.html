@@ -14,7 +14,6 @@
   <style>
     .admin-bar { display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem; }
     .admin-bar.hidden { display:none; }
-    #galleryEditorBtn { position:fixed; bottom:6px; right:6px; z-index:9999; opacity:0.5; }
     .thumb-wrap { position:relative; }
     .thumb-delete {
       position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.65); color:#fff;
@@ -95,8 +94,6 @@
     </div>
   </div>
 
-  <button class="button" id="galleryEditorBtn">Editor</button>
-
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -132,7 +129,6 @@
     const uploadPhotosBtn = document.getElementById('uploadPhotosBtn');
     const photoInput = document.getElementById('photoInput');
     const uploadStatus = document.getElementById('uploadStatus');
-    const editorBtn = document.getElementById('galleryEditorBtn');
     const lightboxEl = document.getElementById('lightbox');
     const lightboxMedia = document.getElementById('lightboxMedia');
     const lightboxCounter = document.getElementById('lightboxCounter');
@@ -172,7 +168,11 @@
     }
 
     // ---- Admin login (same Firebase Auth account used for the itinerary editor) ----
-    editorBtn.addEventListener('click', function() {
+    // Triggered by clicking the footer copyright text - no visible "login" button,
+    // so it doesn't invite casual visitors to poke at it. Delegated on document.body
+    // since the footer is parsed after this script runs.
+    document.body.addEventListener('click', function(e) {
+      if (!e.target.closest('#footerAdminTrigger')) return;
       if (isAdmin) {
         firebase.auth().signOut();
       } else {
@@ -186,7 +186,6 @@
     });
     firebase.auth().onAuthStateChanged(function(user) {
       isAdmin = !!user;
-      editorBtn.textContent = isAdmin ? 'Logout' : 'Editor';
       adminBar.classList.toggle('hidden', !isAdmin);
       uploadPhotosBtn.style.display = (isAdmin && currentGalleryId) ? 'inline-flex' : 'none';
       renderGrid();
@@ -328,7 +327,7 @@
 
 <!-- Footer -->
 <footer id="footer">
-  <p class="copyright">&copy; James Lapierre 2025</p>
+  <p class="copyright" id="footerAdminTrigger">&copy; James Lapierre 2025</p>
 </footer>
 
 <!-- Scripts -->
