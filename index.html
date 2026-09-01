@@ -31,6 +31,19 @@
     .guestbook-entry .guestbook-name { font-weight: 600; margin-right: 0.4rem; }
     .guestbook-entry .guestbook-date { font-size: 0.75rem; color: #aaa; }
     .guestbook-entry .guestbook-message { margin: 0.3rem 0 0; white-space: pre-wrap; }
+    .guestbook-entry .guestbook-admin-actions { margin-top: 0.5rem; }
+    .guestbook-reply {
+      margin: 0.6rem 0 0 1rem;
+      padding: 0.5rem 0.8rem;
+      background: rgba(78, 168, 222, 0.08);
+      border-left: 3px solid #4ea8de;
+      border-radius: 6px;
+    }
+    .guestbook-reply .guestbook-reply-label { font-weight: 600; font-size: 0.85rem; margin-right: 0.4rem; }
+    .guestbook-reply .guestbook-date { font-size: 0.75rem; color: #aaa; }
+    .guestbook-reply p { margin: 0.25rem 0 0; white-space: pre-wrap; }
+    .guestbook-reply-form { margin: 0.6rem 0 0 1rem; display: flex; gap: 0.5rem; align-items: flex-start; }
+    .guestbook-reply-form textarea { flex: 1; min-height: 2.4rem; }
     </style>
 	</head>
 	<body class="is-preload">
@@ -103,7 +116,7 @@
 				</div>
 				<div class="field half">
 					<label for="email">Email</label>
-					<input type="text" name="email" id="email" />
+					<input type="email" name="email" id="email" required />
 				</div>
 				<div class="field">
 					<label for="message">Message</label>
@@ -134,7 +147,7 @@
 
 <!-- Footer -->
 <footer id="footer">
-	<p class="copyright">&copy; James Lapierre 2025</p>
+	<p class="copyright" id="footerAdminTrigger">&copy; James Lapierre 2025</p>
 </footer>
 
 </div>
@@ -145,6 +158,7 @@
 <!-- Firebase (guestbook) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCrXvaiwHdc5whQHuhk6SR7EutV_MY7HWE",
@@ -164,6 +178,31 @@
   const guestbookList = document.getElementById('guestbookList');
   const contactForm = document.getElementById('contactForm');
   const contactStatus = document.getElementById('contactStatus');
+  let isAdmin = false;
+
+  // Admin mode - same pattern as the itinerary page: real Firebase Auth
+  // (not a client-side password) triggered by clicking the footer copyright
+  // text, so Firestore rules are what actually gate access, this just
+  // toggles which buttons render.
+  document.body.addEventListener('click', function(e) {
+    if (!e.target.closest('#footerAdminTrigger')) return;
+    if (isAdmin) {
+      firebase.auth().signOut();
+    } else {
+      const email = prompt('Admin email:');
+      if (!email) return;
+      const pw = prompt('Admin password:');
+      if (!pw) return;
+      firebase.auth().signInWithEmailAndPassword(email, pw)
+        .catch(function(err) {
+          alert('Login failed: ' + err.message);
+        });
+    }
+  });
+  firebase.auth().onAuthStateChanged(function(user) {
+    isAdmin = !!user;
+    loadGuestbook();
+  });
 
   function formatGuestbookDate(ts) {
     if (!ts) return '';
@@ -171,8 +210,8 @@
     return date.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
-  // Built with textContent, not innerHTML - guestbook entries are visitor-
-  // supplied text and must never be interpreted as markup.
+  // Built with textContent, not innerHTML - guestbook entries (and replies)
+  // are visitor/admin-supplied text and must never be interpreted as markup.
   function renderGuestbookEntry(entry, prepend) {
     const div = document.createElement('div');
     div.className = 'guestbook-entry';
@@ -195,6 +234,52 @@
     msg.textContent = entry.message;
     div.appendChild(msg);
 
+    (entry.replies || []).forEach((reply) => {
+      const replyDiv = document.createElement('div');
+      replyDiv.className = 'guestbook-reply';
+      const replyHeader = document.createElement('div');
+      const replyLabel = document.createElement('span');
+      replyLabel.className = 'guestbook-reply-label';
+      replyLabel.textContent = 'James replied:';
+      replyHeader.appendChild(replyLabel);
+      if (reply.dateLabel) {
+        const replyDate = document.createElement('span');
+        replyDate.className = 'guestbook-date';
+        replyDate.textContent = reply.dateLabel;
+        replyHeader.appendChild(replyDate);
+      }
+      replyDiv.appendChild(replyHeader);
+      const replyMsg = document.createElement('p');
+      replyMsg.textContent = reply.message;
+      replyDiv.appendChild(replyMsg);
+      div.appendChild(replyDiv);
+    });
+
+    if (isAdmin && entry.id) {
+      const actions = document.createElement('div');
+      actions.className = 'guestbook-admin-actions';
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'button small';
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.addEventListener('click', () => deleteGuestbookEntry(entry.id));
+      actions.appendChild(deleteBtn);
+      div.appendChild(actions);
+
+      const replyForm = document.createElement('div');
+      replyForm.className = 'guestbook-reply-form';
+      const replyInput = document.createElement('textarea');
+      replyInput.placeholder = 'Write a reply...';
+      const replyBtn = document.createElement('button');
+      replyBtn.type = 'button';
+      replyBtn.className = 'button small';
+      replyBtn.textContent = 'Reply';
+      replyBtn.addEventListener('click', () => submitGuestbookReply(entry.id, replyInput));
+      replyForm.appendChild(replyInput);
+      replyForm.appendChild(replyBtn);
+      div.appendChild(replyForm);
+    }
+
     if (prepend && guestbookList.firstChild) {
       guestbookList.insertBefore(div, guestbookList.firstChild);
     } else {
@@ -202,14 +287,49 @@
     }
   }
 
+  async function deleteGuestbookEntry(id) {
+    if (!confirm('Delete this guestbook entry and its replies?')) return;
+    try {
+      const repliesSnap = await gbDb.collection('guestbook').doc(id).collection('replies').get();
+      const batch = gbDb.batch();
+      repliesSnap.forEach((doc) => batch.delete(doc.ref));
+      batch.delete(gbDb.collection('guestbook').doc(id));
+      batch.delete(gbDb.collection('guestbook_private').doc(id));
+      await batch.commit();
+      loadGuestbook();
+    } catch (err) {
+      alert('Could not delete entry: ' + err.message);
+    }
+  }
+
+  async function submitGuestbookReply(entryId, textareaEl) {
+    const message = textareaEl.value.trim();
+    if (!message) return;
+    try {
+      await gbDb.collection('guestbook').doc(entryId).collection('replies').add({
+        message,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      loadGuestbook();
+    } catch (err) {
+      alert('Could not post reply: ' + err.message);
+    }
+  }
+
   async function loadGuestbook() {
     try {
       const snapshot = await gbDb.collection('guestbook').orderBy('createdAt', 'desc').limit(50).get();
-      guestbookList.innerHTML = '';
-      snapshot.forEach((doc) => {
+      const entries = await Promise.all(snapshot.docs.map(async (doc) => {
         const data = doc.data();
-        renderGuestbookEntry({ name: data.name, message: data.message, dateLabel: formatGuestbookDate(data.createdAt) });
-      });
+        const repliesSnap = await doc.ref.collection('replies').orderBy('createdAt', 'asc').get();
+        const replies = repliesSnap.docs.map((r) => ({
+          message: r.data().message,
+          dateLabel: formatGuestbookDate(r.data().createdAt),
+        }));
+        return { id: doc.id, name: data.name, message: data.message, dateLabel: formatGuestbookDate(data.createdAt), replies };
+      }));
+      guestbookList.innerHTML = '';
+      entries.forEach((entry) => renderGuestbookEntry(entry));
     } catch (err) {
       // Public read, should basically never fail - leave the list empty rather than break the page.
     }
@@ -243,7 +363,7 @@
     const guestbookSend = fetch(GUESTBOOK_FN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, message, website }),
+      body: JSON.stringify({ name, email, message, website }),
     }).then((r) => r.json());
 
     const [formspreeOutcome, gbOutcome] = await Promise.allSettled([formspreeSend, guestbookSend]);
@@ -251,7 +371,7 @@
     const gbResult = gbOutcome.status === 'fulfilled' ? gbOutcome.value : { status: 'error' };
 
     if (gbResult.status === 'ok' && gbResult.entry) {
-      renderGuestbookEntry({ name: gbResult.entry.name, message: gbResult.entry.message, dateLabel: 'Just now' }, true);
+      renderGuestbookEntry({ id: gbResult.entry.id, name: gbResult.entry.name, message: gbResult.entry.message, dateLabel: 'Just now', replies: [] }, true);
       contactForm.reset();
       contactStatus.textContent = emailOk
         ? 'Thanks for the note!'

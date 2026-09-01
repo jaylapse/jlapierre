@@ -15,6 +15,24 @@ service cloud.firestore {
       // writes. Signed-in admin can still delete a bad entry directly.
       allow read: if true;
       allow write: if request.auth != null;
+
+      match /replies/{replyId} {
+        // Replies are public to view (shown nested under the comment) but
+        // only the signed-in admin can post one - creating a reply here is
+        // what triggers the notification email (see onGuestbookReply in
+        // functions/index.js).
+        allow read: if true;
+        allow write: if request.auth != null;
+      }
+    }
+
+    // Commenter emails, kept out of the public guestbook doc above so
+    // visitors reading the guestbook can't harvest them. Only the Admin SDK
+    // (submitGuestbookEntry, onGuestbookReply) and the signed-in admin
+    // (moderation/cleanup) ever touch this collection - never exposed to
+    // anonymous clients.
+    match /guestbook_private/{entryId} {
+      allow read, write: if request.auth != null;
     }
 
     match /galleries/{galleryId} {
