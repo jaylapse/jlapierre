@@ -19,6 +19,13 @@
        even number of nav items it lands on a button border instead of a
        button's center, reading as a stray misaligned line. Suppress it. */
     #header nav:before{ display:none; }
+    /* main.js also auto-adds a "use-middle" center divider for an even nav
+       item count, which assumes symmetric item widths - ours aren't, so the
+       divider lands inside a button instead of at the seam between two, and
+       that button loses its left border, making it look like it bleeds into
+       its neighbor. Undo both: keep the normal border, drop the divider. */
+    #header nav.use-middle:after{ display:none; }
+    #header nav.use-middle ul li.is-middle{ border-left: solid 1px #ffffff; }
 
     .guestbook-list { display: flex; flex-direction: column; gap: 0.7rem; margin-top: 1rem; }
     .guestbook-entry {
@@ -70,7 +77,7 @@
 								<li><a href="#message">Message</a></li>
 								<li><a href="./itinerary/index.html">Itinerary</a></li>
 								<li><a href="./gallery/index.html">Galleries</a></li>
-								<li><a href="./game-night/GameNight.html">Game Night</a></li>
+								<li><a href="./game-night/GameNight.html">Games</a></li>
 								<li><a href="./yarntoss/index.html">YarnToss</a></li>
 							</ul>
 						</nav>
