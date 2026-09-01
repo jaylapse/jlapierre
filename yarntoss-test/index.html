@@ -36,19 +36,19 @@ p.lede{color:var(--muted);margin:0 0 20px;text-align:center;max-width:520px}
 
 <div class="stage">
   <div class="frame-wrap">
-    <iframe id="gameFrame" src="https://yarntoss.pages.dev/" title="YarnToss" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
+    <iframe id="gameFrame" src="https://jaylapse.itch.io/yarntoss" title="YarnToss" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
   </div>
   <div class="toolbar">
     <span class="status" id="statusText">Loaded from main</span>
     <div style="display:flex;gap:8px">
       <button class="btn" id="reloadBtn" type="button">Reload build</button>
-      <a class="btn" href="https://yarntoss.pages.dev/" target="_blank" rel="noopener">Open full screen</a>
+      <a class="btn" href="https://jaylapse.itch.io/yarntoss" target="_blank" rel="noopener">Open full screen</a>
     </div>
   </div>
 </div>
 
 <div class="note">
-  If the frame above is blank, the Web build may not have deployed yet &mdash; check the <a href="https://github.com/jaylapse/YarnToss/actions/workflows/web-build.yml" target="_blank" rel="noopener">Build &amp; Deploy Web</a> workflow run in the (private) YarnToss repo, and make sure the <code>CLOUDFLARE_API_TOKEN</code> and <code>CLOUDFLARE_ACCOUNT_ID</code> repo secrets are set.
+  If the frame above is blank, the Web build may not have deployed yet &mdash; check the <a href="https://github.com/jaylapse/YarnToss/actions/workflows/web-build.yml" target="_blank" rel="noopener">Build &amp; Deploy Web</a> workflow run in the (private) YarnToss repo, and make sure the <code>BUTLER_API_KEY</code> repo secret is set. Note: itch.io's project page itself may refuse to be framed &mdash; if the embed stays blank even after a successful deploy, grab the "embed in-page" iframe code from the project's edit page (Embed options) and swap it in here for a true inline embed.
 </div>
 
 <footer class="site-footer">&copy; James Lapierre 2025</footer>
@@ -57,7 +57,7 @@ p.lede{color:var(--muted);margin:0 0 20px;text-align:center;max-width:520px}
 (function(){
   var frame = document.getElementById('gameFrame');
   var status = document.getElementById('statusText');
-  var baseSrc = 'https://yarntoss.pages.dev/';
+  var baseSrc = 'https://jaylapse.itch.io/yarntoss';
   document.getElementById('reloadBtn').addEventListener('click', function(){
     status.textContent = 'Reloading…';
     frame.src = baseSrc + '?t=' + Date.now();
