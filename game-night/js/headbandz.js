@@ -3,13 +3,12 @@ window.GAMES_LIBRARY.push({
   id:'headbandz',
   name:'Headbandz',
   mechanic:'word',
-  format:'One name per turn',
-  usesPlayers:true,
-  summary:'One random name from a themed category is drawn for whoever\'s turn it is; everyone else describes it to them.',
+  format:'One name at a time, tap to reveal',
+  summary:'One random name from a themed category, hidden behind a tap-to-reveal so it\'s not shown until whoever\'s holding the phone is ready.',
   notes:[
-    'Set the player count above - each turn shows one name for the current player, drawn from a random category.',
-    'Everyone else describes the name out loud until the current player guesses it (or the group gives up).',
-    'Tap Got it to pass to the next player with a fresh name, or New board to jump to a different category.'
+    'Tap to reveal shows the current name; everyone else describes it out loud until the guesser gets it (or the group gives up).',
+    'Tap Got it to hide the screen again and line up a fresh name - tap to reveal when the phone reaches the next guesser.',
+    'New board jumps to a different category.'
   ],
   pools:[
     { title:'Actors & Entertainers', subtitle:'40 names', items:[
