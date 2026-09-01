@@ -114,7 +114,8 @@ button,input,select{font:inherit}
     playerCount: 2, currentPlayerIndex: 0,
     headbandzUsedNames: [], headbandzCurrentName: null, headbandzRevealed: false,
     chainAssignments: [], chainRevealed: 1, chainRoundOver: false,
-    majorityIndex: 0, majorityRevealed: false
+    majorityIndex: 0, majorityRevealed: false,
+    ageGolfIndex: 0, ageGolfRevealed: false
   };
   function byId(i){return document.getElementById(i)}
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -179,6 +180,8 @@ button,input,select{font:inherit}
     state.chainRoundOver = false;
     state.majorityIndex = 0;
     state.majorityRevealed = false;
+    state.ageGolfIndex = 0;
+    state.ageGolfRevealed = false;
   }
   function setPlayerCount(n){
     n = Math.max(2, Math.min(10, n));
@@ -258,6 +261,22 @@ button,input,select{font:inherit}
           : '<button class="btn" id="majorityRevealBtn" type="button">Tap to reveal answer</button>')
       + '</div></section>';
   }
+  // ---- Age Golf: one name at a time, age hidden until tapped. ----
+  function renderAgeGolf(g, p){
+    if (state.ageGolfIndex >= p.items.length) state.ageGolfIndex = 0;
+    var it = p.items[state.ageGolfIndex];
+    return '<section class="round">'
+      + '<div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>Name '+(state.ageGolfIndex+1)+' of '+p.items.length+'</p></div>'
+      + '<div class="pill-row"><span class="pill">'+esc(g.format)+'</span><span class="pill">'+esc(g.mechanic)+'</span></div></div>'
+      + '<div class="items"><div class="item"><strong>'+esc(it.name)+'</strong>'
+      + (state.ageGolfRevealed ? '<small>'+esc(String(ageFromBirthdate(it.birthdate)))+'</small>' : '')
+      + '</div></div>'
+      + '<div class="host-actions" style="margin-top:12px">'
+      + (state.ageGolfRevealed
+          ? '<button class="btn" id="ageGolfNextBtn" type="button">Next name</button>'
+          : '<button class="btn" id="ageGolfRevealBtn" type="button">Tap to reveal age</button>')
+      + '</div></section>';
+  }
   function chainAdvancePlayer(){
     state.currentPlayerIndex++;
     if (state.currentPlayerIndex >= state.playerCount) { state.chainRoundOver = true; }
@@ -284,6 +303,10 @@ button,input,select{font:inherit}
       var mp = currentPool(g);
       byId('boardLabel').textContent = mp.title;
       content = renderMajorityRules(g, mp);
+    } else if(g.id==='age-golf'){
+      var ap = currentPool(g);
+      byId('boardLabel').textContent = ap.title;
+      content = renderAgeGolf(g, ap);
     } else {
       var p=currentPool(g), items=[];
       byId('boardLabel').textContent=p.title;
@@ -309,6 +332,8 @@ button,input,select{font:inherit}
       if(el.id==='chainNewRoundBtn'){ state.chainAssignments=[]; renderBoard(); return }
       if(el.id==='majorityRevealBtn'){ state.majorityRevealed=true; renderBoard(); return }
       if(el.id==='majorityNextBtn'){ state.majorityIndex++; state.majorityRevealed=false; renderBoard(); return }
+      if(el.id==='ageGolfRevealBtn'){ state.ageGolfRevealed=true; renderBoard(); return }
+      if(el.id==='ageGolfNextBtn'){ state.ageGolfIndex++; state.ageGolfRevealed=false; renderBoard(); return }
       if(el.id==='playersMinus'){ setPlayerCount(state.playerCount-1); return }
       if(el.id==='playersPlus'){ setPlayerCount(state.playerCount+1); return }
       el=el.parentNode;

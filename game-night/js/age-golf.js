@@ -3,12 +3,12 @@ window.GAMES_LIBRARY.push({
   id:'age-golf',
   name:'Age Golf',
   mechanic:'number',
-  format:'10 names per board',
-  summary:'Ten names appear at once with ages grouped by category.',
+  format:'10 names per board, one at a time',
+  summary:'Ten names from a category, one at a time with the age hidden until you tap to reveal it.',
   notes:[
     'Ages are computed live from each person’s real birthdate, so they stay correct automatically - no more manually updating numbers.',
     'Each category draws 10 random names from a bigger pool, so boards vary between rounds.',
-    'Answers are visible because this is host-facing.'
+    'Tap to reveal the age, then Next name to move on - it loops back to the first after the 10th.'
   ],
   pools:[
     { title:'Actors', subtitle:'26 names, 10 shown', items:[
