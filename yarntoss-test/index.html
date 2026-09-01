@@ -36,13 +36,13 @@ p.lede{color:var(--muted);margin:0 0 20px;text-align:center;max-width:520px}
 
 <div class="stage">
   <div class="frame-wrap">
-    <iframe id="gameFrame" src="https://dashing-kulfi-a25d96.netlify.app" title="YarnToss" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
+    <iframe id="gameFrame" src="https://yarn-toss.netlify.app" title="YarnToss" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
   </div>
   <div class="toolbar">
     <span class="status" id="statusText">Loaded from main</span>
     <div style="display:flex;gap:8px">
       <button class="btn" id="reloadBtn" type="button">Reload build</button>
-      <a class="btn" href="https://dashing-kulfi-a25d96.netlify.app" target="_blank" rel="noopener">Open full screen</a>
+      <a class="btn" href="https://yarn-toss.netlify.app" target="_blank" rel="noopener">Open full screen</a>
     </div>
   </div>
 </div>
@@ -57,7 +57,7 @@ p.lede{color:var(--muted);margin:0 0 20px;text-align:center;max-width:520px}
 (function(){
   var frame = document.getElementById('gameFrame');
   var status = document.getElementById('statusText');
-  var baseSrc = 'https://dashing-kulfi-a25d96.netlify.app';
+  var baseSrc = 'https://yarn-toss.netlify.app';
   document.getElementById('reloadBtn').addEventListener('click', function(){
     status.textContent = 'Reloading…';
     frame.src = baseSrc + '?t=' + Date.now();
