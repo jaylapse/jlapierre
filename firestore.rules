@@ -8,6 +8,15 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
+    match /guestbook/{entryId} {
+      // Entries are public to view - creation goes through the
+      // submitGuestbookEntry Cloud Function (Admin SDK, bypasses these
+      // rules) so it can validate/rate-limit, not through direct client
+      // writes. Signed-in admin can still delete a bad entry directly.
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
     match /galleries/{galleryId} {
       // Galleries and their photos are public to view...
       allow read: if true;
