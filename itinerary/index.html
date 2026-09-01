@@ -11,6 +11,12 @@
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   />
+  <style>
+    /* main.css sets #wrapper to space-between/min-height:100vh for the homepage's
+       header+main+footer layout; this page has too few elements for that, which
+       stretches large gaps between them. Stack from the top instead. */
+    #wrapper { justify-content: flex-start; min-height: 0; }
+  </style>
 </head>
 
 <body>

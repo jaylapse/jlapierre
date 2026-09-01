@@ -27,6 +27,11 @@
     #uploadStatus { text-align:center; font-size:0.9rem; color:#bbb; margin:0.4rem 0; white-space:pre-line; }
     .gallery-switch.active { outline:2px solid #4ea8de; }
 
+    /* main.css sets #wrapper to space-between/min-height:100vh for the homepage's
+       header+main+footer layout; this page has too few elements for that, which
+       stretches large gaps between them. Stack from the top instead. */
+    #wrapper { justify-content: flex-start; min-height: 0; }
+
     /* Lightbox */
     .lightbox {
       position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:10000;
