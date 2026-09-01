@@ -21,7 +21,7 @@
       position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.65); color:#fff;
       border:none; border-radius:50%; width:1.5rem; height:1.5rem; cursor:pointer; font-size:1rem; line-height:1;
     }
-    #uploadStatus, #migrateStatus { text-align:center; font-size:0.9rem; color:#bbb; margin:0.4rem 0; white-space:pre-line; }
+    #uploadStatus { text-align:center; font-size:0.9rem; color:#bbb; margin:0.4rem 0; white-space:pre-line; }
     .gallery-switch.active { outline:2px solid #4ea8de; }
   </style>
 </head>
@@ -41,17 +41,12 @@
     <button class="button small" id="newGalleryBtn"><i class="fa-solid fa-plus"></i> New Gallery</button>
     <button class="button small" id="uploadPhotosBtn" style="display:none;"><i class="fa-solid fa-upload"></i> Upload Photos</button>
     <input type="file" id="photoInput" accept="image/*" multiple style="display:none;">
-    <button class="button small" id="migrateBtn"><i class="fa-solid fa-box-archive"></i> Import Legacy Galleries</button>
   </div>
   <div id="uploadStatus"></div>
-  <div id="migrateStatus"></div>
 
   <div class="container" id="slideshow-container"></div>
 
   <button class="button" id="galleryEditorBtn">Editor</button>
-
-  <!-- Legacy gallery manifest - only used as the source list for the one-time "Import Legacy Galleries" migration -->
-  <script src="/assets/js/gallery-data.js"></script>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -87,9 +82,7 @@
     const newGalleryBtn = document.getElementById('newGalleryBtn');
     const uploadPhotosBtn = document.getElementById('uploadPhotosBtn');
     const photoInput = document.getElementById('photoInput');
-    const migrateBtn = document.getElementById('migrateBtn');
     const uploadStatus = document.getElementById('uploadStatus');
-    const migrateStatus = document.getElementById('migrateStatus');
     const editorBtn = document.getElementById('galleryEditorBtn');
 
     function slugify(label) {
@@ -257,57 +250,6 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'ArrowLeft') plusSlides(-1);
       if (e.key === 'ArrowRight') plusSlides(1);
-    });
-
-    // ---- One-time import of the old hand-coded galleries into Firestore + Cloudinary ----
-    migrateBtn.addEventListener('click', async function() {
-      if (typeof galleryConfigs === 'undefined') {
-        alert('Legacy gallery data not found.');
-        return;
-      }
-      if (!confirm('Import all legacy galleries into the new system? This uploads every photo to Cloudinary and can take several minutes. Safe to re-run - it skips galleries that were already imported.')) return;
-      migrateBtn.disabled = true;
-      let errorCount = 0;
-      const errorLines = [];
-      const existing = await db.collection('galleries').get();
-      const existingLabels = new Set(existing.docs.map(d => d.data().label));
-      for (const key in galleryConfigs) {
-        const cfg = galleryConfigs[key];
-        if (existingLabels.has(cfg.label)) {
-          migrateStatus.textContent = `Skipping "${cfg.label}" (already imported).`;
-          continue;
-        }
-        const galleryRef = await db.collection('galleries').add({
-          label: cfg.label,
-          slug: slugify(cfg.label),
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        const images = cfg.images.filter(img => img.type === 'image');
-        for (let i = 0; i < images.length; i++) {
-          migrateStatus.textContent = `"${cfg.label}": uploading ${i + 1} of ${images.length}...`;
-          try {
-            const resp = await fetch(encodeURI(cfg.folder + images[i].src));
-            if (!resp.ok) throw new Error(`fetch ${resp.status} for ${cfg.folder + images[i].src}`);
-            const blob = await resp.blob();
-            const file = new File([blob], images[i].src, { type: blob.type });
-            const result = await uploadToCloudinary(file);
-            await db.collection('galleries').doc(galleryRef.id).collection('images').add({
-              url: result.secure_url,
-              publicId: result.public_id,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-          } catch (err) {
-            console.error('Migration error for', images[i].src, err);
-            errorCount++;
-            errorLines.push(`${cfg.label}/${images[i].src}: ${err.message}`);
-          }
-        }
-      }
-      migrateStatus.textContent = errorCount
-        ? `Import finished with ${errorCount} error(s) - see console for details:\n${errorLines.join('\n')}`
-        : 'Import complete.';
-      migrateBtn.disabled = false;
-      await loadGalleries();
     });
 
     loadGalleries();
