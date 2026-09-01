@@ -1,5 +1,13 @@
 {
   "projects": {
     "default": "jlapierre-9ed45"
+  },
+  "targets": {},
+  "etags": {
+    "jlapierre-9ed45": {
+      "extensionInstances": {
+        "firestore-send-email": "b22e624ea18bd44c362be421934e3e05e96c11fd7fd94fd1c6304578dc10b163"
+      }
+    }
   }
 }

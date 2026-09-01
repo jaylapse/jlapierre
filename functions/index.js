@@ -1,4 +1,5 @@
 const { onRequest } = require("firebase-functions/v2/https");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { google } = require("googleapis");
@@ -160,6 +161,16 @@ exports.refreshItinerary = onRequest(
 const GUESTBOOK_COOLDOWN_MS = 30 * 1000;
 const GUESTBOOK_NAME_MAX = 80;
 const GUESTBOOK_MESSAGE_MAX = 1000;
+const GUESTBOOK_EMAIL_MAX = 254;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Names/messages are visitor-supplied text; escape before interpolating
+// into the HTML email body so a comment can't inject markup there.
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
 
 exports.submitGuestbookEntry = onRequest(
   { cors: ["https://jlapierre.ca"], maxInstances: 1, timeoutSeconds: 30 },
@@ -180,8 +191,13 @@ exports.submitGuestbookEntry = onRequest(
 
     const name = (body.name || "").toString().trim().slice(0, GUESTBOOK_NAME_MAX);
     const message = (body.message || "").toString().trim().slice(0, GUESTBOOK_MESSAGE_MAX);
-    if (!name || !message) {
+    const email = (body.email || "").toString().trim().slice(0, GUESTBOOK_EMAIL_MAX);
+    if (!name || !message || !email) {
       res.status(400).json({ status: "error", reason: "missing_fields" });
+      return;
+    }
+    if (!EMAIL_RE.test(email)) {
+      res.status(400).json({ status: "error", reason: "invalid_email" });
       return;
     }
 
@@ -210,16 +226,62 @@ exports.submitGuestbookEntry = onRequest(
         return;
       }
 
-      const docRef = await db.collection("guestbook").add({
-        name,
-        message,
-        createdAt: FieldValue.serverTimestamp(),
-      });
+      // Pre-generated so the public entry and its private email record
+      // share an id - lets onGuestbookReply below look up the email by
+      // entryId without the two collections needing a separate join field.
+      const docRef = db.collection("guestbook").doc();
+      const createdAt = FieldValue.serverTimestamp();
+      await Promise.all([
+        docRef.set({ name, message, createdAt }),
+        db.collection("guestbook_private").doc(docRef.id).set({ email, createdAt }),
+      ]);
 
       res.json({ status: "ok", entry: { id: docRef.id, name, message } });
     } catch (err) {
       console.error("submitGuestbookEntry failed:", err);
       res.status(500).json({ status: "error" });
     }
+  }
+);
+
+// Fires when the admin posts a reply under a guestbook entry (see
+// firestore.rules: only a signed-in admin can create one). Looks up the
+// commenter's email from guestbook_private and drops a doc into the `mail`
+// collection, which the Firestore "Trigger Email" extension watches and
+// actually sends - this function never talks to an SMTP server itself.
+exports.onGuestbookReply = onDocumentCreated(
+  "guestbook/{entryId}/replies/{replyId}",
+  async (event) => {
+    const { entryId } = event.params;
+    const reply = event.data.data();
+
+    const [entrySnap, privateSnap] = await Promise.all([
+      db.collection("guestbook").doc(entryId).get(),
+      db.collection("guestbook_private").doc(entryId).get(),
+    ]);
+    // Entries created before this feature shipped have no private email
+    // record - nothing to notify, so just leave the reply as a page-only
+    // reply for those.
+    if (!privateSnap.exists || !entrySnap.exists) return;
+
+    const email = privateSnap.data().email;
+    const commenterName = entrySnap.data().name;
+    if (!email) return;
+
+    await db.collection("mail").add({
+      to: [email],
+      message: {
+        subject: "James replied to your guestbook comment",
+        text:
+          `Hi ${commenterName},\n\n` +
+          `James replied to your comment on jlapierre.ca:\n\n"${reply.message}"\n\n` +
+          `View it at https://jlapierre.ca/#guestbookList`,
+        html:
+          `<p>Hi ${escapeHtml(commenterName)},</p>` +
+          `<p>James replied to your comment on jlapierre.ca:</p>` +
+          `<blockquote>${escapeHtml(reply.message)}</blockquote>` +
+          `<p><a href="https://jlapierre.ca/#guestbookList">View it on the site</a></p>`,
+      },
+    });
   }
 );
