@@ -31,15 +31,13 @@
        stretches large gaps between them. Stack from the top instead. */
     #wrapper { justify-content: flex-start; min-height: 0; }
 
-    /* Homepage sections get their readability backdrop from #main article in
-       main.css - this page isn't built from that template structure, so
-       without it the thumbnails and buttons sit directly on the busy photo
-       background. Give it the same solid panel treatment, just wider to fit
-       the grid comfortably. */
-    .page-panel {
-      width: 60rem; max-width: 100%; margin: 0 auto;
-      padding: 2rem 2.5rem 2.5rem; background-color: rgba(27, 31, 34, 0.85);
-      border-radius: 4px;
+    .page-panel { width: 60rem; max-width: 100%; margin: 0 auto; }
+
+    /* Keeps text readable over the busy background photo without a solid
+       backdrop panel behind it - a dark glow behind the letterforms instead. */
+    .page-panel h1,
+    #uploadStatus {
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.75);
     }
 
     /* Lightbox */
