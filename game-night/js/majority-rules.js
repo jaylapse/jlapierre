@@ -2,11 +2,11 @@ window.GAMES_LIBRARY.push({
   id:'majority-rules',
   name:'Majority Rules',
   mechanic:'survey',
-  format:'8 random prompts with percentages',
-  summary:'Eight random majority-choice prompts appear at once with visible results for the host.',
+  format:'8 random prompts, one at a time',
+  summary:'Eight random majority-choice prompts, shown one at a time with the answer hidden until you tap to reveal it.',
   notes:[
-    'Each board now draws 8 random prompts from a 64-prompt pool, so rounds stay fresh.',
-    'The percentage values are easy to swap if you run your own polls.',
+    'Each board draws 8 random prompts from a 64-prompt pool, so rounds stay fresh.',
+    'Tap to reveal the answer, then Next prompt to move on - it loops back to the first after the 8th.',
     'Click New board to redraw a different set of 8.'
   ],
   pools:[
