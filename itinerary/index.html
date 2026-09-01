@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>James Lapierre | Itinerary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+</head>
+
+<body>
+<div id="bg"></div>
+<div id="wrapper">
+
+  <div id="back-to-main-btn" style="position:fixed;top:18px;right:24px;z-index:1000;scale: 0.6;">
+    <button style="background:none;border:none;font-size:1.5rem;color:#fff;cursor:pointer;line-height:1;" title="Back to main" onclick="window.location.href='/index.html#itinerary'">&times;</button>
+  </div>
+
+  <h1 class="major" style="text-align:center"><span class="fas fa-plane-departure"></span> My Travel Itinerary</h1>
+
+  <div id="countdown" style="text-align:center;margin-bottom:1rem;"></div>
+
+  <div class="itinerary-container" style="position:relative;">
+    <div id="adminSection" class="sticky-form" style="display:none;">
+      <form id="itineraryForm">
+        <label for="destination">Destination</label>
+        <input type="text" id="destination" placeholder="-" required />
+        <label for="galleryLink">Gallery Link (optional)</label>
+        <input type="url" id="galleryLink" placeholder="/gallery/YourGalleryFolder/" />
+        <label for="startDate">Start</label>
+        <input type="date" id="startDate" required />
+        <label for="endDate">End</label>
+        <input type="date" id="endDate" required />
+        <label for="details">Details</label>
+        <textarea id="details" placeholder="-" rows="4" required></textarea>
+        <button type="submit">Add Itinerary</button>
+      </form>
+    </div>
+    <div class="fold-controls">
+      <button id="foldAllBtn" type="button" title="Fold All"><i class="fa-solid fa-chevron-up"></i></button>
+      <button id="unfoldAllBtn" type="button" title="Unfold All"><i class="fa-solid fa-chevron-down"></i></button>
+    </div>
+    <div class="entries-list" id="itineraryList"></div>
+    <button class="button" id="adminLoginBtn" style="position:fixed;bottom:6px;right:6px;z-index:9999;opacity:0.5;">Editor</button>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrXvaiwHdc5whQHuhk6SR7EutV_MY7HWE",
+      authDomain: "jlapierre-9ed45.firebaseapp.com",
+      projectId: "jlapierre-9ed45",
+      storageBucket: "jlapierre-9ed45.firebasestorage.app",
+      messagingSenderId: "747343028064",
+      appId: "1:747343028064:web:2ef67506c81c09103ac805",
+      measurementId: "G-EFMF6L65H5"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      const options = { day: 'numeric', month: 'long', year: 'numeric' };
+      return date.toLocaleDateString(undefined, options);
+    }
+
+    const form = document.getElementById('itineraryForm');
+    const list = document.getElementById('itineraryList');
+    const adminSection = document.getElementById('adminSection');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    let isAdmin = false;
+    let editId = null;
+    let showPastTrips = false;
+
+    // Add the toggle button above the itinerary list
+    const toggleBtn = document.createElement('button');
+    toggleBtn.textContent = 'Show Past Trips';
+    toggleBtn.className = 'button small';
+    toggleBtn.style.margin = '0 0 1rem 0';
+    toggleBtn.onclick = function() {
+      showPastTrips = !showPastTrips;
+      toggleBtn.textContent = showPastTrips ? 'Hide Past Trips' : 'Show Past Trips';
+      loadItineraries();
+    };
+    list.parentNode.insertBefore(toggleBtn, list);
+
+    // Admin mode logic - backed by real Firebase Authentication rather than a
+    // client-side password, so admin access is actually enforced by Firestore
+    // security rules (see firestore.rules) and not just hidden in the JS.
+    adminLoginBtn.addEventListener('click', function() {
+      if (isAdmin) {
+        firebase.auth().signOut();
+      } else {
+        const email = prompt('Admin email:');
+        if (!email) return;
+        const pw = prompt('Admin password:');
+        if (!pw) return;
+        firebase.auth().signInWithEmailAndPassword(email, pw)
+          .catch(function(err) {
+            alert('Login failed: ' + err.message);
+          });
+      }
+    });
+    firebase.auth().onAuthStateChanged(function(user) {
+      isAdmin = !!user;
+      adminSection.style.display = isAdmin ? 'block' : 'none';
+      adminLoginBtn.textContent = isAdmin ? 'Logout' : 'Editor';
+      loadItineraries();
+    });
+
+    // Prevent end date before start date
+    startDateInput.addEventListener('change', function() {
+      endDateInput.min = this.value;
+      if (endDateInput.value && endDateInput.value < this.value) {
+        endDateInput.value = this.value;
+      }
+    });
+
+    // Firestore Logic
+    async function fetchItineraries() {
+      const snapshot = await db.collection('itineraries').orderBy('startDate').get();
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+    async function addItinerary(item) {
+      await db.collection('itineraries').add(item);
+    }
+    async function updateItinerary(id, item) {
+      await db.collection('itineraries').doc(id).set(item);
+    }
+    async function deleteItineraryFromDb(id) {
+      await db.collection('itineraries').doc(id).delete();
+    }
+    async function loadItineraries() {
+      const items = await fetchItineraries();
+      list.innerHTML = '';
+      const today = new Date().toISOString().slice(0, 10);
+      let filtered = items;
+      if (!showPastTrips) {
+        filtered = items.filter(item => item.endDate >= today);
+      }
+      filtered.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'entry';
+        div.style.position = 'relative';
+        const isPast = item.endDate < today;
+        const isCurrent = item.startDate <= today && item.endDate >= today;
+        div.innerHTML = `
+          <div class="entry-header" style="display:flex;align-items:flex-start;gap:0.2rem;cursor:pointer;flex-direction:column;">
+            <h3 style="
+              ${isPast ? 'text-decoration:line-through;' : ''}
+              ${isCurrent ? 'color:#3ecf4a;' : ''}
+            ">
+              ${item.destination}
+            </h3>
+          </div>
+          <div class="entry-details" style="display:none;margin-top:0.5rem;">
+            <div style="font-size:1rem;color:#bbb;margin-bottom:0.2rem;">
+              ${formatDate(item.startDate)} - ${formatDate(item.endDate)}
+              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.destination)}" target="_blank" title="View on Google Maps" style="margin-left:8px;color:#4ea8de;"><i class="fa-solid fa-map-location-dot"></i></a>
+            </div>
+            <p>${item.details}</p>
+            ${isAdmin ? `<button onclick="editItinerary('${item.id}')">Edit</button> <button onclick="deleteItinerary('${item.id}')">Delete</button>` : ''}
+          </div>
+        `;
+        // Add separator except after last entry
+        if (index < filtered.length - 1) {
+          const sep = document.createElement('div');
+          sep.className = 'entry-separator';
+          list.appendChild(div);
+          list.appendChild(sep);
+        } else {
+          list.appendChild(div);
+        }
+        div.querySelector('.entry-header').addEventListener('click', function(e) {
+          if (e.target.closest('a')) return;
+          const details = div.querySelector('.entry-details');
+          details.style.display = details.style.display === 'none' ? 'block' : 'none';
+        });
+      });
+      updateCountdown(filtered);
+    }
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (endDateInput.value < startDateInput.value) {
+        alert('End date cannot be before start date.');
+        return;
+      }
+      const newItem = {
+        destination: document.getElementById('destination').value,
+        startDate: startDateInput.value,
+        endDate: endDateInput.value,
+        details: document.getElementById('details').value,
+        galleryLink: document.getElementById('galleryLink').value || ''
+      };
+      if (editId) {
+        await updateItinerary(editId, newItem);
+        editId = null;
+        form.querySelector('button[type="submit"]').textContent = 'Add Itinerary';
+      } else {
+        await addItinerary(newItem);
+      }
+      form.reset();
+      loadItineraries();
+    });
+
+    window.editItinerary = async function(id) {
+      const items = await fetchItineraries();
+      const item = items.find(i => i.id === id);
+      document.getElementById('destination').value = item.destination;
+      document.getElementById('startDate').value = item.startDate;
+      document.getElementById('endDate').value = item.endDate;
+      document.getElementById('details').value = item.details;
+      document.getElementById('galleryLink').value = item.galleryLink || '';
+      editId = id;
+      form.querySelector('button[type="submit"]').textContent = 'Update Itinerary';
+    }
+
+    window.deleteItinerary = async function(id) {
+      await deleteItineraryFromDb(id);
+      loadItineraries();
+      if (editId === id) {
+        form.reset();
+        editId = null;
+      }
+    }
+
+    function updateCountdown(items) {
+      const countdownDiv = document.getElementById('countdown');
+      const today = new Date().toISOString().slice(0, 10);
+      const upcoming = items.filter(item => item.startDate > today);
+      if (!upcoming.length) {
+        countdownDiv.textContent = '';
+        return;
+      }
+      const next = upcoming[0];
+      const diff = Math.ceil((new Date(next.startDate) - new Date()) / (1000 * 60 * 60 * 24));
+      countdownDiv.textContent = `Next trip: ${next.destination} in ${diff} day${diff !== 1 ? 's' : ''} (${formatDate(next.startDate)})`;
+    }
+
+    // Fold/Unfold All logic
+    document.getElementById('foldAllBtn').onclick = function() {
+      document.querySelectorAll('.entry .entry-details').forEach(d => { d.style.display = 'none'; });
+    };
+    document.getElementById('unfoldAllBtn').onclick = function() {
+      document.querySelectorAll('.entry .entry-details').forEach(d => { d.style.display = 'block'; });
+    };
+  </script>
+
+</div>
+
+<!-- Footer -->
+<footer id="footer">
+  <p class="copyright">&copy; James Lapierre 2025</p>
+</footer>
+
+<!-- Scripts -->
+<script src="/assets/js/jquery.min.js"></script>
+<script src="/assets/js/browser.min.js"></script>
+<script src="/assets/js/breakpoints.min.js"></script>
+<script src="/assets/js/util.js"></script>
+<script src="/assets/js/main.js"></script>
+
+</body>
+</html>
