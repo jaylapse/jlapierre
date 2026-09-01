@@ -1,12 +1,17 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { getAuth } = require("firebase-admin/auth");
 const { google } = require("googleapis");
 const crypto = require("crypto");
 
 initializeApp();
 const db = getFirestore();
+
+const cloudinaryApiKey = defineSecret("CLOUDINARY_API_KEY");
+const cloudinaryApiSecret = defineSecret("CLOUDINARY_API_SECRET");
 
 // Real-world traffic here is a handful of family members occasionally
 // clicking a button - this cooldown is what actually keeps costs at zero
@@ -106,7 +111,7 @@ exports.refreshItinerary = onRequest(
             location,
             startDate,
             endDate,
-            details: lines.length ? lines.join("<br>") : e.summary || "",
+            details: lines.length ? lines.join("\n") : e.summary || "",
           };
         });
 
@@ -283,5 +288,38 @@ exports.onGuestbookReply = onDocumentCreated(
           `<p><a href="https://jlapierre.ca/#guestbookList">View it on the site</a></p>`,
       },
     });
+  }
+);
+
+// Cloudinary's unsigned upload preset can be called by anyone who reads the
+// gallery page's source, not just the admin - it's not scoped to this site
+// at all. This issues a short-lived signed-upload authorization instead,
+// gated on a real Firebase Auth session, so only a signed-in admin can get
+// one. The API key isn't itself sensitive (Cloudinary expects it to travel
+// with every upload request), only the secret used to compute the
+// signature is - that never leaves this function.
+exports.getUploadSignature = onRequest(
+  { cors: ["https://jlapierre.ca"], secrets: [cloudinaryApiKey, cloudinaryApiSecret] },
+  async (req, res) => {
+    try {
+      const authHeader = req.get("Authorization") || "";
+      const match = authHeader.match(/^Bearer (.+)$/);
+      if (!match) {
+        res.status(401).json({ error: "Missing bearer token" });
+        return;
+      }
+      await getAuth().verifyIdToken(match[1]);
+
+      const timestamp = Math.floor(Date.now() / 1000);
+      const signature = crypto
+        .createHash("sha1")
+        .update(`timestamp=${timestamp}${cloudinaryApiSecret.value()}`)
+        .digest("hex");
+
+      res.json({ timestamp, signature, apiKey: cloudinaryApiKey.value() });
+    } catch (err) {
+      console.error("getUploadSignature failed:", err);
+      res.status(401).json({ error: "Invalid or expired session" });
+    }
   }
 );
