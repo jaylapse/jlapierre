@@ -339,6 +339,29 @@
       95: 'Thunderstorm', 96: 'Thunderstorm with hail', 99: 'Thunderstorm with hail',
     };
 
+    // Open-Meteo's geocoder wants a place name, not a full street address -
+    // "1329 Waterville Rd, Skowhegan, ME 04976, USA" (what synced calendar
+    // events store as `location`) returns zero results, but "Skowhegan, ME"
+    // does. So strip zip codes and any street-number segment, then try
+    // progressively shorter suffixes (dropping the business/street name
+    // first) until one resolves.
+    async function geocodeQuery(query) {
+      const resp = await fetch(`https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(query)}`);
+      const data = await resp.json();
+      return (data.results && data.results[0]) || null;
+    }
+
+    async function geocode(place) {
+      const parts = place.split(',')
+        .map(s => s.trim().replace(/\b\d{5}(-\d{4})?\b/g, '').trim())
+        .filter(s => s && !/^\d/.test(s));
+      for (let start = 0; start < parts.length; start++) {
+        const hit = await geocodeQuery(parts.slice(start).join(', '));
+        if (hit) return hit;
+      }
+      return null;
+    }
+
     let lastWeatherKey = null;
     async function updateWeather(items) {
       const widget = document.getElementById('weatherWidget');
@@ -357,9 +380,7 @@
       lastWeatherKey = key;
 
       try {
-        const geoResp = await fetch(`https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(place)}`);
-        const geoData = await geoResp.json();
-        const hit = geoData.results && geoData.results[0];
+        const hit = await geocode(place);
         if (!hit) { widget.textContent = ''; return; }
 
         const weatherResp = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${hit.latitude}&longitude=${hit.longitude}&current=temperature_2m,weather_code&timezone=auto`);
