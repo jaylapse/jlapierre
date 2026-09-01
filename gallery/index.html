@@ -15,16 +15,24 @@
     .admin-bar { display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem; }
     .admin-bar.hidden { display:none; }
     .thumb-wrap { position:relative; }
-    .thumb-delete {
-      position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.65); color:#fff;
+    .thumb-delete, .thumb-edit-alt {
+      position:absolute; top:4px; background:rgba(0,0,0,0.65); color:#fff;
       border:none; border-radius:50%; width:1.5rem; height:1.5rem; cursor:pointer; font-size:1rem; line-height:1;
     }
+    .thumb-delete { right:4px; }
+    .thumb-edit-alt { right:32px; font-size:0.75rem; }
     .video-badge {
       position:absolute; bottom:4px; left:4px; font-size:1.1em; color:#fff;
       background:rgba(0,0,0,0.55); border-radius:50%; padding:1px 6px; pointer-events:none;
     }
     #uploadStatus { text-align:center; font-size:0.9rem; color:#bbb; margin:0.4rem 0; white-space:pre-line; }
     .gallery-switch.active { outline:2px solid #4ea8de; }
+    .gallery-switch-wrap { position:relative; display:inline-flex; }
+    .gallery-rename-btn {
+      background:rgba(0,0,0,0.55); color:#fff; border:none; border-radius:50%;
+      width:1.2rem; height:1.2rem; font-size:0.65rem; line-height:1; cursor:pointer;
+      position:absolute; top:-0.4rem; right:-0.4rem;
+    }
 
     /* main.css sets #wrapper to space-between/min-height:100vh for the homepage's
        header+main+footer layout; this page has too few elements for that, which
@@ -215,11 +223,22 @@
     function renderGalleryButtons() {
       galleryButtonsEl.innerHTML = '';
       galleries.forEach(g => {
+        const wrap = document.createElement('div');
+        wrap.className = 'gallery-switch-wrap';
         const btn = document.createElement('button');
         btn.className = 'gallery-switch small' + (g.id === currentGalleryId ? ' active' : '');
         btn.textContent = g.label;
         btn.onclick = function() { loadGallery(g.id); };
-        galleryButtonsEl.appendChild(btn);
+        wrap.appendChild(btn);
+        if (isAdmin) {
+          const renameBtn = document.createElement('button');
+          renameBtn.className = 'gallery-rename-btn';
+          renameBtn.title = 'Rename gallery';
+          renameBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
+          renameBtn.onclick = function(e) { e.stopPropagation(); renameGallery(g.id); };
+          wrap.appendChild(renameBtn);
+        }
+        galleryButtonsEl.appendChild(wrap);
       });
     }
 
@@ -234,6 +253,15 @@
       await loadGalleries();
     });
 
+    window.renameGallery = async function(id) {
+      const gallery = galleries.find(g => g.id === id);
+      if (!gallery) return;
+      const label = prompt('Gallery name:', gallery.label);
+      if (!label || label === gallery.label) return;
+      await db.collection('galleries').doc(id).update({ label: label, slug: slugify(label) });
+      await loadGalleries();
+    };
+
     // ---- Photos/videos within the selected gallery ----
     async function loadGallery(galleryId) {
       currentGalleryId = galleryId;
@@ -242,6 +270,18 @@
       const snap = await db.collection('galleries').doc(galleryId).collection('images').orderBy('createdAt').get();
       currentImages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       renderGrid();
+    }
+
+    // Alt text is free-form admin input that lands inside a single-quoted
+    // HTML attribute below - escape it (and the gallery label, same story
+    // since renaming lets it contain quotes too) or a stray apostrophe
+    // breaks the markup.
+    function escapeAttr(str) {
+      return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function altTextFor(item, galleryLabel, i) {
+      return item.altText || `${galleryLabel} ${item.resourceType === 'video' ? 'video' : 'photo'} ${i + 1}`;
     }
 
     function renderGrid() {
@@ -253,8 +293,9 @@
       const galleryLabel = currentGallery ? currentGallery.label : 'Gallery';
       photoGrid.innerHTML = currentImages.map((item, i) => `
         <div class='column thumb-wrap'>
-          <img class='demo cursor' src='${thumbUrlFor(item)}' alt='${galleryLabel} ${item.resourceType === 'video' ? 'video' : 'photo'} ${i + 1}' onclick='openLightbox(${i})'>
+          <img class='demo cursor' src='${thumbUrlFor(item)}' alt='${escapeAttr(altTextFor(item, galleryLabel, i))}' onclick='openLightbox(${i})'>
           ${item.resourceType === 'video' ? `<span class='video-badge'><i class="fa-solid fa-play"></i></span>` : ''}
+          ${isAdmin ? `<button class='thumb-edit-alt' title='Edit alt text' onclick='editAltText("${item.id}")'><i class="fa-solid fa-pen"></i></button>` : ''}
           ${isAdmin ? `<button class='thumb-delete' title='Delete' onclick='deletePhoto("${item.id}")'>&times;</button>` : ''}
         </div>
       `).join('');
@@ -263,6 +304,15 @@
     window.deletePhoto = async function(imageId) {
       if (!confirm('Remove this from the gallery?')) return;
       await db.collection('galleries').doc(currentGalleryId).collection('images').doc(imageId).delete();
+      await loadGallery(currentGalleryId);
+    };
+
+    window.editAltText = async function(imageId) {
+      const item = currentImages.find(it => it.id === imageId);
+      if (!item) return;
+      const altText = prompt('Alt text (describes the photo for screen readers):', item.altText || '');
+      if (altText === null) return;
+      await db.collection('galleries').doc(currentGalleryId).collection('images').doc(imageId).update({ altText: altText.trim() });
       await loadGallery(currentGalleryId);
     };
 
@@ -310,7 +360,7 @@
       if (item.resourceType === 'video') {
         lightboxMedia.innerHTML = `<video src='${cloudinaryUrl(item.url, 'q_auto')}' controls autoplay playsinline></video>`;
       } else {
-        lightboxMedia.innerHTML = `<img src='${cloudinaryUrl(item.url, 'q_auto,f_auto')}' alt='${galleryLabel} photo ${lightboxIndex + 1}'>`;
+        lightboxMedia.innerHTML = `<img src='${cloudinaryUrl(item.url, 'q_auto,f_auto')}' alt='${escapeAttr(altTextFor(item, galleryLabel, lightboxIndex))}'>`;
       }
       lightboxCounter.textContent = `${lightboxIndex + 1} / ${currentImages.length}`;
     }
