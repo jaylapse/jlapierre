@@ -17,6 +17,15 @@
        stretches large gaps between them. Stack from the top instead. */
     #wrapper { justify-content: flex-start; min-height: 0; }
 
+    /* Homepage sections get this same backdrop from #main article in main.css,
+       which is what keeps text readable over the busy background photo. This
+       page isn't built from that template structure, so it needs its own. */
+    .page-panel {
+      width: 40rem; max-width: 100%; margin: 0 auto;
+      padding: 2rem 2.5rem 2.5rem; background-color: rgba(27, 31, 34, 0.85);
+      border-radius: 4px;
+    }
+
     .itinerary-container { max-width: 640px; margin: 0 auto; width: 100%; }
 
     .fold-controls { display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.5rem; }
@@ -76,31 +85,33 @@
     <button style="background:none;border:none;font-size:1.5rem;color:#fff;cursor:pointer;line-height:1;" title="Back to main" onclick="window.location.href='/index.html#itinerary'">&times;</button>
   </div>
 
-  <h1 class="major" style="text-align:center"><span class="fas fa-plane-departure"></span> Travel</h1>
+  <div class="page-panel">
+    <h1 class="major" style="text-align:center"><span class="fas fa-plane-departure"></span> Travel</h1>
 
-  <div id="countdown" style="text-align:center;margin-bottom:1rem;"></div>
+    <div id="countdown" style="text-align:center;margin-bottom:1rem;"></div>
 
-  <div class="itinerary-container" style="position:relative;">
-    <div id="adminSection" class="sticky-form" style="display:none;">
-      <form id="itineraryForm">
-        <label for="destination">Destination</label>
-        <input type="text" id="destination" placeholder="-" required />
-        <label for="galleryLink">Gallery Link (optional)</label>
-        <input type="url" id="galleryLink" placeholder="/gallery/YourGalleryFolder/" />
-        <label for="startDate">Start</label>
-        <input type="date" id="startDate" required />
-        <label for="endDate">End</label>
-        <input type="date" id="endDate" required />
-        <label for="details">Details</label>
-        <textarea id="details" placeholder="-" rows="4" required></textarea>
-        <button type="submit">Add Itinerary</button>
-      </form>
+    <div class="itinerary-container" style="position:relative;">
+      <div id="adminSection" class="sticky-form" style="display:none;">
+        <form id="itineraryForm">
+          <label for="destination">Destination</label>
+          <input type="text" id="destination" placeholder="-" required />
+          <label for="galleryLink">Gallery Link (optional)</label>
+          <input type="url" id="galleryLink" placeholder="/gallery/YourGalleryFolder/" />
+          <label for="startDate">Start</label>
+          <input type="date" id="startDate" required />
+          <label for="endDate">End</label>
+          <input type="date" id="endDate" required />
+          <label for="details">Details</label>
+          <textarea id="details" placeholder="-" rows="4" required></textarea>
+          <button type="submit">Add Itinerary</button>
+        </form>
+      </div>
+      <div class="fold-controls">
+        <button id="foldAllBtn" type="button" title="Fold All"><i class="fa-solid fa-chevron-up"></i></button>
+        <button id="unfoldAllBtn" type="button" title="Unfold All"><i class="fa-solid fa-chevron-down"></i></button>
+      </div>
+      <div class="entries-list" id="itineraryList"></div>
     </div>
-    <div class="fold-controls">
-      <button id="foldAllBtn" type="button" title="Fold All"><i class="fa-solid fa-chevron-up"></i></button>
-      <button id="unfoldAllBtn" type="button" title="Unfold All"><i class="fa-solid fa-chevron-down"></i></button>
-    </div>
-    <div class="entries-list" id="itineraryList"></div>
   </div>
 
   <!-- Firebase -->
