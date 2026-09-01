@@ -17,13 +17,15 @@
        stretches large gaps between them. Stack from the top instead. */
     #wrapper { justify-content: flex-start; min-height: 0; }
 
-    /* Homepage sections get this same backdrop from #main article in main.css,
-       which is what keeps text readable over the busy background photo. This
-       page isn't built from that template structure, so it needs its own. */
-    .page-panel {
-      width: 40rem; max-width: 100%; margin: 0 auto;
-      padding: 2rem 2.5rem 2.5rem; background-color: rgba(27, 31, 34, 0.85);
-      border-radius: 4px;
+    .page-panel { width: 40rem; max-width: 100%; margin: 0 auto; }
+
+    /* Keeps text readable over the busy background photo without a solid
+       backdrop panel behind it - a dark glow behind the letterforms instead. */
+    .page-panel h1,
+    .entry-title h3,
+    .entry-dates,
+    #countdown {
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.75);
     }
 
     .itinerary-container { max-width: 640px; margin: 0 auto; width: 100%; }
@@ -57,7 +59,7 @@
     .entry-title { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
     .entry-title h3 { margin: 0; font-size: 1.1rem; }
     .entry-title h3.strike { text-decoration: line-through; }
-    .entry-dates { font-size: 0.85rem; color: #999; }
+    .entry-dates { font-size: 0.85rem; color: #ccc; }
     .entry-badge {
       font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;
       background: #3ecf4a; color: #12210f; padding: 2px 8px; border-radius: 999px;
