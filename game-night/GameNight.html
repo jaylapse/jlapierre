@@ -101,6 +101,19 @@ button,input,select{font:inherit}
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
   function getGame(id){for(var i=0;i<source.length;i++) if(source[i].id===id) return source[i]; return source[0]}
   function currentGame(){return state.activeId ? getGame(state.activeId) : null}
+  // Computes a person's current age from a stored "YYYY-MM-DD" birthdate,
+  // so ages stay correct forever instead of being a fixed number that goes
+  // stale. Used by Age Golf; other games keep using a fixed "detail" string.
+  function ageFromBirthdate(dateStr){
+    var parts = dateStr.split('-').map(Number);
+    var birth = new Date(parts[0], parts[1] - 1, parts[2]);
+    var today = new Date();
+    var age = today.getFullYear() - birth.getFullYear();
+    var hadBirthdayThisYear = (today.getMonth() > birth.getMonth()) ||
+      (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
+    if (!hadBirthdayThisYear) age--;
+    return age;
+  }
   // Fisher-Yates partial shuffle - used to draw N random, non-repeating items from a pool.
   function sampleN(arr, n){
     var copy = arr.slice();
@@ -133,7 +146,7 @@ button,input,select{font:inherit}
   function drawTwoDistinct(items){if(!items||items.length<2) return items||[]; var a=Math.floor(Math.random()*items.length), b=Math.floor(Math.random()*(items.length-1)); if(b>=a) b+=1; return [items[a], items[b]]}
   function renderNav(){var q=byId('search').value.toLowerCase(), m=byId('mechanic').value, out=[]; for(var i=0;i<source.length;i++){var g=source[i], hay=(g.name+' '+g.summary+' '+g.mechanic).toLowerCase(); if(q&&hay.indexOf(q)===-1) continue; if(m!=='all'&&g.mechanic!==m) continue; out.push('<button class="btn'+(g.id===state.activeId?' active':'')+'" type="button" data-load="'+esc(g.id)+'">'+esc(g.name)+'</button>')} byId('gameNav').innerHTML=out.join('')}
   function clearScreen(){state.activeId=null; byId('activeTitle').innerHTML='&nbsp;'; byId('activeSummary').innerHTML='&nbsp;'; byId('formatLabel').textContent='Host board'; byId('boardLabel').textContent='Board 1'; byId('boardArea').innerHTML='<div class="empty"></div>'; byId('hostNotes').innerHTML=''; renderNav()}
-  function renderBoard(){var g=currentGame(); if(!g){clearScreen(); return} var p=currentPool(g), items=[]; byId('activeTitle').textContent=g.name; byId('activeSummary').textContent=g.summary; byId('formatLabel').textContent=g.format; byId('boardLabel').textContent=p.title; for(var i=0;i<p.items.length;i++){var it=p.items[i]; items.push('<div class="item"><strong>'+esc(it.name)+'</strong>'+(it.detail?'<small>'+esc(it.detail)+'</small>':'')+'</div>')}
+  function renderBoard(){var g=currentGame(); if(!g){clearScreen(); return} var p=currentPool(g), items=[]; byId('activeTitle').textContent=g.name; byId('activeSummary').textContent=g.summary; byId('formatLabel').textContent=g.format; byId('boardLabel').textContent=p.title; for(var i=0;i<p.items.length;i++){var it=p.items[i]; var detailText=it.birthdate?String(ageFromBirthdate(it.birthdate)):it.detail; items.push('<div class="item"><strong>'+esc(it.name)+'</strong>'+(detailText?'<small>'+esc(detailText)+'</small>':'')+'</div>')}
     var content='';
     if(g.id==='headbandz'){
       var cats=g.pools.map(function(x){return x.title});
