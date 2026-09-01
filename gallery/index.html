@@ -6,6 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" />
   <link rel="stylesheet" href="/assets/css/main.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    .admin-bar { display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem; }
+    .admin-bar.hidden { display:none; }
+    #galleryEditorBtn { position:fixed; bottom:6px; right:6px; z-index:9999; opacity:0.5; }
+    .thumb-wrap { position:relative; }
+    .thumb-delete {
+      position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.65); color:#fff;
+      border:none; border-radius:50%; width:1.5rem; height:1.5rem; cursor:pointer; font-size:1rem; line-height:1;
+    }
+    #uploadStatus, #migrateStatus { text-align:center; font-size:0.9rem; color:#bbb; margin:0.4rem 0; }
+    .gallery-switch.active { outline:2px solid #4ea8de; }
+  </style>
 </head>
 
 <body class="gallery-page">
@@ -18,81 +36,275 @@
   </div>
 
   <div id="gallery-buttons" style="display:flex;gap:0.7rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap;"></div>
+
+  <div class="admin-bar hidden" id="adminBar">
+    <button class="button small" id="newGalleryBtn"><i class="fa-solid fa-plus"></i> New Gallery</button>
+    <button class="button small" id="uploadPhotosBtn" style="display:none;"><i class="fa-solid fa-upload"></i> Upload Photos</button>
+    <input type="file" id="photoInput" accept="image/*" multiple style="display:none;">
+    <button class="button small" id="migrateBtn"><i class="fa-solid fa-box-archive"></i> Import Legacy Galleries</button>
+  </div>
+  <div id="uploadStatus"></div>
+  <div id="migrateStatus"></div>
+
   <div class="container" id="slideshow-container"></div>
 
-  <!-- ✅ Load your generated gallery configs -->
+  <button class="button" id="galleryEditorBtn">Editor</button>
+
+  <!-- Legacy gallery manifest - only used as the source list for the one-time "Import Legacy Galleries" migration -->
   <script src="/assets/js/gallery-data.js"></script>
 
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
   <script>
-    // Dynamically create gallery buttons
-    const btnContainer = document.getElementById('gallery-buttons');
-    for (const key in galleryConfigs) {
-      const btn = document.createElement('button');
-      btn.className = 'gallery-switch small';
-      btn.dataset.gallery = key;
-      btn.textContent = galleryConfigs[key].label || key;
-      btn.onclick = function() { loadGallery(key); };
-      btnContainer.appendChild(btn);
+    // ---- Fill these in after creating a free Cloudinary account (see setup notes) ----
+    const CLOUDINARY_CLOUD_NAME = 'YOUR_CLOUD_NAME';
+    const CLOUDINARY_UPLOAD_PRESET = 'YOUR_UNSIGNED_PRESET';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCrXvaiwHdc5whQHuhk6SR7EutV_MY7HWE",
+      authDomain: "jlapierre-9ed45.firebaseapp.com",
+      projectId: "jlapierre-9ed45",
+      storageBucket: "jlapierre-9ed45.firebasestorage.app",
+      messagingSenderId: "747343028064",
+      appId: "1:747343028064:web:2ef67506c81c09103ac805",
+      measurementId: "G-EFMF6L65H5"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let isAdmin = false;
+    let galleries = [];
+    let currentGalleryId = null;
+    let currentImages = [];
+    let slideIndex = 1;
+
+    const galleryButtonsEl = document.getElementById('gallery-buttons');
+    const slideshowContainer = document.getElementById('slideshow-container');
+    const adminBar = document.getElementById('adminBar');
+    const newGalleryBtn = document.getElementById('newGalleryBtn');
+    const uploadPhotosBtn = document.getElementById('uploadPhotosBtn');
+    const photoInput = document.getElementById('photoInput');
+    const migrateBtn = document.getElementById('migrateBtn');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const migrateStatus = document.getElementById('migrateStatus');
+    const editorBtn = document.getElementById('galleryEditorBtn');
+
+    function slugify(label) {
+      return label.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'gallery';
     }
 
-    function loadGallery(galleryKey) {
-      const config = galleryConfigs[galleryKey];
-      const images = config.images;
-      let slides = '', thumbs = '';
-      for (let i = 0; i < images.length; i++) {
-        if (images[i].type === 'video') {
-          // Local or hosted video file
-          if (images[i].video) {
-            slides += `<div class='mySlides'><div class='numbertext'>${i+1} / ${images.length}</div><video class='slideshow-img' controls poster='${config.folder + images[i].thumb}'><source src='${config.folder + images[i].video}' type='video/mp4'>Your browser does not support the video tag.</video></div>`;
-          } else if (images[i].youtube) {
-            // YouTube embed
-            slides += `<div class='mySlides'><div class='numbertext'>${i+1} / ${images.length}</div><div class='slideshow-img' style='position:relative;padding-bottom:56.25%;height:0;'><iframe src='https://www.youtube.com/embed/${images[i].youtube}' frameborder='0' allowfullscreen style='position:absolute;top:0;left:0;width:100%;height:100%;'></iframe></div></div>`;
-          }
-          thumbs += `<div class='column' style='position:relative;'><img class='demo cursor' src='${config.folder + images[i].thumb}' onclick='currentSlide(${i+1})'><span style='position:absolute;top:6px;left:6px;font-size:1.2em;color:#fff;background:rgba(0,0,0,0.5);border-radius:50%;padding:2px 6px;'>▶</span></div>`;
-        } else {
-          // Image
-          slides += `<div class='mySlides'><div class='numbertext'>${i+1} / ${images.length}</div><img src='${config.folder + images[i].src}' class='slideshow-img'></div>`;
-          thumbs += `<div class='column'><img class='demo cursor' src='${config.folder + images[i].thumb}' onclick='currentSlide(${i+1})'></div>`;
-        }
+    // Cloudinary generates resized/optimized versions on the fly by inserting
+    // transformation params into the URL - no separate thumbnail file needed.
+    function cloudinaryUrl(url, transform) {
+      return url.replace('/upload/', `/upload/${transform}/`);
+    }
+
+    async function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error('Cloudinary upload failed: ' + err);
       }
-      document.getElementById('slideshow-container').innerHTML = `
+      return res.json();
+    }
+
+    // ---- Admin login (same Firebase Auth account used for the itinerary editor) ----
+    editorBtn.addEventListener('click', function() {
+      if (isAdmin) {
+        firebase.auth().signOut();
+      } else {
+        const email = prompt('Admin email:');
+        if (!email) return;
+        const pw = prompt('Admin password:');
+        if (!pw) return;
+        firebase.auth().signInWithEmailAndPassword(email, pw)
+          .catch(function(err) { alert('Login failed: ' + err.message); });
+      }
+    });
+    firebase.auth().onAuthStateChanged(function(user) {
+      isAdmin = !!user;
+      editorBtn.textContent = isAdmin ? 'Logout' : 'Editor';
+      adminBar.classList.toggle('hidden', !isAdmin);
+      uploadPhotosBtn.style.display = (isAdmin && currentGalleryId) ? 'inline-flex' : 'none';
+      renderSlideshow();
+    });
+
+    // ---- Galleries list ----
+    async function loadGalleries() {
+      const snap = await db.collection('galleries').orderBy('createdAt').get();
+      galleries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderGalleryButtons();
+      if (galleries.length && !currentGalleryId) {
+        loadGallery(galleries[0].id);
+      }
+    }
+
+    function renderGalleryButtons() {
+      galleryButtonsEl.innerHTML = '';
+      galleries.forEach(g => {
+        const btn = document.createElement('button');
+        btn.className = 'gallery-switch small' + (g.id === currentGalleryId ? ' active' : '');
+        btn.textContent = g.label;
+        btn.onclick = function() { loadGallery(g.id); };
+        galleryButtonsEl.appendChild(btn);
+      });
+    }
+
+    newGalleryBtn.addEventListener('click', async function() {
+      const label = prompt('New gallery name:');
+      if (!label) return;
+      await db.collection('galleries').add({
+        label: label,
+        slug: slugify(label),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      await loadGalleries();
+    });
+
+    // ---- Photos within the selected gallery ----
+    async function loadGallery(galleryId) {
+      currentGalleryId = galleryId;
+      renderGalleryButtons();
+      uploadPhotosBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+      const snap = await db.collection('galleries').doc(galleryId).collection('images').orderBy('createdAt').get();
+      currentImages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderSlideshow();
+    }
+
+    function renderSlideshow() {
+      let slides = '', thumbs = '';
+      currentImages.forEach((img, i) => {
+        const full = cloudinaryUrl(img.url, 'q_auto,f_auto');
+        const thumb = cloudinaryUrl(img.url, 'w_300,h_300,c_fill,q_auto,f_auto');
+        slides += `<div class='mySlides'><div class='numbertext'>${i + 1} / ${currentImages.length}</div><img src='${full}' class='slideshow-img'></div>`;
+        thumbs += `<div class='column thumb-wrap'>
+            <img class='demo cursor' src='${thumb}' onclick='currentSlide(${i + 1})'>
+            ${isAdmin ? `<button class='thumb-delete' title='Delete photo' onclick='deletePhoto("${img.id}")'>&times;</button>` : ''}
+          </div>`;
+      });
+      if (!currentImages.length) {
+        slideshowContainer.innerHTML = `<p style="text-align:center;color:#999;">No photos yet${isAdmin ? ' — click "Upload Photos" to add some.' : '.'}</p>`;
+        return;
+      }
+      slideshowContainer.innerHTML = `
         ${slides}
-        <a class='prev' onclick='plusSlides(-1)'>❮</a>
-        <a class='next' onclick='plusSlides(1)'>❯</a>
+        <a class='prev' onclick='plusSlides(-1)'>&#10094;</a>
+        <a class='next' onclick='plusSlides(1)'>&#10095;</a>
         <div class='row'>${thumbs}</div>
       `;
       slideIndex = 1;
       showSlides(slideIndex);
     }
 
-    let slideIndex = 1;
-    function plusSlides(n) { showSlides(slideIndex += n); }
-    function currentSlide(n) { showSlides(slideIndex = n); }
-    function showSlides(n) {
-      let slides = document.getElementsByClassName('mySlides');
-      let dots = document.getElementsByClassName('demo');
-      let captionText = document.getElementById('caption');
-      if (n > slides.length) {slideIndex = 1}
-      if (n < 1) {slideIndex = slides.length}
-      for (let i = 0; i < slides.length; i++) {
-        slides[i].style.display = 'none';
-      }
-      for (let i = 0; i < dots.length; i++) {
-        dots[i].className = dots[i].className.replace(' active', '');
-      }
-      slides[slideIndex-1].style.display = 'block';
-      dots[slideIndex-1].className += ' active';
-      if (captionText) captionText.innerHTML = '';
-    }
+    window.deletePhoto = async function(imageId) {
+      if (!confirm('Remove this photo from the gallery?')) return;
+      await db.collection('galleries').doc(currentGalleryId).collection('images').doc(imageId).delete();
+      await loadGallery(currentGalleryId);
+    };
 
-    // Keyboard navigation for slideshow
+    uploadPhotosBtn.addEventListener('click', function() {
+      if (!currentGalleryId) { alert('Select or create a gallery first.'); return; }
+      photoInput.click();
+    });
+
+    photoInput.addEventListener('change', async function() {
+      const files = Array.from(photoInput.files);
+      if (!files.length) return;
+      uploadPhotosBtn.disabled = true;
+      for (let i = 0; i < files.length; i++) {
+        uploadStatus.textContent = `Uploading ${i + 1} of ${files.length}...`;
+        try {
+          const result = await uploadToCloudinary(files[i]);
+          await db.collection('galleries').doc(currentGalleryId).collection('images').add({
+            url: result.secure_url,
+            publicId: result.public_id,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        } catch (err) {
+          console.error(err);
+          alert('Upload failed for ' + files[i].name + ': ' + err.message);
+        }
+      }
+      uploadStatus.textContent = '';
+      uploadPhotosBtn.disabled = false;
+      photoInput.value = '';
+      await loadGallery(currentGalleryId);
+    });
+
+    // ---- Slideshow controls ----
+    window.plusSlides = function(n) { showSlides(slideIndex += n); };
+    window.currentSlide = function(n) { showSlides(slideIndex = n); };
+    function showSlides(n) {
+      const slides = document.getElementsByClassName('mySlides');
+      const dots = document.getElementsByClassName('demo');
+      if (!slides.length) return;
+      if (n > slides.length) slideIndex = 1;
+      if (n < 1) slideIndex = slides.length;
+      for (let i = 0; i < slides.length; i++) slides[i].style.display = 'none';
+      for (let i = 0; i < dots.length; i++) dots[i].className = dots[i].className.replace(' active', '');
+      slides[slideIndex - 1].style.display = 'block';
+      dots[slideIndex - 1].className += ' active';
+    }
     document.addEventListener('keydown', function(e) {
       if (e.key === 'ArrowLeft') plusSlides(-1);
       if (e.key === 'ArrowRight') plusSlides(1);
     });
 
-    // Load default gallery on page load
-    // loadGallery('home');
+    // ---- One-time import of the old hand-coded galleries into Firestore + Cloudinary ----
+    migrateBtn.addEventListener('click', async function() {
+      if (typeof galleryConfigs === 'undefined') {
+        alert('Legacy gallery data not found.');
+        return;
+      }
+      if (!confirm('Import all legacy galleries into the new system? This uploads every photo to Cloudinary and can take several minutes. Safe to re-run - it skips galleries that were already imported.')) return;
+      migrateBtn.disabled = true;
+      const existing = await db.collection('galleries').get();
+      const existingLabels = new Set(existing.docs.map(d => d.data().label));
+      for (const key in galleryConfigs) {
+        const cfg = galleryConfigs[key];
+        if (existingLabels.has(cfg.label)) {
+          migrateStatus.textContent = `Skipping "${cfg.label}" (already imported).`;
+          continue;
+        }
+        const galleryRef = await db.collection('galleries').add({
+          label: cfg.label,
+          slug: slugify(cfg.label),
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        const images = cfg.images.filter(img => img.type === 'image');
+        for (let i = 0; i < images.length; i++) {
+          migrateStatus.textContent = `"${cfg.label}": uploading ${i + 1} of ${images.length}...`;
+          try {
+            const resp = await fetch(encodeURI(cfg.folder + images[i].src));
+            const blob = await resp.blob();
+            const file = new File([blob], images[i].src, { type: blob.type });
+            const result = await uploadToCloudinary(file);
+            await db.collection('galleries').doc(galleryRef.id).collection('images').add({
+              url: result.secure_url,
+              publicId: result.public_id,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          } catch (err) {
+            console.error('Migration error for', images[i].src, err);
+            migrateStatus.textContent = `Error uploading ${images[i].src}: ${err.message}`;
+          }
+        }
+      }
+      migrateStatus.textContent = 'Import complete.';
+      migrateBtn.disabled = false;
+      await loadGalleries();
+    });
+
+    loadGalleries();
   </script>
 
 </div>
