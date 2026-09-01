@@ -16,7 +16,16 @@ const SAGE_COLOR_ID = "2";
 const SYNC_FIELDS = ["destination", "location", "startDate", "endDate", "details"];
 
 exports.refreshItinerary = onRequest(
-  { cors: ["https://jlapierre.ca"], maxInstances: 1, timeoutSeconds: 60 },
+  {
+    cors: ["https://jlapierre.ca"],
+    maxInstances: 1,
+    timeoutSeconds: 60,
+    // 2nd-gen functions default to the Compute Engine default service
+    // account, not the App Engine default one - but the calendar was
+    // shared with the appspot SA, so the runtime identity has to be
+    // pinned here or Calendar API calls 404 on that calendar.
+    serviceAccount: "jlapierre-9ed45@appspot.gserviceaccount.com",
+  },
   async (req, res) => {
     const metaRef = db.collection("_meta").doc("calendarSync");
     const now = Date.now();
@@ -49,12 +58,20 @@ exports.refreshItinerary = onRequest(
       });
       const calendar = google.calendar({ version: "v3", auth });
 
-      const timeMin = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+      // No real lower bound - past trips need to stay "seen" every sync (as
+      // long as they're still on the calendar) or the reconciliation below
+      // deletes them as soon as they age out of a windowed query, even
+      // though nothing about them actually changed. This fixed floor just
+      // guards against Calendar API's unbounded-query edge cases, not a
+      // real assumption about trip history.
+      const timeMin = "2000-01-01T00:00:00Z";
       let events = [];
       let pageToken;
       do {
         const resp = await calendar.events.list({
-          calendarId: "primary",
+          // "primary" means the service account's own (empty) calendar, not
+          // the human calendar shared with it - has to be the actual owner.
+          calendarId: "jaylapse@gmail.com",
           timeMin,
           singleEvents: true,
           orderBy: "startTime",
