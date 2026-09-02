@@ -115,7 +115,7 @@ button,input,select{font:inherit}
     activeId: null, boardIndex: {}, lastPoolIndex: {}, sampledItems: {},
     playerCount: 2, currentPlayerIndex: 0,
     headbandzUsedNames: [], headbandzCurrentName: null, headbandzRevealed: false,
-    chainWords: [], chainRevealed: 1, chainMistakes: 0, chainDone: false,
+    chainWords: [], chainRevealed: 1, chainMistakes: 0, chainDone: false, chainGaveUp: false,
     majorityIndex: 0, majorityRevealed: false,
     ageGolfIndex: 0, ageGolfRevealed: false
   };
@@ -181,6 +181,7 @@ button,input,select{font:inherit}
     state.chainRevealed = 1;
     state.chainMistakes = 0;
     state.chainDone = false;
+    state.chainGaveUp = false;
     state.majorityIndex = 0;
     state.majorityRevealed = false;
     state.ageGolfIndex = 0;
@@ -228,14 +229,18 @@ button,input,select{font:inherit}
     state.chainRevealed = 1;
     state.chainMistakes = 0;
     state.chainDone = false;
+    state.chainGaveUp = false;
   }
   function renderChainGame(g){
     ensureChainWords(g);
     var chain = state.chainWords;
     var revealed = chain.slice(0, state.chainRevealed).join(' → ');
     if (state.chainDone) {
+      var headline = state.chainGaveUp
+        ? 'Gave up - here\'s the full chain'
+        : 'Finished in '+state.chainMistakes+' guess'+(state.chainMistakes===1?'':'es')+'!';
       return '<section class="round">'
-        + '<div class="round-top"><div><h3>Chain Game</h3><p>Finished in '+state.chainMistakes+' guess'+(state.chainMistakes===1?'':'es')+'!</p></div></div>'
+        + '<div class="round-top"><div><h3>Chain Game</h3><p>'+headline+'</p></div></div>'
         + '<div class="items"><div class="item"><strong>'+esc(revealed)+'</strong></div></div>'
         + '<div class="host-actions"><button class="btn" id="chainNewBtn" type="button">New Chain</button></div></section>';
     }
@@ -246,7 +251,9 @@ button,input,select{font:inherit}
       + '<div class="chain-input-row">'
       + '<input id="chainGuessInput" type="text" autocomplete="off" placeholder="Type the next word...">'
       + '<button class="btn" id="chainCheckBtn" type="button">Check</button>'
-      + '</div></section>';
+      + '</div>'
+      + '<div class="host-actions" style="margin-top:8px"><button class="btn" id="chainGiveUpBtn" type="button">Give Up</button></div>'
+      + '</section>';
   }
   function chainCheckGuess(){
     var input = byId('chainGuessInput');
@@ -260,6 +267,12 @@ button,input,select{font:inherit}
     } else {
       state.chainMistakes++;
     }
+    renderBoard();
+  }
+  function chainGiveUp(){
+    state.chainRevealed = state.chainWords.length;
+    state.chainDone = true;
+    state.chainGaveUp = true;
     renderBoard();
   }
   // ---- Majority Rules: one prompt at a time, answer hidden until tapped. ----
@@ -343,6 +356,7 @@ button,input,select{font:inherit}
       if(el.id==='headbandzRevealBtn'){ state.headbandzRevealed=true; renderBoard(); return }
       if(el.id==='headbandzNextBtn'){ state.headbandzCurrentName=null; state.headbandzRevealed=false; renderBoard(); return }
       if(el.id==='chainCheckBtn'){ chainCheckGuess(); return }
+      if(el.id==='chainGiveUpBtn'){ chainGiveUp(); return }
       if(el.id==='chainNewBtn'){ state.chainWords=[]; renderBoard(); return }
       if(el.id==='majorityRevealBtn'){ state.majorityRevealed=true; renderBoard(); return }
       if(el.id==='majorityNextBtn'){ state.majorityIndex++; state.majorityRevealed=false; renderBoard(); return }
