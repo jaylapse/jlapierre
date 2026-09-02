@@ -31,6 +31,9 @@ button,input,select{font:inherit}
 .stepper{display:flex;align-items:center;gap:10px}
 .stepper button{width:36px;min-height:32px;padding:0;flex:none}
 .stepper span{min-width:1.4em;text-align:center;font-size:18px;font-weight:600}
+.chain-input-row{display:flex;gap:8px}
+.chain-input-row input{flex:1;min-height:42px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03);color:var(--text);font:inherit}
+.chain-input-row button{width:auto;flex:none;padding:0 18px}
 .mini-card{padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--surface2)}
 .mini-card strong{display:block;font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
 .board{display:grid;gap:12px}
@@ -112,7 +115,7 @@ button,input,select{font:inherit}
     activeId: null, boardIndex: {}, lastPoolIndex: {}, sampledItems: {},
     playerCount: 2, currentPlayerIndex: 0,
     headbandzUsedNames: [], headbandzCurrentName: null, headbandzRevealed: false,
-    chainAssignments: [], chainRevealed: 1, chainRoundOver: false,
+    chainAssignments: [], chainRevealed: 1, chainRoundOver: false, chainMissed: false,
     majorityIndex: 0, majorityRevealed: false,
     ageGolfIndex: 0, ageGolfRevealed: false
   };
@@ -177,6 +180,7 @@ button,input,select{font:inherit}
     state.chainAssignments = [];
     state.chainRevealed = 1;
     state.chainRoundOver = false;
+    state.chainMissed = false;
     state.majorityIndex = 0;
     state.majorityRevealed = false;
     state.ageGolfIndex = 0;
@@ -215,8 +219,9 @@ button,input,select{font:inherit}
   }
 
   // ---- Chain Game: one full word chain per player, drawn fresh each round.
-  // Players go in order, revealing their own chain one link at a time until
-  // they miss; the round ends once every player has had a turn. ----
+  // Players go in order, typing each next link themselves - the app checks
+  // it against the real answer - until they miss; the round ends once every
+  // player has had a turn. ----
   function ensureChainRound(g){
     if (state.chainAssignments.length === state.playerCount) return;
     var chains = sampleN(g.pools[0].items, state.playerCount).map(function(it){ return it.name.split(' -> '); });
@@ -224,6 +229,7 @@ button,input,select{font:inherit}
     state.currentPlayerIndex = 0;
     state.chainRevealed = 1;
     state.chainRoundOver = false;
+    state.chainMissed = false;
   }
   function renderChainGame(g){
     ensureChainRound(g);
@@ -235,14 +241,35 @@ button,input,select{font:inherit}
     var chain = state.chainAssignments[state.currentPlayerIndex];
     var revealed = chain.slice(0, state.chainRevealed).join(' → ');
     var atEnd = state.chainRevealed >= chain.length;
+    if (atEnd) {
+      return '<section class="round">'
+        + '<div class="round-top"><div><h3>Chain Game</h3><p>Player '+(state.currentPlayerIndex+1)+' of '+state.playerCount+' — chain complete!</p></div></div>'
+        + '<div class="items"><div class="item"><strong>'+esc(revealed)+'</strong></div></div>'
+        + '<div class="host-actions"><button class="btn" id="chainAdvanceBtn" type="button">Next Player</button></div></section>';
+    }
+    if (state.chainMissed) {
+      var missedWord = chain[state.chainRevealed];
+      return '<section class="round">'
+        + '<div class="round-top"><div><h3>Chain Game</h3><p>Player '+(state.currentPlayerIndex+1)+' of '+state.playerCount+' — missed link '+(state.chainRevealed+1)+' of '+chain.length+'</p></div></div>'
+        + '<div class="items"><div class="item"><strong>'+esc(revealed)+' → '+esc(missedWord)+'</strong><small>The answer was "'+esc(missedWord)+'"</small></div></div>'
+        + '<div class="host-actions"><button class="btn" id="chainAdvanceBtn" type="button">Next Player</button></div></section>';
+    }
     return '<section class="round">'
       + '<div class="round-top"><div><h3>Chain Game</h3><p>Player '+(state.currentPlayerIndex+1)+' of '+state.playerCount+' — link '+state.chainRevealed+' of '+chain.length+'</p></div></div>'
-      + '<div class="items"><div class="item"><strong>'+esc(revealed)+(atEnd?'':' → •••')+'</strong></div></div>'
-      + '<div class="host-actions">'
-      + (atEnd
-          ? '<button class="btn" id="chainAdvanceBtn" type="button">Chain complete — Next Player</button>'
-          : '<button class="btn" id="chainCorrectBtn" type="button">Correct — Reveal Next</button><button class="btn" id="chainMissBtn" type="button">Miss — Next Player</button>')
+      + '<div class="items"><div class="item"><strong>'+esc(revealed)+' → •••</strong></div></div>'
+      + '<div class="chain-input-row">'
+      + '<input id="chainGuessInput" type="text" autocomplete="off" placeholder="Type the next word...">'
+      + '<button class="btn" id="chainCheckBtn" type="button">Check</button>'
       + '</div></section>';
+  }
+  function chainCheckGuess(){
+    var input = byId('chainGuessInput');
+    if (!input || !input.value.trim()) return;
+    var chain = state.chainAssignments[state.currentPlayerIndex];
+    var guess = input.value.trim().toLowerCase();
+    var target = chain[state.chainRevealed].trim().toLowerCase();
+    if (guess === target) { state.chainRevealed++; } else { state.chainMissed = true; }
+    renderBoard();
   }
   // ---- Majority Rules: one prompt at a time, answer hidden until tapped. ----
   function renderMajorityRules(g, p){
@@ -278,6 +305,7 @@ button,input,select{font:inherit}
   }
   function chainAdvancePlayer(){
     state.currentPlayerIndex++;
+    state.chainMissed = false;
     if (state.currentPlayerIndex >= state.playerCount) { state.chainRoundOver = true; }
     else { state.chainRevealed = 1; }
     renderBoard();
@@ -317,8 +345,13 @@ button,input,select{font:inherit}
       }
     }
     byId('boardArea').innerHTML=content; renderNav();
+    var guessInput = byId('chainGuessInput');
+    if (guessInput) guessInput.focus();
   }
   function loadGame(id){ state.activeId=id; resetTurnState(); renderBoard(); }
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' && e.target && e.target.id === 'chainGuessInput') { chainCheckGuess(); }
+  });
   document.addEventListener('click', function(e){
     var el=e.target;
     while(el&&el!==document){
@@ -326,8 +359,8 @@ button,input,select{font:inherit}
       if(load){ loadGame(load); return }
       if(el.id==='headbandzRevealBtn'){ state.headbandzRevealed=true; renderBoard(); return }
       if(el.id==='headbandzNextBtn'){ state.headbandzCurrentName=null; state.headbandzRevealed=false; renderBoard(); return }
-      if(el.id==='chainCorrectBtn'){ state.chainRevealed++; renderBoard(); return }
-      if(el.id==='chainMissBtn' || el.id==='chainAdvanceBtn'){ chainAdvancePlayer(); return }
+      if(el.id==='chainCheckBtn'){ chainCheckGuess(); return }
+      if(el.id==='chainAdvanceBtn'){ chainAdvancePlayer(); return }
       if(el.id==='chainNewRoundBtn'){ state.chainAssignments=[]; renderBoard(); return }
       if(el.id==='majorityRevealBtn'){ state.majorityRevealed=true; renderBoard(); return }
       if(el.id==='majorityNextBtn'){ state.majorityIndex++; state.majorityRevealed=false; renderBoard(); return }

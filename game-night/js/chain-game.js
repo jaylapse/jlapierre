@@ -3,9 +3,9 @@ window.GAMES_LIBRARY.push({
   id:'chain-game',
   name:'Chain Game',
   mechanic:'word',
-  format:'Set the player count above - a fresh word chain is drawn for each player at the start of a round. The current player guesses the next link out loud; tap Correct to reveal it, or Miss to pass to the next player. The round ends once everyone has had a turn - New Round then draws a fresh set of chains.',
+  format:'Set the player count above - a fresh word chain is drawn for each player at the start of a round. The current player types the next link into the box themselves; the app checks it against the real answer. A correct guess reveals the word and moves to the next link; a wrong guess shows the real answer and passes to the next player. The round ends once everyone has had a turn - New Round then draws a fresh set of chains.',
   usesPlayers:true,
-  summary:'Each player gets their own word chain, guessing one link at a time until they miss.',
+  summary:'Each player types their own word chain link by link, checked automatically, until they miss.',
   pools:[
     { title:'All chains', subtitle:'32 chains total', items:[
       {name:'red -> hot -> dog -> park -> bench -> press -> conference -> room -> service -> animal'},
