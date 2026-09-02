@@ -362,12 +362,25 @@
     formspreeBody.append('email', email);
     formspreeBody.append('message', message);
 
-    const formspreeSend = fetch(FORMSPREE_URL, {
+    // Some in-app browsers (e.g. Facebook/Instagram's webview) will
+    // occasionally let a cross-origin fetch hang forever instead of ever
+    // resolving or rejecting - without a timeout that leaves the form
+    // stuck on "Sending..." with no way to recover. AbortController forces
+    // each request to fail after 15s so Promise.allSettled below always
+    // finishes and the button gets re-enabled.
+    const FETCH_TIMEOUT_MS = 15000;
+    function fetchWithTimeout(url, options) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+    }
+
+    const formspreeSend = fetchWithTimeout(FORMSPREE_URL, {
       method: 'POST',
       headers: { Accept: 'application/json' },
       body: formspreeBody,
     });
-    const guestbookSend = fetch(GUESTBOOK_FN_URL, {
+    const guestbookSend = fetchWithTimeout(GUESTBOOK_FN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, message, website }),
