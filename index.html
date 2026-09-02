@@ -126,8 +126,8 @@
 					<input type="email" name="email" id="email" required />
 				</div>
 				<div class="field">
-					<label for="message">Message</label>
-					<textarea name="message" id="message" rows="4" required style="max-width: 100%; max-height:100%; min-width: 100%"></textarea>
+					<label for="messageText">Message</label>
+					<textarea name="message" id="messageText" rows="4" required style="max-width: 100%; max-height:100%; min-width: 100%"></textarea>
 				</div>
 				<!-- Honeypot - hidden from real visitors via CSS, but naive bots fill every field they find. -->
 				<div class="field" style="position:absolute;left:-9999px;" aria-hidden="true">
@@ -352,61 +352,69 @@
     submitBtn.disabled = true;
     contactStatus.textContent = 'Sending...';
 
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const message = document.getElementById('message').value.trim();
-    const website = document.getElementById('website').value;
+    // Guards against any bug in this block (sync or async) leaving the
+    // button disabled and the status stuck on "Sending..." forever - a
+    // duplicate-id bug here once did exactly that with no way to recover
+    // short of reloading the page.
+    try {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const message = document.getElementById('messageText').value.trim();
+      const website = document.getElementById('website').value;
 
-    const formspreeBody = new FormData();
-    formspreeBody.append('name', name);
-    formspreeBody.append('email', email);
-    formspreeBody.append('message', message);
+      const formspreeBody = new FormData();
+      formspreeBody.append('name', name);
+      formspreeBody.append('email', email);
+      formspreeBody.append('message', message);
 
-    // Some in-app browsers (e.g. Facebook/Instagram's webview) will
-    // occasionally let a cross-origin fetch hang forever instead of ever
-    // resolving or rejecting - without a timeout that leaves the form
-    // stuck on "Sending..." with no way to recover. AbortController forces
-    // each request to fail after 15s so Promise.allSettled below always
-    // finishes and the button gets re-enabled.
-    const FETCH_TIMEOUT_MS = 15000;
-    function fetchWithTimeout(url, options) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-      return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
-    }
+      // Some in-app browsers (e.g. Facebook/Instagram's webview) will
+      // occasionally let a cross-origin fetch hang forever instead of ever
+      // resolving or rejecting - without a timeout that leaves the form
+      // stuck on "Sending..." with no way to recover. AbortController forces
+      // each request to fail after 15s so Promise.allSettled below always
+      // finishes and the button gets re-enabled.
+      const FETCH_TIMEOUT_MS = 15000;
+      function fetchWithTimeout(url, options) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+        return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+      }
 
-    const formspreeSend = fetchWithTimeout(FORMSPREE_URL, {
-      method: 'POST',
-      headers: { Accept: 'application/json' },
-      body: formspreeBody,
-    });
-    const guestbookSend = fetchWithTimeout(GUESTBOOK_FN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, message, website }),
-    }).then((r) => r.json());
+      const formspreeSend = fetchWithTimeout(FORMSPREE_URL, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: formspreeBody,
+      });
+      const guestbookSend = fetchWithTimeout(GUESTBOOK_FN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message, website }),
+      }).then((r) => r.json());
 
-    const [formspreeOutcome, gbOutcome] = await Promise.allSettled([formspreeSend, guestbookSend]);
-    const emailOk = formspreeOutcome.status === 'fulfilled' && formspreeOutcome.value.ok;
-    const gbResult = gbOutcome.status === 'fulfilled' ? gbOutcome.value : { status: 'error' };
+      const [formspreeOutcome, gbOutcome] = await Promise.allSettled([formspreeSend, guestbookSend]);
+      const emailOk = formspreeOutcome.status === 'fulfilled' && formspreeOutcome.value.ok;
+      const gbResult = gbOutcome.status === 'fulfilled' ? gbOutcome.value : { status: 'error' };
 
-    if (gbResult.status === 'ok' && gbResult.entry) {
-      renderGuestbookEntry({ id: gbResult.entry.id, name: gbResult.entry.name, message: gbResult.entry.message, dateLabel: 'Just now', replies: [] }, true);
-      contactForm.reset();
-      contactStatus.textContent = emailOk
-        ? 'Thanks for the note!'
-        : 'Posted! (Could not email James directly, but your note is up.)';
-    } else if (gbResult.status === 'cooldown') {
-      contactStatus.textContent = `You're posting a bit fast - try again in ${gbResult.secondsRemaining}s.`;
-    } else if (emailOk) {
-      contactForm.reset();
-      contactStatus.textContent = 'Message sent to James! (Could not post to the guestbook right now.)';
-    } else {
+      if (gbResult.status === 'ok' && gbResult.entry) {
+        renderGuestbookEntry({ id: gbResult.entry.id, name: gbResult.entry.name, message: gbResult.entry.message, dateLabel: 'Just now', replies: [] }, true);
+        contactForm.reset();
+        contactStatus.textContent = emailOk
+          ? 'Thanks for the note!'
+          : 'Posted! (Could not email James directly, but your note is up.)';
+      } else if (gbResult.status === 'cooldown') {
+        contactStatus.textContent = `You're posting a bit fast - try again in ${gbResult.secondsRemaining}s.`;
+      } else if (emailOk) {
+        contactForm.reset();
+        contactStatus.textContent = 'Message sent to James! (Could not post to the guestbook right now.)';
+      } else {
+        contactStatus.textContent = 'Something went wrong - please try again in a moment.';
+      }
+    } catch (err) {
       contactStatus.textContent = 'Something went wrong - please try again in a moment.';
+    } finally {
+      submitBtn.disabled = false;
+      setTimeout(() => { contactStatus.textContent = ''; }, 6000);
     }
-
-    submitBtn.disabled = false;
-    setTimeout(() => { contactStatus.textContent = ''; }, 6000);
   });
 </script>
 
