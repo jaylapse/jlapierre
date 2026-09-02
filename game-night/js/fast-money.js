@@ -3,13 +3,8 @@ window.GAMES_LIBRARY.push({
   id:'fast-money',
   name:'Fast Money',
   mechanic:'survey',
-  format:'5 random questions with top answers',
+  format:'Draws 5 random prompts, each with its top survey answers already shown - all visible at once for a fast round. Click New board to redraw a different set of 5 from the 80-question pool.',
   summary:'A host board that draws five random rapid survey prompts with top answers ready to go.',
-  notes:[
-    'Each board now draws 5 random prompts from an 80-question pool, so rounds stay fresh.',
-    'Click New board to redraw a different set of 5.',
-    'A future upgrade can hide answers until reveal.'
-  ],
   pools:[
     { title:'Fast Money prompts', subtitle:'80 questions, 5 shown', items:[
       {name:'Name something green.', detail:'Grass, money, tree, salad, frog'},

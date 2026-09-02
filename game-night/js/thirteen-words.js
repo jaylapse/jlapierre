@@ -3,13 +3,8 @@ window.GAMES_LIBRARY.push({
   id:'thirteen-words',
   name:'13 Words',
   mechanic:'word',
-  format:'10 targets on one board',
+  format:'Shows 10 random targets from a themed category at once, for rapid-fire clue rounds. Click New board to redraw a different set of 10.',
   summary:'Ten connected targets appear at once for rapid clue rounds, drawn randomly from a bigger themed pool.',
-  notes:[
-    'Each board draws 10 random targets from a themed pool, so boards vary between rounds.',
-    'Add more items to a category, or more categories, whenever you want fresh material.',
-    'This host-first version keeps the target list visible.'
-  ],
   pools:[
     { title:'Superheroes and comic characters', subtitle:'16 targets, 10 shown', items:[
       {name:'Spider-Man', detail:'Marvel superhero'},

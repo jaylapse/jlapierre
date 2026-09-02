@@ -3,13 +3,8 @@ window.GAMES_LIBRARY.push({
   id:'age-golf',
   name:'Age Golf',
   mechanic:'number',
-  format:'10 names per board, one at a time',
+  format:'Shows one of 10 names at a time from the category. Tap to reveal the age, then Next name to move on - it loops back to the first after the 10th. Ages are computed live from real birthdates, so they stay correct automatically. New board jumps to a different category.',
   summary:'Ten names from a category, one at a time with the age hidden until you tap to reveal it.',
-  notes:[
-    'Ages are computed live from each person’s real birthdate, so they stay correct automatically - no more manually updating numbers.',
-    'Each category draws 10 random names from a bigger pool, so boards vary between rounds.',
-    'Tap to reveal the age, then Next name to move on - it loops back to the first after the 10th.'
-  ],
   pools:[
     { title:'Actors', subtitle:'26 names, 10 shown', items:[
       {name:'Paul Rudd', birthdate:'1969-04-06'},{name:'Sandra Bullock', birthdate:'1964-07-26'},{name:'Denzel Washington', birthdate:'1954-12-28'},{name:'Zendaya', birthdate:'1996-09-01'},{name:'Ryan Gosling', birthdate:'1980-11-12'},

@@ -22,7 +22,7 @@ button,input,select{font:inherit}
 .nav{display:grid;gap:8px;margin-top:10px}
 .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px}
 .field input,.field select{width:100%;min-height:42px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03);color:var(--text)}
-.workspace{display:grid;grid-template-columns:1fr 320px;gap:12px;align-items:start}
+.workspace{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
 .host-header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
 .host-header h2{margin:0 0 6px;font-size:28px;font-weight:600}
 .host-header p{margin:0;color:var(--muted)}
@@ -59,7 +59,7 @@ button,input,select{font:inherit}
 #back-to-main-btn button{background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:999px;padding:0.5rem 1rem;font-size:.75rem;letter-spacing:.05em;text-transform:uppercase;color:#fff;cursor:pointer;line-height:1}
 #back-to-main-btn button:hover{background:rgba(0,0,0,.8)}
 .site-footer{text-align:center;padding:14px;font-size:.6rem;letter-spacing:.2rem;text-transform:uppercase;opacity:.6;color:var(--text)}
-@media (max-width:1100px){.wrap,.workspace{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--border)}}
+@media (max-width:1100px){.wrap{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--border)}}
 </style>
 </head>
 <body>
@@ -79,7 +79,7 @@ button,input,select{font:inherit}
       <section class="box section">
         <div class="host-header"><div><h2 id="activeTitle">&nbsp;</h2><p id="activeSummary">&nbsp;</p></div><div class="host-actions"><button class="btn" id="newBoardBtn" type="button">New board</button></div></div>
         <div class="host-meta">
-          <div class="mini-card"><strong>Format</strong><span id="formatLabel">Host board</span></div>
+          <div class="mini-card" style="grid-column:1/-1"><strong>Format</strong><span id="formatLabel">Host board</span></div>
           <div class="mini-card"><strong>Board</strong><span id="boardLabel">Board 1</span></div>
           <div class="mini-card" id="playersCard" style="display:none">
             <strong>Players</strong>
@@ -92,7 +92,6 @@ button,input,select{font:inherit}
         </div>
         <div id="boardArea" class="board"></div>
       </section>
-      <aside class="box panel"><h2 style="margin:0 0 10px">Host notes</h2><div class="side-list" id="hostNotes"></div></aside>
     </div>
   </main>
 </div>
@@ -251,7 +250,7 @@ button,input,select{font:inherit}
     var it = p.items[state.majorityIndex];
     return '<section class="round">'
       + '<div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>Prompt '+(state.majorityIndex+1)+' of '+p.items.length+'</p></div>'
-      + '<div class="pill-row"><span class="pill">'+esc(g.format)+'</span><span class="pill">'+esc(g.mechanic)+'</span></div></div>'
+      + '<div class="pill-row"><span class="pill">'+esc(g.mechanic)+'</span></div></div>'
       + '<div class="items"><div class="item"><strong>'+esc(it.name)+'</strong>'
       + (state.majorityRevealed ? '<small>'+esc(it.detail)+'</small>' : '')
       + '</div></div>'
@@ -267,7 +266,7 @@ button,input,select{font:inherit}
     var it = p.items[state.ageGolfIndex];
     return '<section class="round">'
       + '<div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>Name '+(state.ageGolfIndex+1)+' of '+p.items.length+'</p></div>'
-      + '<div class="pill-row"><span class="pill">'+esc(g.format)+'</span><span class="pill">'+esc(g.mechanic)+'</span></div></div>'
+      + '<div class="pill-row"><span class="pill">'+esc(g.mechanic)+'</span></div></div>'
       + '<div class="items"><div class="item"><strong>'+esc(it.name)+'</strong>'
       + (state.ageGolfRevealed ? '<small>'+esc(String(ageFromBirthdate(it.birthdate)))+'</small>' : '')
       + '</div></div>'
@@ -284,7 +283,7 @@ button,input,select{font:inherit}
     renderBoard();
   }
 
-  function clearScreen(){state.activeId=null; byId('activeTitle').innerHTML='&nbsp;'; byId('activeSummary').innerHTML='&nbsp;'; byId('formatLabel').textContent='Host board'; byId('boardLabel').textContent='Board 1'; byId('playersCard').style.display='none'; byId('boardArea').innerHTML='<div class="empty"></div>'; byId('hostNotes').innerHTML=''; renderNav()}
+  function clearScreen(){state.activeId=null; byId('activeTitle').innerHTML='&nbsp;'; byId('activeSummary').innerHTML='&nbsp;'; byId('formatLabel').textContent='Host board'; byId('boardLabel').textContent='Board 1'; byId('playersCard').style.display='none'; byId('boardArea').innerHTML='<div class="empty"></div>'; renderNav()}
   function renderBoard(){
     var g=currentGame();
     if(!g){clearScreen(); return}
@@ -312,12 +311,12 @@ button,input,select{font:inherit}
       byId('boardLabel').textContent=p.title;
       for(var i=0;i<p.items.length;i++){var it=p.items[i]; var detailText=it.birthdate?String(ageFromBirthdate(it.birthdate)):it.detail; items.push('<div class="item"><strong>'+esc(it.name)+'</strong>'+(detailText?'<small>'+esc(detailText)+'</small>':'')+'</div>')}
       if(g.id==='zero-to-hundred' || g.id==='i-can-eat-that' || g.id==='got-it'){
-        content='<section class="round"><div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>'+esc(p.subtitle||'')+'</p></div><div class="pill-row"><span class="pill">'+esc(g.format)+'</span><span class="pill">'+esc(g.mechanic)+'</span></div></div><div class="rules">'+items.map(function(x){return x.replace('item','rule')}).join('')+'</div></section>';
+        content='<section class="round"><div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>'+esc(p.subtitle||'')+'</p></div><div class="pill-row"><span class="pill">'+esc(g.mechanic)+'</span></div></div><div class="rules">'+items.map(function(x){return x.replace('item','rule')}).join('')+'</div></section>';
       } else {
-        content='<section class="round"><div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>'+esc(p.subtitle||'')+'</p></div><div class="pill-row"><span class="pill">'+esc(g.format)+'</span><span class="pill">'+esc(g.mechanic)+'</span></div></div><div class="items">'+items.join('')+'</div></section>';
+        content='<section class="round"><div class="round-top"><div><h3>'+esc(p.title)+'</h3><p>'+esc(p.subtitle||'')+'</p></div><div class="pill-row"><span class="pill">'+esc(g.mechanic)+'</span></div></div><div class="items">'+items.join('')+'</div></section>';
       }
     }
-    byId('boardArea').innerHTML=content; byId('hostNotes').innerHTML=g.notes.map(function(n){return '<div class="side-note"><strong>'+esc(g.name)+'</strong><span>'+esc(n)+'</span></div>'}).join(''); renderNav();
+    byId('boardArea').innerHTML=content; renderNav();
   }
   function loadGame(id){ state.activeId=id; resetTurnState(); renderBoard(); }
   document.addEventListener('click', function(e){

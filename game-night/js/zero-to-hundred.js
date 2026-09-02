@@ -3,13 +3,8 @@ window.GAMES_LIBRARY.push({
   id:'zero-to-hundred',
   name:'0-100',
   mechanic:'word',
-  format:'Rules only',
+  format:'Reference card only - nothing here is interactive. The rules below cover setup, turns, and win conditions; New board switches to a set of variant ideas for making it more engaging.',
   summary:'Both players secretly choose a number from 0 to 100, then ask yes/no questions to deduce the opponents number.',
-  notes:[
-    'Suggested scoring: first correct guess wins 1 point, or play best-of-5 rounds.',
-    'To make it more tense, limit each player to one guess per turn after one question.',
-    'You can allow one "cap" challenge if a player thinks the opponent is bluffing.'
-  ],
   pools:[
     { title:'How it works', subtitle:'Clean rules for the host', items:[
       {name:'Setup', detail:'Both players write a secret number from 0 to 100.'},

@@ -3,13 +3,8 @@ window.GAMES_LIBRARY.push({
   id:'i-can-eat-that',
   name:'I Can Eat That',
   mechanic:'draft',
-  format:'Challenge rules',
+  format:'Reference card only - nothing here is interactive. The rules below cover the bidding/cap challenge; New board switches to a set of house-rule ideas for keeping it fair. Choose foods that are safe and reasonable for the players.',
   summary:'Players bid time to eat a food item; the last person to call cap must either eat it or concede the point.',
-  notes:[
-    'Host should choose foods that are safe and reasonable for the players.',
-    'Use original foods and avoid anything dangerous, extreme, or allergen-heavy.',
-    'A stopwatch makes this game much more fun.'
-  ],
   pools:[
     { title:'Rules summary', subtitle:'Host-ready explanation', items:[
       {name:'1. Pick a food', detail:'Choose something both players can realistically eat.'},

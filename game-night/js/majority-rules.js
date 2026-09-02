@@ -2,13 +2,8 @@ window.GAMES_LIBRARY.push({
   id:'majority-rules',
   name:'Majority Rules',
   mechanic:'survey',
-  format:'8 random prompts, one at a time',
+  format:'Shows one of 8 random prompts at a time. Tap to reveal the answer, then Next prompt to move on - it loops back to the first after the 8th. New board redraws a different set of 8 from the 64-prompt pool.',
   summary:'Eight random majority-choice prompts, shown one at a time with the answer hidden until you tap to reveal it.',
-  notes:[
-    'Each board draws 8 random prompts from a 64-prompt pool, so rounds stay fresh.',
-    'Tap to reveal the answer, then Next prompt to move on - it loops back to the first after the 8th.',
-    'Click New board to redraw a different set of 8.'
-  ],
   pools:[
     { title:'Majority prompts', subtitle:'64 prompts, 8 shown', items:[
       {name:'Take $1M now or $10M if you must make 10 half-court shots?', detail:'$1M now - 70%'},
