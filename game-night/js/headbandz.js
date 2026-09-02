@@ -3,13 +3,8 @@ window.GAMES_LIBRARY.push({
   id:'headbandz',
   name:'Headbandz',
   mechanic:'word',
-  format:'One name at a time, tap to reveal',
+  format:'Tap to reveal shows one name from the category; everyone else describes it out loud until the guesser gets it (or the group gives up). Tap Got it to hide the screen and line up a fresh name for the next guesser. New board jumps to a different category.',
   summary:'One random name from a themed category, hidden behind a tap-to-reveal so it\'s not shown until whoever\'s holding the phone is ready.',
-  notes:[
-    'Tap to reveal shows the current name; everyone else describes it out loud until the guesser gets it (or the group gives up).',
-    'Tap Got it to hide the screen again and line up a fresh name - tap to reveal when the phone reaches the next guesser.',
-    'New board jumps to a different category.'
-  ],
   pools:[
     { title:'Actors & Entertainers', subtitle:'40 names', items:[
       {name:'Tom Hanks', detail:'Actor'},{name:'Meryl Streep', detail:'Actor'},{name:'Leonardo DiCaprio', detail:'Actor'},

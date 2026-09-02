@@ -3,13 +3,8 @@ window.GAMES_LIBRARY.push({
   id:'got-it',
   name:'Got It',
   mechanic:'word',
-  format:'Rules only',
+  format:'Reference card only - nothing here is interactive. The rules below cover scoring options since the core idea has no automatic winner; New board switches to a set of ways to make it feel more like a game.',
   summary:'Two players say a word at the same time and try to converge on the same final answer.',
-  notes:[
-    'This game can work as a quick warm-up or tiebreaker.',
-    'Because the core idea has no obvious automatic winner, use one of the scoring variants below.',
-    'A shared word or agreed synonym counts as a successful "got it".'
-  ],
   pools:[
     { title:'How to score it', subtitle:'Ways to give it a winner', items:[
       {name:'Same-word point', detail:'If both players say the same word on the same attempt, they score 1 point.'},
