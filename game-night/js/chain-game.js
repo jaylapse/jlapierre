@@ -3,7 +3,7 @@ window.GAMES_LIBRARY.push({
   id:'chain-game',
   name:'Chain Game',
   mechanic:'word',
-  format:'One chain at a time. Type the next link into the box and the app checks it against the real answer - a correct guess reveals the word and moves to the next link. A wrong guess doesn\'t reveal the answer or end anything; it just counts as a mistake and the same link stays open until you get it. Finishing the whole chain shows how many mistakes it took. New board (or New Chain) draws a fresh one.',
+  format:'One chain at a time. Type the next link into the box and the app checks it against the real answer - a correct guess reveals the word and moves to the next link. A wrong guess doesn\'t reveal the answer or end anything; it just counts as a mistake and the same link stays open until you get it. Give Up reveals the rest of the chain if you\'re stuck. Finishing (or giving up) shows how many mistakes it took. New board (or New Chain) draws a fresh one.',
   summary:'Type a word chain link by link, checked automatically; wrong guesses just count as mistakes until you finish.',
   pools:[
     { title:'All chains', subtitle:'32 chains total', items:[
