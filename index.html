@@ -228,7 +228,7 @@
     const header = document.createElement('div');
     const nameSpan = document.createElement('span');
     nameSpan.className = 'guestbook-name';
-    nameSpan.textContent = entry.name;
+    nameSpan.textContent = entry.email ? `${entry.name} (${entry.email})` : entry.name;
     header.appendChild(nameSpan);
     if (entry.dateLabel) {
       const dateSpan = document.createElement('span');
@@ -335,7 +335,15 @@
           message: r.data().message,
           dateLabel: formatGuestbookDate(r.data().createdAt),
         }));
-        return { id: doc.id, name: data.name, message: data.message, dateLabel: formatGuestbookDate(data.createdAt), replies };
+        // Only fetched/shown to a signed-in admin - lets James cross-check
+        // a name against the email that posted it (guestbook_private is
+        // locked to signed-in reads only, see firestore.rules).
+        let email = '';
+        if (isAdmin) {
+          const privateSnap = await gbDb.collection('guestbook_private').doc(doc.id).get();
+          email = privateSnap.exists ? privateSnap.data().email || '' : '';
+        }
+        return { id: doc.id, name: data.name, message: data.message, dateLabel: formatGuestbookDate(data.createdAt), replies, email };
       }));
       guestbookList.innerHTML = '';
       entries.forEach((entry) => renderGuestbookEntry(entry));
