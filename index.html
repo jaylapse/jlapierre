@@ -380,11 +380,18 @@
         return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
       }
 
-      const formspreeSend = fetchWithTimeout(FORMSPREE_URL, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: formspreeBody,
-      });
+      // Honeypot - real visitors never fill this hidden field, only bots
+      // that auto-fill every input do. The guestbook function below already
+      // silently no-ops on this, but it never stopped Formspree from also
+      // getting (and emailing) the same submission - skip it here too, since
+      // Formspree's own reCAPTCHA has to stay off to allow this AJAX flow.
+      const formspreeSend = website
+        ? Promise.resolve({ ok: true })
+        : fetchWithTimeout(FORMSPREE_URL, {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: formspreeBody,
+          });
       const guestbookSend = fetchWithTimeout(GUESTBOOK_FN_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
