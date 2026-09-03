@@ -14,6 +14,7 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
     /* The header's connector tick centers on the nav box itself; with an
        even number of nav items it lands on a button border instead of a
@@ -134,6 +135,7 @@
 					<label for="website">Website</label>
 					<input type="text" name="website" id="website" tabindex="-1" autocomplete="off" />
 				</div>
+				<div class="cf-turnstile" data-sitekey="0x4AAAAAAElVeXO-OSEBFwcg" data-action="contact"></div>
 			</div>
 			<ul class="actions">
 				<li><input type="submit" value="Send Message" class="primary" /></li>
@@ -366,6 +368,8 @@
       formspreeBody.append('name', name);
       formspreeBody.append('email', email);
       formspreeBody.append('message', message);
+      const turnstileToken = document.querySelector('#contactForm [name="cf-turnstile-response"]')?.value || '';
+      formspreeBody.append('cf-turnstile-response', turnstileToken);
 
       // Some in-app browsers (e.g. Facebook/Instagram's webview) will
       // occasionally let a cross-origin fetch hang forever instead of ever
@@ -419,6 +423,9 @@
     } catch (err) {
       contactStatus.textContent = 'Something went wrong - please try again in a moment.';
     } finally {
+      // Turnstile tokens are single-use and expire quickly - reset so the
+      // next submit attempt (retry or a fresh message) gets a new one.
+      if (window.turnstile) window.turnstile.reset();
       submitBtn.disabled = false;
       setTimeout(() => { contactStatus.textContent = ''; }, 6000);
     }
