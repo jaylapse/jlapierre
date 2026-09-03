@@ -30,17 +30,17 @@ p.lede{color:var(--muted);margin:0 0 20px;text-align:center;max-width:520px}
 </div>
 
 <h1>YarnToss &mdash; Testing</h1>
-<p class="lede">Live build from the <code>main</code> branch of YarnToss, rebuilt automatically on every push. Use this as a scratch environment while iterating on the game.</p>
+<p class="lede">Latest published build of YarnToss, manually rebuilt from the <code>main</code> branch when there's something new to test. Use this as a scratch environment while iterating on the game.</p>
 
 <div class="stage">
   <div class="frame-wrap">
-    <iframe id="gameFrame" src="https://yarn-toss.netlify.app" title="YarnToss" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
+    <iframe id="gameFrame" src="/yarntoss/game/index.html" title="YarnToss" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
   </div>
   <div class="toolbar">
     <span class="status" id="statusText">Loaded from main</span>
     <div style="display:flex;gap:8px">
       <button class="btn" id="reloadBtn" type="button">Reload build</button>
-      <a class="btn" href="https://yarn-toss.netlify.app" target="_blank" rel="noopener">Open full screen</a>
+      <a class="btn" href="/yarntoss/game/index.html" target="_blank" rel="noopener">Open full screen</a>
     </div>
   </div>
 </div>
@@ -51,7 +51,7 @@ p.lede{color:var(--muted);margin:0 0 20px;text-align:center;max-width:520px}
 (function(){
   var frame = document.getElementById('gameFrame');
   var status = document.getElementById('statusText');
-  var baseSrc = 'https://yarn-toss.netlify.app';
+  var baseSrc = '/yarntoss/game/index.html';
   document.getElementById('reloadBtn').addEventListener('click', function(){
     status.textContent = 'Reloading…';
     frame.src = baseSrc + '?t=' + Date.now();
