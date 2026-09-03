@@ -239,23 +239,6 @@ exports.submitGuestbookEntry = onRequest(
       await Promise.all([
         docRef.set({ name, message, createdAt }),
         db.collection("guestbook_private").doc(docRef.id).set({ email, createdAt }),
-        // Notify James directly instead of relying on Formspree - this runs
-        // after the honeypot/rate-limit checks above, so it can't be hit by
-        // bots the way a client-side-only AJAX call to Formspree could.
-        db.collection("mail").add({
-          to: ["jaylapse@gmail.com"],
-          replyTo: email,
-          message: {
-            subject: `New guestbook message from ${name}`,
-            text:
-              `${name} (${email}) left a message on jlapierre.ca:\n\n${message}\n\n` +
-              `View it at https://jlapierre.ca/#guestbookList`,
-            html:
-              `<p><strong>${escapeHtml(name)}</strong> (${escapeHtml(email)}) left a message on jlapierre.ca:</p>` +
-              `<blockquote>${escapeHtml(message)}</blockquote>` +
-              `<p><a href="https://jlapierre.ca/#guestbookList">View it on the site</a></p>`,
-          },
-        }),
       ]);
 
       res.json({ status: "ok", entry: { id: docRef.id, name, message } });
