@@ -180,6 +180,7 @@
   const gbDb = firebase.firestore();
 
   const GUESTBOOK_FN_URL = 'https://us-central1-jlapierre-9ed45.cloudfunctions.net/submitGuestbookEntry';
+  const FORMSPREE_URL = 'https://formspree.io/f/meognnzq';
 
   const guestbookList = document.getElementById('guestbookList');
   const contactForm = document.getElementById('contactForm');
@@ -342,9 +343,9 @@
   }
   loadGuestbook();
 
-  // Posts to the guestbook function only - it emails James directly (via
-  // the mail collection) after its own honeypot/rate-limit checks pass, so
-  // there's no separate Formspree round-trip to keep in sync.
+  // Sends to Formspree (email, unchanged) and the guestbook function (on-page
+  // display) independently - one failing shouldn't block the other, so the
+  // status message reflects whichever combination actually happened.
   contactForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     const submitBtn = contactForm.querySelector('input[type="submit"]');
@@ -361,26 +362,50 @@
       const message = document.getElementById('messageText').value.trim();
       const website = document.getElementById('website').value;
 
+      const formspreeBody = new FormData();
+      formspreeBody.append('name', name);
+      formspreeBody.append('email', email);
+      formspreeBody.append('message', message);
+
       // Some in-app browsers (e.g. Facebook/Instagram's webview) will
       // occasionally let a cross-origin fetch hang forever instead of ever
       // resolving or rejecting - without a timeout that leaves the form
       // stuck on "Sending..." with no way to recover. AbortController forces
-      // the request to fail after 15s so the button always gets re-enabled.
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 15000);
-      const gbResult = await fetch(GUESTBOOK_FN_URL, {
+      // each request to fail after 15s so Promise.allSettled below always
+      // finishes and the button gets re-enabled.
+      const FETCH_TIMEOUT_MS = 15000;
+      function fetchWithTimeout(url, options) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+        return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+      }
+
+      const formspreeSend = fetchWithTimeout(FORMSPREE_URL, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: formspreeBody,
+      });
+      const guestbookSend = fetchWithTimeout(GUESTBOOK_FN_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, message, website }),
-        signal: controller.signal,
-      }).finally(() => clearTimeout(timer)).then((r) => r.json());
+      }).then((r) => r.json());
+
+      const [formspreeOutcome, gbOutcome] = await Promise.allSettled([formspreeSend, guestbookSend]);
+      const emailOk = formspreeOutcome.status === 'fulfilled' && formspreeOutcome.value.ok;
+      const gbResult = gbOutcome.status === 'fulfilled' ? gbOutcome.value : { status: 'error' };
 
       if (gbResult.status === 'ok' && gbResult.entry) {
         renderGuestbookEntry({ id: gbResult.entry.id, name: gbResult.entry.name, message: gbResult.entry.message, dateLabel: 'Just now', replies: [] }, true);
         contactForm.reset();
-        contactStatus.textContent = 'Thanks for the note!';
+        contactStatus.textContent = emailOk
+          ? 'Thanks for the note!'
+          : 'Posted! (Could not email James directly, but your note is up.)';
       } else if (gbResult.status === 'cooldown') {
         contactStatus.textContent = `You're posting a bit fast - try again in ${gbResult.secondsRemaining}s.`;
+      } else if (emailOk) {
+        contactForm.reset();
+        contactStatus.textContent = 'Message sent to James! (Could not post to the guestbook right now.)';
       } else {
         contactStatus.textContent = 'Something went wrong - please try again in a moment.';
       }
