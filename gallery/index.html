@@ -15,12 +15,13 @@
     .admin-bar { display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; margin-bottom:1rem; }
     .admin-bar.hidden { display:none; }
     .thumb-wrap { position:relative; }
-    .thumb-delete, .thumb-edit-alt {
+    .thumb-delete, .thumb-edit-alt, .thumb-move {
       position:absolute; top:4px; background:rgba(0,0,0,0.65); color:#fff;
       border:none; border-radius:50%; width:1.5rem; height:1.5rem; cursor:pointer; font-size:1rem; line-height:1;
     }
     .thumb-delete { right:4px; }
     .thumb-edit-alt { right:32px; font-size:0.75rem; }
+    .thumb-move { right:60px; font-size:0.75rem; }
     .video-badge {
       position:absolute; bottom:4px; left:4px; font-size:1.1em; color:#fff;
       background:rgba(0,0,0,0.55); border-radius:50%; padding:1px 6px; pointer-events:none;
@@ -28,11 +29,13 @@
     #uploadStatus { text-align:center; font-size:0.9rem; color:#bbb; margin:0.4rem 0; white-space:pre-line; }
     .gallery-switch.active { outline:2px solid #4ea8de; }
     .gallery-switch-wrap { position:relative; display:inline-flex; }
-    .gallery-rename-btn {
+    .gallery-rename-btn, .gallery-delete-btn {
       background:rgba(0,0,0,0.55); color:#fff; border:none; border-radius:50%;
       width:1.2rem; height:1.2rem; font-size:0.65rem; line-height:1; cursor:pointer;
-      position:absolute; top:-0.4rem; right:-0.4rem;
+      position:absolute; top:-0.4rem;
     }
+    .gallery-rename-btn { right:-0.4rem; }
+    .gallery-delete-btn { left:-0.4rem; }
 
     /* main.css sets #wrapper to space-between/min-height:100vh for the homepage's
        header+main+footer layout; this page has too few elements for that, which
@@ -253,6 +256,13 @@
           renameBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
           renameBtn.onclick = function(e) { e.stopPropagation(); renameGallery(g.id); };
           wrap.appendChild(renameBtn);
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'gallery-delete-btn';
+          deleteBtn.title = 'Delete gallery';
+          deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+          deleteBtn.onclick = function(e) { e.stopPropagation(); deleteGallery(g.id); };
+          wrap.appendChild(deleteBtn);
         }
         galleryButtonsEl.appendChild(wrap);
       });
@@ -275,6 +285,19 @@
       const label = prompt('Gallery name:', gallery.label);
       if (!label || label === gallery.label) return;
       await db.collection('galleries').doc(id).update({ label: label, slug: slugify(label) });
+      await loadGalleries();
+    };
+
+    window.deleteGallery = async function(id) {
+      const gallery = galleries.find(g => g.id === id);
+      if (!gallery) return;
+      if (!confirm(`Delete the gallery "${gallery.label}" and all of its photos/videos? This cannot be undone.`)) return;
+      const imagesSnap = await db.collection('galleries').doc(id).collection('images').get();
+      const batch = db.batch();
+      imagesSnap.docs.forEach(doc => batch.delete(doc.ref));
+      batch.delete(db.collection('galleries').doc(id));
+      await batch.commit();
+      if (currentGalleryId === id) currentGalleryId = null;
       await loadGalleries();
     };
 
@@ -311,6 +334,7 @@
         <div class='column thumb-wrap'>
           <img class='demo cursor' src='${thumbUrlFor(item)}' alt='${escapeAttr(altTextFor(item, galleryLabel, i))}' onclick='openLightbox(${i})'>
           ${item.resourceType === 'video' ? `<span class='video-badge'><i class="fa-solid fa-play"></i></span>` : ''}
+          ${isAdmin ? `<button class='thumb-move' title='Move to another gallery' onclick='movePhoto("${item.id}")'><i class="fa-solid fa-right-left"></i></button>` : ''}
           ${isAdmin ? `<button class='thumb-edit-alt' title='Edit alt text' onclick='editAltText("${item.id}")'><i class="fa-solid fa-pen"></i></button>` : ''}
           ${isAdmin ? `<button class='thumb-delete' title='Delete' onclick='deletePhoto("${item.id}")'>&times;</button>` : ''}
         </div>
@@ -319,6 +343,25 @@
 
     window.deletePhoto = async function(imageId) {
       if (!confirm('Remove this from the gallery?')) return;
+      await db.collection('galleries').doc(currentGalleryId).collection('images').doc(imageId).delete();
+      await loadGallery(currentGalleryId);
+    };
+
+    window.movePhoto = async function(imageId) {
+      const others = galleries.filter(g => g.id !== currentGalleryId);
+      if (!others.length) { alert('No other galleries to move this to.'); return; }
+      const list = others.map((g, i) => `${i + 1}. ${g.label}`).join('\n');
+      const choice = prompt(`Move to which gallery?\n${list}`);
+      if (!choice) return;
+      const target = others[parseInt(choice, 10) - 1];
+      if (!target) { alert('Invalid selection.'); return; }
+      const item = currentImages.find(it => it.id === imageId);
+      if (!item) return;
+      const { id, createdAt, ...rest } = item;
+      await db.collection('galleries').doc(target.id).collection('images').add({
+        ...rest,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
       await db.collection('galleries').doc(currentGalleryId).collection('images').doc(imageId).delete();
       await loadGallery(currentGalleryId);
     };
