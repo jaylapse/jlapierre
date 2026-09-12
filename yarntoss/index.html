@@ -3,21 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>YarnToss | Testing</title>
+<title>YarnToss</title>
 <style>
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300italic,600italic,300,600");
-:root{--bg:#12161a;--surface:rgba(28,34,39,.92);--surface2:rgba(34,41,47,.92);--border:#3a444c;--text:#ffffff;--muted:#a8b3ba;--primary:#4ea8de;--radius:16px;--shadow:0 14px 36px rgba(0,0,0,.32)}
+:root{--bg:#12161a;--surface:rgba(28,34,39,.92);--border:#3a444c;--text:#ffffff;--muted:#a8b3ba;--primary:#4ea8de;--radius:16px;--shadow:0 14px 36px rgba(0,0,0,.32)}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:linear-gradient(to bottom, rgba(15,18,21,.82), rgba(15,18,21,.82)), url('/images/bg.jpg') center/cover no-repeat;background-color:var(--bg);color:var(--text);font:300 16px/1.5 'Source Sans Pro',Arial,Helvetica,sans-serif;display:flex;flex-direction:column;align-items:center;padding:24px 12px 40px}
+body{margin:0;min-height:100vh;background:linear-gradient(to bottom, rgba(15,18,21,.82), rgba(15,18,21,.82)), url('/images/bg.jpg') center/cover no-repeat;background-color:var(--bg);color:var(--text);font:300 16px/1.5 'Source Sans Pro',Arial,Helvetica,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 12px 40px}
 h1{font-size:26px;font-weight:600;margin:8px 0 4px;letter-spacing:.02em}
-p.lede{color:var(--muted);margin:0 0 20px;text-align:center;max-width:520px}
-.stage{width:100%;max-width:480px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:10px}
-.frame-wrap{position:relative;width:100%;aspect-ratio:9/16;background:#000;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
-.frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.toolbar{display:flex;gap:8px;justify-content:space-between;align-items:center}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:rgba(255,255,255,.03);color:var(--text);cursor:pointer;text-transform:uppercase;font-size:.7rem;letter-spacing:.08em;transition:background .2s,border-color .2s;text-decoration:none}
-.btn:hover{background:rgba(255,255,255,.08)}
-.status{font-size:12px;color:var(--muted)}
+p.lede{color:var(--muted);margin:0 0 24px;text-align:center;max-width:480px}
+.stage{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 24px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:12px 28px;border:1px solid var(--primary);border-radius:999px;background:var(--primary);color:#0c1620;cursor:pointer;text-transform:uppercase;font-size:.85rem;font-weight:600;letter-spacing:.08em;transition:filter .2s;text-decoration:none}
+.btn-primary:hover{filter:brightness(1.1)}
 #back-to-main-btn{position:fixed;top:14px;left:14px;z-index:1000}
 #back-to-main-btn button{background:rgba(0,0,0,.55);border:1px solid var(--border);border-radius:999px;padding:0.5rem 1rem;font-size:.75rem;letter-spacing:.05em;text-transform:uppercase;color:#fff;cursor:pointer;line-height:1}
 #back-to-main-btn button:hover{background:rgba(0,0,0,.8)}
@@ -29,35 +25,13 @@ p.lede{color:var(--muted);margin:0 0 20px;text-align:center;max-width:520px}
   <button title="Back to main" onclick="window.location.href='/index.html'">Home</button>
 </div>
 
-<h1>YarnToss &mdash; Testing</h1>
-<p class="lede">Latest published build of YarnToss, manually rebuilt from the <code>main</code> branch when there's something new to test. Use this as a scratch environment while iterating on the game.</p>
+<h1>YarnToss</h1>
+<p class="lede">A cat-survivor game where a stationary granny fights waves of cats. Currently in development - play the latest build on itch.io.</p>
 
 <div class="stage">
-  <div class="frame-wrap">
-    <iframe id="gameFrame" src="/yarntoss/game/index.html" title="YarnToss" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>
-  </div>
-  <div class="toolbar">
-    <span class="status" id="statusText">Loaded from main</span>
-    <div style="display:flex;gap:8px">
-      <button class="btn" id="reloadBtn" type="button">Refresh</button>
-      <a class="btn" href="/yarntoss/game/index.html" target="_blank" rel="noopener">Open full screen</a>
-    </div>
-  </div>
+  <a class="btn-primary" href="https://jaylapse.itch.io/yarntoss" target="_blank" rel="noopener">Play on itch.io</a>
 </div>
 
 <footer class="site-footer">&copy; James Lapierre 2025</footer>
-
-<script>
-(function(){
-  var frame = document.getElementById('gameFrame');
-  var status = document.getElementById('statusText');
-  var baseSrc = '/yarntoss/game/index.html';
-  document.getElementById('reloadBtn').addEventListener('click', function(){
-    status.textContent = 'Reloading…';
-    frame.src = baseSrc + '?t=' + Date.now();
-    setTimeout(function(){ status.textContent = 'Loaded from main'; }, 800);
-  });
-})();
-</script>
 </body>
 </html>
